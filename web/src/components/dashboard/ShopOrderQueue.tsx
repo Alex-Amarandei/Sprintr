@@ -121,7 +121,16 @@ export function ShopOrderQueue({
           style={{ textDecoration: "none", color: "inherit", minWidth: 0, flex: 1 }}
         >
           <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-            <Avatar radius="xl" color="brand" size={38}>
+            <Avatar
+              radius="xl"
+              size={38}
+              style={
+                {
+                  "--avatar-bg": "var(--mantine-color-brand-1)",
+                  "--avatar-color": "var(--mantine-color-brand-7)",
+                } as React.CSSProperties
+              }
+            >
               {initials(o.customerName)}
             </Avatar>
             <div style={{ minWidth: 0 }}>

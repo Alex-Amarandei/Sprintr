@@ -63,7 +63,15 @@ export function ChatPanel({
         wrap="nowrap"
         style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
       >
-        <Avatar radius="xl" color="brand">
+        <Avatar
+          radius="xl"
+          style={
+            {
+              "--avatar-bg": "var(--mantine-color-brand-1)",
+              "--avatar-color": "var(--mantine-color-brand-7)",
+            } as React.CSSProperties
+          }
+        >
           {initials}
         </Avatar>
         <div>
