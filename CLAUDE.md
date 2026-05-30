@@ -467,8 +467,26 @@ shop's schema. Two job types, **service** and **product**, share one model.
 ## 2. Document structure
 
 ```jsonc
-{ "schema_version": 1, "items": [ /* ordered Items */ ] }
+{
+  "schema_version": 1,
+  "categories": [ /* nested, per-shop — see below */ ],
+  "items": [ /* ordered Items */ ]
+}
 ```
+
+**Categories (nested, per-shop, in the document).** A flat list with `parent_id`
+(adjacency list → arbitrary nesting, easy to move/reorder). Items reference one via
+`category_id`. Versioned with everything else, so revert restores categories + items
+together.
+```jsonc
+"categories": [
+  { "id": "cat_print",  "name": "Printare",          "parent_id": null,        "sort_order": 0 },
+  { "id": "cat_thesis", "name": "Lucrări de licență", "parent_id": "cat_print", "sort_order": 0 },
+  { "id": "cat_paper",  "name": "Papetărie",           "parent_id": null,        "sort_order": 1 }
+]
+```
+The UI builds the tree from `parent_id`. (Per-shop only for now — a global cross-shop
+taxonomy would be a separate shared table, deferred.)
 
 ## 3. Item
 
@@ -482,6 +500,7 @@ shop's schema. Two job types, **service** and **product**, share one model.
   "is_active": true,
   "sort_order": 0,
   "base_price": 0,            // RON; part of the line base (see §7)
+  "category_id": null,        // optional → a category id from document.categories
   "stock_display": "none",    // "none" | "in_out" | "exact"   (Phase 2 / inventory)
   "inventory_item_id": null,  // PRODUCT only, 1:1 link            (Phase 2 / inventory)
   "fields": [ /* ordered Fields — the configurator */ ]
@@ -593,6 +612,8 @@ round half-up to 2 decimals at the end.
 - at most ONE field per item has `is_quantity: true`; its answer ≥ its `min` (≥1).
 - `file` answer is a storage path whose object exists, whose type ∈ the field's resolved
   `accept`, and whose size ≤ `max_size_mb`.
+- **categories:** each `category.parent_id` references an existing category, no cycles; every
+  item `category_id` (if set) references an existing category.
 - every `per` (and Phase-2 `qty_per`) references an existing `number` field key.
 - unknown answer keys rejected; malformed `document` rejected on save.
 
@@ -729,5 +750,52 @@ Reverses the original "admin = dashboard only, not in the enum" line under "Role
   policies OR together, so an admin bypasses all ownership/role/status gating and can
   read/insert/update/delete anything (incl. inserting orders directly, editing any catalog
   version, any shop, etc.).
-- **Who's admin:** set `profiles.role='admin'`. Currently `georgecodefy@gmail.com` (George).
-  Alex + Ioana to be added once they have auth accounts (a profile needs an `auth.users` row).
+- **Who's admin:** set `profiles.role='admin'`. Currently **George**
+  (`georgecodefy@gmail.com`) and **Alex** (`alex.m.amarandei@gmail.com`). Ioana once she has
+  an auth account.
+
+# Backend architecture (Vercel + Supabase)
+
+We host the Next.js app on **Vercel**. "Backend" = three layers:
+
+1. **Supabase (managed)** — Postgres + RLS (the real authz layer), Auth, Storage, Realtime.
+   Clients talk to it directly for anything that's read/write-your-own-stuff.
+2. **Next.js on Vercel** — UI **plus** our custom server logic (serverless functions):
+   **Server Actions** for UI-driven mutations, **Route Handlers** (`app/api/*`) for
+   webhooks / external callers.
+3. **Client** — browse, auth, chat (Realtime), file upload → straight to Supabase, RLS-gated.
+
+**No separate Supabase Edge Function** (supersedes the earlier note): custom logic lives in
+`web/` so the client preview and the server share one TypeScript pricing module.
+
+### Server Actions vs Route Handlers
+- **Server Actions** (`'use server'`, called from components/forms): internal, UI-driven
+  mutations with `revalidatePath`. Use for `placeOrder`, `acceptOrder`/advance status, set
+  `handled_by`, `postReview`, publish/revert catalog.
+- **Route Handlers** (stable public URL, own the raw Request/Response): anything external —
+  **Stripe webhook** (`/api/stripe/webhook`, raw-body signature verify), future Supabase
+  DB-webhook → WhatsApp, signed-URL endpoints, health checks.
+- **Security is identical & mandatory in both:** args/bodies are untrusted → check
+  `auth.uid()`, validate with zod, and **recompute price server-side**. The
+  **`service_role`** Supabase client is created *inside* the action/handler only (never
+  shipped to the browser); it's what lets the server insert orders (clients can't) and mint
+  signed URLs.
+
+### What runs where
+- **Place order** → Server Action: recompute from the live catalog `document` (+ offers
+  later), validate answers (§8), insert `orders`/`order_items` with service role.
+- **Stripe** (online payments, building now) → Route Handler creates the PaymentIntent +
+  `/api/stripe/webhook` flips `payment_status`→`paid`, sets `payment_ref`/`paid_at`. Secrets
+  are Vercel server env only.
+- **WhatsApp** (later) → server-side on accept (Server Action or DB-webhook→Route Handler).
+- **Archive** → Supabase `pg_cron` (already built).
+
+### Shared pricing/validation module
+`web/src/lib/catalog/{pricing,answers}.ts` — **pure TS, no React / no server-only imports**
+so it runs in both the browser (live preview) and the server (authoritative). Single source
+of truth for the §7 formula and §8 validation. (`server/` folder was dropped.)
+
+### Secrets / env
+- Client: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (public).
+- Server-only on Vercel: `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`,
+  `STRIPE_WEBHOOK_SECRET` (and WhatsApp creds later). Never `NEXT_PUBLIC_`.
