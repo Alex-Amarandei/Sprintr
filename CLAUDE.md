@@ -511,6 +511,11 @@ Functions (`place-order`, `stripe-webhook`) are superseded and unused.
 CLI) prints a local `whsec_...` secret — paste into `.env.local` as `STRIPE_WEBHOOK_SECRET`.
 Test card: `4242 4242 4242 4242`, any future date, any CVC.
 
+> **WEBHOOK STATUS (2026-05-30):** order placement + intent work, but `payment_status` stays
+> `pending` locally because no one's running the webhook listener yet. George can't install
+> the Stripe CLI (Xcode CLT too old) → **Alex owns local webhook setup**. Step-by-step in
+> **`STRIPE_WEBHOOK_SETUP.md`** (repo root). Open test order pending: `f800bc3c-…7bac9`.
+
 **Platform fee:** 6% (`PLATFORM_FEE_PERCENT = 0.06` in the route handler). Charged on top
 of the order subtotal; visible to the customer in `CheckoutModal` as "include taxă platformă 6%".
 
