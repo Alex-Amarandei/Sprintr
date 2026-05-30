@@ -2,11 +2,9 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   ActionIcon,
-  Badge,
   Box,
   Card,
   Group,
-  Paper,
   Stack,
   Text,
   ThemeIcon,
@@ -25,22 +23,14 @@ import { getShopView, getShopCatalog } from "@/lib/catalog/shops";
 import { SHOP_CATEGORY } from "@/components/shop/category";
 import { OpenBadge } from "@/components/ui/OpenBadge";
 import { ShopCatalogTabs } from "@/components/shop/ShopCatalogTabs";
+import { ShopSchedule } from "@/components/shop/ShopSchedule";
+import { SAMPLE_SCHEDULE, getScheduleStatus } from "@/lib/shop/schedule";
 
 export const metadata: Metadata = { title: "Magazin" };
 
 interface Props {
   params: Promise<{ shopId: string }>;
 }
-
-const DAYS = [
-  ["Lun", "08–20"],
-  ["Mar", "08–20"],
-  ["Mie", "08–20"],
-  ["Joi", "08–20"],
-  ["Vin", "08–20"],
-  ["Sâm", "09–17"],
-  ["Dum", "Închis"],
-];
 
 export default async function ShopDetailPage({ params }: Props) {
   const { shopId } = await params;
@@ -52,8 +42,9 @@ export default async function ShopDetailPage({ params }: Props) {
   if (!shop) notFound();
   const cat = SHOP_CATEGORY[shop.category ?? "print"];
   const Icon = cat.icon;
-  const open = shop.isOpen ?? true;
-  const todayIdx = (new Date().getDay() + 6) % 7; // Mon = 0
+
+  // TODO(BE): pass the shop's real `schedule` jsonb instead of SAMPLE_SCHEDULE.
+  const open = getScheduleStatus(SAMPLE_SCHEDULE).open;
 
   return (
     <Stack gap="lg">
@@ -132,22 +123,8 @@ export default async function ShopDetailPage({ params }: Props) {
         {/* Main: program + catalog */}
         <Stack gap="lg" style={{ flex: 1, minWidth: 0 }}>
           {/* Program */}
-          <Paper withBorder radius="lg" p="md">
-            <Group gap="xs">
-              {DAYS.map(([day, hours], i) => (
-                <Badge
-                  key={day}
-                  variant={i === todayIdx ? "filled" : "light"}
-                  color={i === todayIdx ? "teal.6" : "mist"}
-                  size="lg"
-                  radius="sm"
-                >
-                  {day} · {hours}
-                  {i === todayIdx ? " · azi" : ""}
-                </Badge>
-              ))}
-            </Group>
-          </Paper>
+          {/* TODO(BE): pass the shop's real `schedule` jsonb instead of SAMPLE_SCHEDULE. */}
+          <ShopSchedule schedule={SAMPLE_SCHEDULE} />
 
           {/* Catalog */}
           <div>

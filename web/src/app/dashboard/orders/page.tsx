@@ -1,18 +1,21 @@
 import { Metadata } from "next";
-import { Paper, Title } from "@mantine/core";
+import { Stack, Text, Title } from "@mantine/core";
+import { sampleOrders } from "@/lib/orders/sample";
+import { ShopOrderQueue } from "@/components/dashboard/ShopOrderQueue";
 
 export const metadata: Metadata = { title: "Comenzi primite" };
 
 export default function ShopOrdersPage() {
   return (
-    <div>
-      <Title order={2} mb="lg">
-        Comenzi primite
-      </Title>
-      {/* TODO: fetch shop orders from Supabase */}
-      <Paper withBorder radius="lg" p={48} ta="center" c="dimmed">
-        Nu există comenzi deocamdată.
-      </Paper>
-    </div>
+    <Stack gap="lg">
+      <div>
+        <Title order={2}>Comenzi</Title>
+        <Text c="dimmed">
+          Acceptă, respinge și avansează statusul comenzilor primite.
+        </Text>
+      </div>
+      {/* TODO(BE): replace sampleOrders with this shop's orders from Supabase. */}
+      <ShopOrderQueue initialOrders={sampleOrders} />
+    </Stack>
   );
 }

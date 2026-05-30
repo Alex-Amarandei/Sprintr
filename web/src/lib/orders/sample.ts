@@ -17,6 +17,8 @@ export interface SampleOrder {
   id: string;
   shopId: string;
   shopName: string;
+  /** Customer who placed it — shown on the shop dashboard queue. */
+  customerName: string;
   category: ShopCategory;
   itemsCount: number;
   total: number;
@@ -32,6 +34,7 @@ export interface SampleOrder {
 export const sampleOrders: SampleOrder[] = [
   {
     id: "SR-1042",
+    customerName: "Andrei Popescu",
     shopId: "pim-copy",
     shopName: "PIM Copy",
     category: "print",
@@ -55,6 +58,7 @@ export const sampleOrders: SampleOrder[] = [
   },
   {
     id: "SR-1041",
+    customerName: "Maria Ionescu",
     shopId: "copy-center-tudor",
     shopName: "Copy Center Tudor",
     category: "copy",
@@ -76,6 +80,7 @@ export const sampleOrders: SampleOrder[] = [
   },
   {
     id: "SR-1039",
+    customerName: "Vlad Georgescu",
     shopId: "printhaus",
     shopName: "PrintHaus",
     category: "binding",
@@ -94,6 +99,7 @@ export const sampleOrders: SampleOrder[] = [
   },
   {
     id: "SR-1037",
+    customerName: "Elena Rusu",
     shopId: "pim-copy",
     shopName: "PIM Copy",
     category: "print",
@@ -108,6 +114,7 @@ export const sampleOrders: SampleOrder[] = [
   },
   {
     id: "SR-1031",
+    customerName: "Cristian Dima",
     shopId: "birotica-independentei",
     shopName: "Birotica Independenței",
     category: "stationery",
