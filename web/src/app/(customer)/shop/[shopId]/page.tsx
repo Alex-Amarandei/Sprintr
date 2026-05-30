@@ -1,5 +1,9 @@
 import { Metadata } from "next";
-import { Paper, Text } from "@mantine/core";
+import { notFound } from "next/navigation";
+import { Group, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { MapPin } from "lucide-react";
+import { getSampleShop, getSampleCatalog } from "@/lib/catalog/samples";
+import { AddItemCard } from "@/components/cart/AddItemCard";
 
 export const metadata: Metadata = { title: "Magazin" };
 
@@ -10,15 +14,31 @@ interface Props {
 export default async function ShopDetailPage({ params }: Props) {
   const { shopId } = await params;
 
+  // TODO(BE): read the shop + its active catalog document from Supabase.
+  const shop = getSampleShop(shopId);
+  if (!shop) notFound();
+
+  const items = getSampleCatalog(shopId);
+
   return (
-    <div>
-      <Text c="dimmed" size="sm" mb="lg">
-        Shop ID: {shopId}
-      </Text>
-      {/* TODO: fetch shop details, services and products from Supabase */}
-      <Paper withBorder radius="lg" p={48} ta="center" c="dimmed">
-        Detaliile magazinului vor apărea aici.
+    <Stack gap="lg">
+      <Paper withBorder radius="lg" p="lg">
+        <Title order={2}>{shop.name}</Title>
+        <Text c="dimmed" mt={4}>
+          {shop.description}
+        </Text>
+        <Group gap={4} mt="xs" c="dimmed">
+          <MapPin size={14} />
+          <Text size="sm">{shop.address}</Text>
+        </Group>
       </Paper>
-    </div>
+
+      <Title order={3}>Produse și servicii</Title>
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
+        {items.map((item) => (
+          <AddItemCard key={item.id} item={item} />
+        ))}
+      </SimpleGrid>
+    </Stack>
   );
 }

@@ -15,7 +15,7 @@ export default function LoginPage() {
       </Text>
 
       <Stack gap="md">
-        <GoogleSignInButton next="/browse" label="Continuă cu Google" />
+        <GoogleSignInButton label="Continuă cu Google" />
       </Stack>
 
       <Divider my="lg" />
