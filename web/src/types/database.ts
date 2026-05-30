@@ -542,6 +542,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_shop_member: {
         Args: {
           p_min_role?: Database["public"]["Enums"]["shop_role"]
@@ -563,7 +567,7 @@ export type Database = {
       payment_status: "pending" | "paid" | "failed" | "refunded"
       review_target: "shop" | "employee" | "item"
       shop_role: "staff" | "catalog" | "owner"
-      user_role: "customer" | "shop"
+      user_role: "customer" | "shop" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -699,7 +703,7 @@ export const Constants = {
       payment_status: ["pending", "paid", "failed", "refunded"],
       review_target: ["shop", "employee", "item"],
       shop_role: ["staff", "catalog", "owner"],
-      user_role: ["customer", "shop"],
+      user_role: ["customer", "shop", "admin"],
     },
   },
 } as const
