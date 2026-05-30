@@ -409,18 +409,19 @@ shop's schema. Two job types, **service** and **product**, share one model.
   "image_path": "shops/<id>/items/<file>",   // storage path (not URL), nullable
   "is_active": true,
   "sort_order": 0,
-  "base_price": 0,            // RON, additive once (see §7)
-  "requires_upload": true,    // service: customer must attach a PDF; product: usually false
+  "base_price": 0,            // RON; part of the line base (see §7)
   "stock_display": "none",    // "none" | "in_out" | "exact"   (Phase 2 / inventory)
   "inventory_item_id": null,  // PRODUCT only, 1:1 link            (Phase 2 / inventory)
   "fields": [ /* ordered Fields — the configurator */ ]
 }
 ```
 
-- **product** = simple good: `requires_upload:false`, typically a single `quantity` number
-  field, 1:1 `inventory_item_id`.
-- **service** = configurable job: `requires_upload:true` (usually); `fields` define the
-  config; may consume **several** inventory items based on choices (Phase 2 `consumes`).
+- **No fixed `requires_upload` flag** — expected inputs are just fields: a `file` field for a
+  PDF/image/doc, a `text` field for a note. The shop configures exactly what it needs (§4).
+- **product** = simple good: typically one `number` field flagged `is_quantity` (the qty),
+  1:1 `inventory_item_id`.
+- **service** = configurable job: `fields` define the config (incl. any `file`/`text`
+  inputs); may consume **several** inventory items based on choices (Phase 2 `consumes`).
 
 ## 4. Field — render by `type`
 
@@ -428,7 +429,7 @@ shop's schema. Two job types, **service** and **product**, share one model.
 {
   "key": "binding",      // unique within the item; [a-z0-9_]; machine-stable
   "label": "Legătorie",  // customer-facing
-  "type": "single_select" | "multi_select" | "boolean" | "number" | "text",
+  "type": "single_select" | "multi_select" | "boolean" | "number" | "text" | "file",
   "required": false,     // see per-type meaning below
   "help": null,          // optional hint
   "default": null        // optional prefill
@@ -440,8 +441,9 @@ shop's schema. Two job types, **service** and **product**, share one model.
 | `single_select` | radio / dropdown | chosen `value` (string) | chosen option's `price` |
 | `multi_select` | checkbox group | `value`s (string[]) | Σ chosen options' `price` |
 | `boolean` | switch / checkbox | `true`/`false` | field `price` when `true` |
-| `number` | number input | number | field `price` (usually `per_unit`) |
+| `number` | number input | number | field `price` (usually `per_unit`); may be the `is_quantity` multiplier |
 | `text` | text input | string | never priced |
+| `file` | file upload | storage path (string) | never priced |
 
 - **single_/multi_select** add:
   ```jsonc
@@ -452,8 +454,19 @@ shop's schema. Two job types, **service** and **product**, share one model.
   "min_select": 0,   // multi_select only — 0 = optional, ≥1 = mandatory count
   "max_select": null // multi_select only — null = unlimited
   ```
-- **number** adds: `"min":1, "max":null, "step":1, "unit":"pagini"` + optional `"price"`.
+- **number** adds: `"min":1, "max":null, "step":1, "unit":"pagini"`, optional `"price"`, and
+  optional **`"is_quantity": true`** — at most ONE per item; it multiplies the whole line (§7).
 - **boolean** adds optional `"price"` (applied when `true`).
+- **file** (configurable expected input — the shop picks what it accepts) adds:
+  ```jsonc
+  "accept": ["documents", ".jpg", ".png"],  // named groups AND/OR explicit extensions/mime
+  "max_size_mb": 20
+  ```
+  **Named groups** resolve to extension/mime sets (client + server), so a shop can pick a
+  broad category or specific types:
+  - `images` = jpg, jpeg, png, webp · `documents` = pdf, doc, docx, txt, odt · `pdf` = pdf only
+  - (extensible — groups defined in one shared place); explicit `.docx` / `image/*` also allowed.
+  The file uploads to the private bucket; the **answer is its storage path**.
 
 ### Mandatory vs optional
 - `required:true` on `single_select`/`number` → must be answered.
@@ -481,19 +494,22 @@ single_select→string · multi_select→string[] · boolean→bool · number→
 ## 7. Pricing algorithm (authoritative; client mirrors it for live preview)
 
 ```
-total = base_price
-for each field, by type:
+quantity = answers[the field flagged is_quantity]   (or 1 if none)
+addons   = Σ over every NON-quantity field, by type:
   single_select : answered ? resolve(chosenOption.price) : 0
   multi_select  : Σ resolve(option.price) over selected
   boolean       : value === true ? resolve(field.price) : 0
   number        : resolve(field.price)        // per defaults to this field's own value
-  text          : 0
+  text, file    : 0
+line_total = quantity × (base_price + addons)
 resolve(additive)       = amount
 resolve(per_unit, per)  = amount × answers[per]
 round half-up to 2 decimals at the end.
 ```
-- **Flat sum, NO conditional/branching pricing** — every priced element contributes
-  independently.
+- The **`is_quantity` number field multiplies the whole line** (e.g. `copies`) — it is NOT in
+  the addon sum, it's the multiplier. At most one per item; default `quantity = 1`.
+- A `per_unit` price adds *within* one unit (e.g. `pages × 0.25`); the assembled unit then
+  scales by `quantity`. **No other conditional/branching pricing.**
 - **Server is the source of truth.** The client computes the same formula for live preview,
   but the order total is recomputed server-side at placement; mismatch → reject.
 
@@ -502,16 +518,22 @@ round half-up to 2 decimals at the end.
 - `required` single_select/number answered; multi_select count ∈ [min_select, max_select].
 - every selected value ∈ that field's option `value`s; all `locked` options present.
 - number ∈ [min, max] honoring `step`.
+- at most ONE field per item has `is_quantity: true`; its answer ≥ its `min` (≥1).
+- `file` answer is a storage path whose object exists, whose type ∈ the field's resolved
+  `accept`, and whose size ≤ `max_size_mb`.
 - every `per` (and Phase-2 `qty_per`) references an existing `number` field key.
 - unknown answer keys rejected; malformed `document` rejected on save.
 
 ## 9. Worked example (service)
 
 ```jsonc
-{ "kind":"service", "title":"Listare licență", "base_price":0, "requires_upload":true,
+{ "kind":"service", "title":"Listare licență", "base_price":0,
   "fields":[
     {"key":"pages","label":"Pagini","type":"number","required":true,"min":1,"unit":"pag",
      "price":{"mode":"per_unit","amount":0.25}},
+    {"key":"copies","label":"Exemplare","type":"number","required":true,"min":1,
+     "default":1,"is_quantity":true},
+    {"key":"file","label":"Document PDF","type":"file","required":true,"accept":["pdf"]},
     {"key":"print","label":"Tipar","type":"single_select","required":true,"options":[
       {"value":"bw","label":"Alb-negru","price":{"mode":"additive","amount":0}},
       {"value":"color","label":"Color","price":{"mode":"per_unit","amount":1.0,"per":"pages"}}]},
@@ -519,17 +541,18 @@ round half-up to 2 decimals at the end.
       {"value":"none","label":"Fără","price":{"mode":"additive","amount":0}},
       {"value":"spiral","label":"Spiră","price":{"mode":"additive","amount":10}}]}
   ]}
-// answers {pages:100, print:"color", binding:"spiral"} → 0 + 25 + 100 + 10 = 135 RON
+// answers {pages:100, copies:2, print:"color", binding:"spiral", file:"order-files/…"}
+//   addons = 25 (pages) + 100 (color) + 10 (spiral) = 135 ; line = 2 × (0 + 135) = 270 RON
 ```
 
 ## 10. Product pattern
 
 ```jsonc
-{ "kind":"product", "title":"Pix Pilot", "base_price":0, "requires_upload":false,
+{ "kind":"product", "title":"Pix Pilot", "base_price":5,
   "inventory_item_id":"…", "stock_display":"in_out",
   "fields":[ {"key":"quantity","label":"Cantitate","type":"number","required":true,
-              "min":1,"default":1,"price":{"mode":"per_unit","amount":5.0}} ] }
-// answers {quantity:3} → 15 RON; decrements its inventory item by 3 at placement (Phase 2).
+              "min":1,"default":1,"is_quantity":true} ] }
+// answers {quantity:3} → 3 × (5 + 0) = 15 RON; decrements its inventory item by 3 (Phase 2).
 ```
 
 ## 11. Phase 2 — inventory (designed, NOT built yet)
