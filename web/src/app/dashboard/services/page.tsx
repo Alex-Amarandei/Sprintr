@@ -1,8 +1,10 @@
 import { Metadata } from "next";
-import { Alert, Title } from "@mantine/core";
+import { Stack, Title } from "@mantine/core";
+import { Store } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { emptyDocument, parseDocument } from "@/lib/catalog/schema";
 import { CatalogBuilder } from "@/components/catalog/CatalogBuilder";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export const metadata: Metadata = { title: "Catalog" };
 
@@ -23,15 +25,14 @@ export default async function ShopCatalogPage() {
 
   if (!membership) {
     return (
-      <div>
-        <Title order={2} mb="lg">
-          Catalog
-        </Title>
-        <Alert color="yellow" variant="light" title="Niciun magazin asociat">
-          Contul tău nu este asociat unui magazin. Un administrator trebuie să te
-          adauge ca membru (rol „catalog" sau „owner") pentru a edita catalogul.
-        </Alert>
-      </div>
+      <Stack gap="lg">
+        <Title order={2}>Catalog</Title>
+        <EmptyState
+          icon={<Store size={26} />}
+          title="Niciun magazin asociat"
+          description="Contul tău nu este asociat unui magazin. Contactează un administrator pentru a edita catalogul."
+        />
+      </Stack>
     );
   }
 

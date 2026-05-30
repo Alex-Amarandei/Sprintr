@@ -1,34 +1,116 @@
 import { Metadata } from "next";
-import { Paper, SimpleGrid, Text, Title } from "@mantine/core";
+import {
+  Button,
+  Card,
+  Group,
+  SimpleGrid,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
+import { Check, Clock, Download, Package, Plus, TrendingUp } from "lucide-react";
+import { sampleOrders } from "@/lib/orders/sample";
+import { StatCard } from "@/components/ui/StatCard";
+import { RevenueBars } from "@/components/dashboard/RevenueBars";
+import { ShopOrderQueue } from "@/components/dashboard/ShopOrderQueue";
 
 export const metadata: Metadata = { title: "Dashboard magazin" };
 
-const stats = [
-  { label: "Comenzi noi", value: "0", color: "orange" },
-  { label: "În procesare", value: "0", color: "blue" },
-  { label: "Finalizate azi", value: "0", color: "green" },
-  { label: "Venituri azi", value: "0 RON", color: "grape" },
+const REVENUE = [
+  { label: "L", value: 620 },
+  { label: "Ma", value: 880 },
+  { label: "Mi", value: 540 },
+  { label: "J", value: 1120 },
+  { label: "V", value: 1320 },
+  { label: "S", value: 980 },
+  { label: "D", value: 1240 },
+];
+
+const TOP = [
+  { name: "Listare licență", orders: 42, revenue: 3150 },
+  { name: "Legare termică", orders: 28, revenue: 700 },
+  { name: "Printare A3 color", orders: 19, revenue: 855 },
+  { name: "Caiet A4 80 file", orders: 64, revenue: 954 },
 ];
 
 export default function ShopDashboardPage() {
+  const today = new Intl.DateTimeFormat("ro-RO", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date());
+  const newCount = sampleOrders.filter((o) => o.status === "pending").length;
+  const prepCount = sampleOrders.filter(
+    (o) => o.status === "accepted" || o.status === "in_progress"
+  ).length;
+
   return (
-    <div>
-      <Title order={2} mb="xl">
-        Dashboard
-      </Title>
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">
-        {stats.map(({ label, value, color }) => (
-          <Paper key={label} withBorder radius="lg" p="lg">
-            <Text size="sm" c="dimmed" mb="xs">
-              {label}
-            </Text>
-            <Text fz={28} fw={700} c={`${color}.7`}>
-              {value}
-            </Text>
-          </Paper>
-        ))}
+    <Stack gap="xl">
+      <Group justify="space-between" align="flex-end" wrap="wrap" gap="md">
+        <div>
+          <Text fz="sm" c="dimmed" tt="capitalize">
+            {today}
+          </Text>
+          <Title order={2}>Bună dimineața, PIM Copy 👋</Title>
+          <Text c="dimmed">
+            Ai {newCount} comenzi noi care așteaptă aprobare.
+          </Text>
+        </div>
+        <Group>
+          <Button variant="default" leftSection={<Download size={16} />}>
+            Export raport
+          </Button>
+          <Button leftSection={<Plus size={16} />}>Adaugă produs</Button>
+        </Group>
+      </Group>
+
+      <SimpleGrid cols={{ base: 2, md: 4 }} spacing="lg">
+        <StatCard icon={<Clock size={20} />} value={String(newCount)} label="Comenzi noi" delta="+2 vs ieri" color="brand" />
+        <StatCard icon={<Package size={20} />} value={String(prepCount)} label="În pregătire" color="cyan" />
+        <StatCard icon={<Check size={20} />} value="18" label="Finalizate azi" delta="+12%" color="teal" />
+        <StatCard icon={<TrendingUp size={20} />} value="1.240 lei" label="Venit azi" delta="+24%" color="brand" />
       </SimpleGrid>
-      {/* TODO: recent orders table */}
-    </div>
+
+      <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
+        <Card>
+          <Group justify="space-between">
+            <Text fw={700}>Venit — ultimele 7 zile</Text>
+            <Text fw={800} fz={20} c="ink.9">
+              8.420 lei
+            </Text>
+          </Group>
+          <RevenueBars data={REVENUE} />
+        </Card>
+        <Card>
+          <Text fw={700} mb="md">
+            Top servicii
+          </Text>
+          <Stack gap="sm">
+            {TOP.map((t) => (
+              <Group key={t.name} justify="space-between">
+                <div>
+                  <Text fz="sm" fw={600}>
+                    {t.name}
+                  </Text>
+                  <Text fz="xs" c="dimmed">
+                    {t.orders} comenzi
+                  </Text>
+                </div>
+                <Text fw={700} fz="sm">
+                  {t.revenue} lei
+                </Text>
+              </Group>
+            ))}
+          </Stack>
+        </Card>
+      </SimpleGrid>
+
+      <div>
+        <Title order={3} mb="md">
+          Comenzi de procesat
+        </Title>
+        <ShopOrderQueue initialOrders={sampleOrders} limit={5} />
+      </div>
+    </Stack>
   );
 }

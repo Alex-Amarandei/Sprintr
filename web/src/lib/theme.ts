@@ -94,6 +94,8 @@ export const theme = createTheme({
       defaultProps: { radius: "sm", fw: 600 },
       styles: { label: { textTransform: "none" } },
     },
+    // Mid-bold tab labels (semibold) — stronger than body, lighter than titles.
+    Tabs: { styles: { tabLabel: { fontWeight: 600 } } },
     Modal: { defaultProps: { radius: "lg", centered: true } },
     TextInput: { defaultProps: { radius: "md" } },
     Textarea: { defaultProps: { radius: "md" } },
