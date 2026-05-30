@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ActionIcon,
   Alert,
@@ -21,6 +22,7 @@ import {
   GripVertical,
   Pencil,
   Plus,
+  Rocket,
   Save,
   Trash2,
 } from "lucide-react";
@@ -49,9 +51,14 @@ import {
   type ItemKind,
 } from "@/lib/catalog/schema";
 import { newCategory, newItem } from "@/lib/catalog/factories";
-import { createDraft, saveDraftDocument } from "@/lib/catalog/api";
+import {
+  createDraft,
+  publishVersion,
+  saveDraftDocument,
+} from "@/lib/catalog/api";
 import { roCount } from "@/lib/utils/format";
 import { ItemCard } from "./ItemCard";
+import { CatalogVersions } from "./CatalogVersions";
 
 /** An ItemCard wrapped as a dnd-kit sortable, with its own drag handle. */
 function SortableItemCard({
@@ -245,6 +252,8 @@ interface Props {
   shopId: string;
   initialDraft: { id: string; version: number; document: unknown } | null;
   activeDocument: CatalogDocument;
+  /** The shop's live version pointer — drives the "Live" marker in the history. */
+  activeVersionId?: string | null;
   /** Test mode: no Supabase calls — "save" just validates and shows the JSON. */
   localMode?: boolean;
 }
@@ -253,8 +262,10 @@ export function CatalogBuilder({
   shopId,
   initialDraft,
   activeDocument,
+  activeVersionId = null,
   localMode = false,
 }: Props) {
+  const router = useRouter();
   const [draftId, setDraftId] = useState<string | null>(
     initialDraft?.id ?? (localMode ? "local" : null),
   );
@@ -266,6 +277,7 @@ export function CatalogBuilder({
   );
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [liveId, setLiveId] = useState<string | null>(activeVersionId);
 
   const editing = draftId !== null;
 
@@ -372,36 +384,43 @@ export function CatalogBuilder({
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  async function save() {
-    if (!draftId) return;
-    // normalize sort_order by position, then validate
+  /** Normalize sort_order + validate. Returns the clean doc, or null (toasts why). */
+  function buildValidDoc(): CatalogDocument | null {
     const normalized: CatalogDocument = {
       ...doc,
       items: doc.items.map((it, idx) => ({ ...it, sort_order: idx })),
     };
     const dupErr = findDuplicateKeys(normalized);
-    if (dupErr) return toast.error(dupErr);
-
+    if (dupErr) {
+      toast.error(dupErr);
+      return null;
+    }
     const parsed = catalogDocumentSchema.safeParse(normalized);
     if (!parsed.success) {
       const first = parsed.error.issues[0];
-      return toast.error(
-        `Document invalid: ${first.path.join(".")} — ${first.message}`,
-      );
+      toast.error(`Document invalid: ${first.path.join(".")} — ${first.message}`);
+      return null;
     }
+    return parsed.data;
+  }
+
+  async function save() {
+    if (!draftId) return;
+    const valid = buildValidDoc();
+    if (!valid) return;
 
     if (localMode) {
-      setDoc(parsed.data);
+      setDoc(valid);
       setDirty(false);
-      console.log("[catalog local mode] document:", parsed.data);
+      console.log("[catalog local mode] document:", valid);
       toast.success("Document valid (mod local — nu a fost trimis la backend)");
       return;
     }
 
     setBusy(true);
     try {
-      await saveDraftDocument(draftId, parsed.data);
-      setDoc(parsed.data);
+      await saveDraftDocument(draftId, valid);
+      setDoc(valid);
       setDirty(false);
       toast.success("Catalog salvat în schiță");
     } catch (e) {
@@ -409,6 +428,46 @@ export function CatalogBuilder({
     } finally {
       setBusy(false);
     }
+  }
+
+  /** Save the current draft, then make it the live version (publish). */
+  async function publishDraft() {
+    if (!draftId) return;
+    const valid = buildValidDoc();
+    if (!valid) return;
+
+    if (localMode) {
+      toast.success("Mod local — publicarea nu trimite la backend");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      await saveDraftDocument(draftId, valid);
+      await publishVersion(draftId);
+      // The draft is now the live version → drop back to read-only view of it.
+      setLiveId(draftId);
+      setDoc(valid);
+      setDraftId(null);
+      setVersion(null);
+      setDirty(false);
+      toast.success("Catalog publicat — acum este versiunea live");
+      router.refresh();
+    } catch (e) {
+      toast.error(`Publicarea a eșuat: ${(e as Error).message}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /** A version was made live from the history drawer — show it read-only. */
+  function onActivate(versionId: string, activated: CatalogDocument) {
+    setLiveId(versionId);
+    setDoc(activated);
+    setDraftId(null);
+    setVersion(null);
+    setDirty(false);
+    router.refresh();
   }
 
   return (
@@ -431,31 +490,51 @@ export function CatalogBuilder({
             </Text>
           </Group>
         </div>
-        {editing ? (
-          <Button
-            leftSection={<Save size={16} />}
-            onClick={save}
-            loading={busy}
-            disabled={!dirty}
-          >
-            Salvează
-          </Button>
-        ) : (
-          <Button
-            leftSection={<Pencil size={16} />}
-            onClick={startEditing}
-            loading={busy}
-            variant="default"
-          >
-            Editează catalogul
-          </Button>
-        )}
+        <Group gap="xs">
+          {!localMode && (
+            <CatalogVersions
+              shopId={shopId}
+              activeVersionId={liveId}
+              onActivate={onActivate}
+            />
+          )}
+          {editing ? (
+            <>
+              <Button
+                variant="default"
+                leftSection={<Save size={16} />}
+                onClick={save}
+                loading={busy}
+                disabled={!dirty}
+              >
+                Salvează
+              </Button>
+              <Button
+                leftSection={<Rocket size={16} />}
+                onClick={publishDraft}
+                loading={busy}
+              >
+                Publică
+              </Button>
+            </>
+          ) : (
+            <Button
+              leftSection={<Pencil size={16} />}
+              onClick={startEditing}
+              loading={busy}
+              variant="default"
+            >
+              Editează catalogul
+            </Button>
+          )}
+        </Group>
       </Group>
 
       {!editing && (
         <Alert color="brand" variant="light">
           Vezi catalogul live. Apasă „Editează catalogul" pentru a crea o schiță
-          pe care o poți modifica și salva.
+          pe care o modifici, o salvezi și apoi o publici. Din „Versiuni" poți
+          comuta între versiuni sau reveni la una anterioară.
         </Alert>
       )}
 

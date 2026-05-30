@@ -104,3 +104,49 @@ export async function saveProductToDraft(
 
   await saveDraftDocument(draft.id, doc);
 }
+
+/** One row in the version history (document included for item-count + restore). */
+export type VersionRow = {
+  id: string;
+  version: number;
+  label: string | null;
+  status: "draft" | "published" | "archived";
+  document: unknown;
+  created_at: string;
+  published_at: string | null;
+};
+
+/** All catalog versions for a shop, newest first. Members-only per RLS. */
+export async function listVersions(shopId: string): Promise<VersionRow[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("catalog_versions")
+    .select("id, version, label, status, document, created_at, published_at")
+    .eq("shop_id", shopId)
+    .order("version", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as VersionRow[];
+}
+
+/**
+ * Make a version the live one — publishing a draft, or switching/reverting to a
+ * past version. All three are the same operation: move the shop's active pointer
+ * (RPC `set_active_catalog_version`, which also stamps status='published').
+ */
+export async function publishVersion(versionId: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("set_active_catalog_version", {
+    p_version_id: versionId,
+  });
+  if (error) throw error;
+}
+
+/** Hide a non-live version from the history (status → archived; reversible). */
+export async function archiveVersion(versionId: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("catalog_versions")
+    .update({ status: "archived" })
+    .eq("id", versionId);
+  if (error) throw error;
+}

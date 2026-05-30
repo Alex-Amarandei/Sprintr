@@ -70,6 +70,7 @@ export default async function ShopCatalogPage() {
       shopId={shopId}
       initialDraft={draft ?? null}
       activeDocument={activeDocument}
+      activeVersionId={shop?.active_version_id ?? null}
     />
   );
 }
