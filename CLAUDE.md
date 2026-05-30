@@ -170,3 +170,48 @@ for fast seed data). Store storage PATHS not URLs. No `city` column (Iași hardc
 3. `messages` + realtime + RLS policies across all tables.
 4. Wire frontend: chat is a SHARED component one person owns (both customer + shop embed it).
    Frontend split otherwise: Person A = shop side, Person B = customer side.
+
+---
+
+# Build-day conventions (append-only)
+
+> Decisions made while building. **Append here additively** whenever we agree on
+> something colleagues must follow — never rewrite/delete. Commit the change.
+
+## Tooling
+
+- **Package manager: bun** (not npm/npx). Use `bun install`, `bun run <script>`,
+  `bunx <tool>`, `bun add <pkg>`. `web/` uses `bun.lock` (the old `package-lock.json`
+  was removed). Node was briefly broken on macOS (missing `libsimdjson` dylib); fix is
+  `brew reinstall node@24 simdjson`.
+- **Commits: a single gitmoji subject line, no body** (see https://gitmoji.dev).
+
+## Supabase
+
+- **One shared cloud project. No Supabase DB branching** this weekend (Pro-only,
+  overkill for 3 people). Project ref: `qborcngytmztfucjuwgw`, region Central EU
+  (Frankfurt).
+- **Postgres 17.6** → no native `uuidv7()`. We ship `public.uuid_generate_v7()` and use
+  it as the default for our PKs. (Resolves open decision #3.)
+- Access is via the **Supabase MCP** (`.mcp.json`, committed). Each teammate must
+  (1) be **invited to the Supabase project/org**, then (2) run `/mcp` → **authenticate**
+  (OAuth). The committed config alone grants no access.
+- Supabase **agent skills** are installed under `.agents/skills/` (symlinked into
+  `.claude/skills/`); install with `bunx skills add supabase/agent-skills`.
+
+## Migration workflow
+
+- **Backend owns all schema changes.** `supabase/migrations/*.sql` is the single source
+  of truth.
+- Apply migrations via the **MCP `apply_migration`**, then commit the `.sql`, regenerate
+  TypeScript types, and commit those too.
+- Teammates **`git pull` migration files + types — they never apply migrations
+  themselves** (shared DB). Announce "applying migration X" before doing so.
+
+## Git / branching
+
+- **Trunk-based.** `main` stays demoable; merge early & often.
+- Branches: **`migrations`** (schema/DB work), **`backend-dev`** (server code),
+  **`feat/shop-*`**, **`feat/customer-*`**. Chat component has one owner, merged early.
+- Repo is the fork **`Alex-Amarandei/Sprintr`** (`origin`); the original upstream remote
+  was removed to avoid mistakes.
