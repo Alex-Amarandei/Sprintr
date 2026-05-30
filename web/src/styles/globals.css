@@ -14,3 +14,51 @@ body {
   /* Higher-contrast secondary text — Mantine's default dimmed (gray.6) reads too light. */
   --mantine-color-dimmed: var(--mantine-color-mist-5);
 }
+
+/*
+ * Dark mode: keep every `light` variant (Badge / ThemeIcon / Avatar / Alert / light Button)
+ * using the SAME pale tint as light mode — pale `<color>-1` background + dark `<color>-7`
+ * foreground — instead of Mantine's muddy dark-tinted version. Design decision: tinted
+ * chips/icons read identically in both schemes. The `-1/-2/-7` shades are scheme-independent.
+ */
+[data-mantine-color-scheme="dark"] {
+  --mantine-color-brand-light: var(--mantine-color-brand-1);
+  --mantine-color-brand-light-hover: var(--mantine-color-brand-2);
+  --mantine-color-brand-light-color: var(--mantine-color-brand-7);
+  --mantine-color-slate-light: var(--mantine-color-slate-1);
+  --mantine-color-slate-light-hover: var(--mantine-color-slate-2);
+  --mantine-color-slate-light-color: var(--mantine-color-slate-7);
+  --mantine-color-ink-light: var(--mantine-color-ink-1);
+  --mantine-color-ink-light-hover: var(--mantine-color-ink-2);
+  --mantine-color-ink-light-color: var(--mantine-color-ink-7);
+  --mantine-color-teal-light: var(--mantine-color-teal-1);
+  --mantine-color-teal-light-hover: var(--mantine-color-teal-2);
+  --mantine-color-teal-light-color: var(--mantine-color-teal-7);
+  --mantine-color-cyan-light: var(--mantine-color-cyan-1);
+  --mantine-color-cyan-light-hover: var(--mantine-color-cyan-2);
+  --mantine-color-cyan-light-color: var(--mantine-color-cyan-7);
+  --mantine-color-mist-light: var(--mantine-color-mist-1);
+  --mantine-color-mist-light-hover: var(--mantine-color-mist-2);
+  --mantine-color-mist-light-color: var(--mantine-color-mist-7);
+  --mantine-color-stone-light: var(--mantine-color-stone-1);
+  --mantine-color-stone-light-hover: var(--mantine-color-stone-2);
+  --mantine-color-stone-light-color: var(--mantine-color-stone-7);
+  --mantine-color-red-light: var(--mantine-color-red-1);
+  --mantine-color-red-light-hover: var(--mantine-color-red-2);
+  --mantine-color-red-light-color: var(--mantine-color-red-7);
+  --mantine-color-green-light: var(--mantine-color-green-1);
+  --mantine-color-green-light-hover: var(--mantine-color-green-2);
+  --mantine-color-green-light-color: var(--mantine-color-green-7);
+  --mantine-color-yellow-light: var(--mantine-color-yellow-1);
+  --mantine-color-yellow-light-hover: var(--mantine-color-yellow-2);
+  --mantine-color-yellow-light-color: var(--mantine-color-yellow-8);
+  --mantine-color-blue-light: var(--mantine-color-blue-1);
+  --mantine-color-blue-light-hover: var(--mantine-color-blue-2);
+  --mantine-color-blue-light-color: var(--mantine-color-blue-7);
+  --mantine-color-grape-light: var(--mantine-color-grape-1);
+  --mantine-color-grape-light-hover: var(--mantine-color-grape-2);
+  --mantine-color-grape-light-color: var(--mantine-color-grape-7);
+  --mantine-color-gray-light: var(--mantine-color-gray-1);
+  --mantine-color-gray-light-hover: var(--mantine-color-gray-2);
+  --mantine-color-gray-light-color: var(--mantine-color-gray-7);
+}

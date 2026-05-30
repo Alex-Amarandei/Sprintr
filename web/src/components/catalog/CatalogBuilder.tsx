@@ -121,7 +121,9 @@ function CategorySection({
       radius="lg"
       p="md"
       style={{
-        background: isOver ? "var(--mantine-color-stone-1)" : "var(--mantine-color-gray-0)",
+        background: isOver
+          ? "light-dark(var(--mantine-color-stone-1), var(--mantine-color-stone-7))"
+          : "light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6))",
         transition: "background 120ms",
       }}
     >
