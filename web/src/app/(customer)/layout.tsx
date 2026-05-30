@@ -5,6 +5,7 @@ import { SignOutButton } from "@/components/auth/SignOutButton";
 import { CartProvider } from "@/components/cart/CartContext";
 import { CartBar } from "@/components/cart/CartBar";
 import { SiteFooter } from "@/components/ui/SiteFooter";
+import { Wordmark } from "@/components/ui/Wordmark";
 
 export default function CustomerLayout({
   children,
@@ -33,7 +34,7 @@ export default function CustomerLayout({
                 c="brand.6"
                 underline="never"
               >
-                SprintR
+                <Wordmark />
               </LinkAnchor>
               <TextInput
                 flex={1}

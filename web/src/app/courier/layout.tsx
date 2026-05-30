@@ -1,6 +1,7 @@
 import { Bike, Wallet } from "lucide-react";
 import { Box, Container, Group } from "@mantine/core";
 import { LinkAnchor, LinkButton } from "@/components/ui/links";
+import { Wordmark } from "@/components/ui/Wordmark";
 
 export default function CourierLayout({
   children,
@@ -28,7 +29,7 @@ export default function CourierLayout({
               c="brand.6"
               underline="never"
             >
-              SprintR
+              <Wordmark />
             </LinkAnchor>
             <Group gap="xs">
               <LinkButton

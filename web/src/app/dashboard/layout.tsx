@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Box, Group } from "@mantine/core";
 import { LinkAnchor } from "@/components/ui/links";
+import { Wordmark } from "@/components/ui/Wordmark";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { createClient } from "@/lib/supabase/server";
@@ -51,7 +52,7 @@ export default async function ShopLayout({
               c="brand.6"
               underline="never"
             >
-              SprintR
+              <Wordmark />
             </LinkAnchor>
             <SignOutButton />
           </Group>
