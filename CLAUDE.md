@@ -377,6 +377,10 @@ We switched login to **Google OAuth only** (was: email/password in Scope-IN line
   fictive placeholder, 3 are real (`:false`).
 - `web/seed/printhaus.json` — PrintHaus catalog (16 services, 38 option groups); all prices
   fictive estimates (site publishes none). Phone/address in the `shop` block.
+- `web/seed/stef.json` — STEF Copy Center (stef.ro, WooCommerce), Iași. 8 services + 5
+  products. **5 REAL prices** (`:false`, from product JSON-LD: șapcă 35, ecuson 1.1,
+  ștampile 137/185, set creion 45.3); print/copy/binding/lamination services + variable
+  personalizări are estimates (`:true`). Real contact + weekday schedule in `shop`.
 - These JSONs use richer option types (`number`, `radio`) + per-unit pricing that **don't**
   match our MVP model (`single_select|boolean|text`, additive-only). **Down-map** when we
   write the seed migration. Seeding ownership (FE script vs seed migration) is TBD.
@@ -423,6 +427,27 @@ in the actual app, using sample data until backend reads land:
   header — cart persists across customer pages (client state; resets on full reload).
 - TODO(BE) markers flag where `sampleShops`/`getSampleCatalog` get replaced by Supabase reads,
   and where cart checkout calls the pricing/placement Edge Function.
+
+## Role-based routing (FE, 2026-05-30) — single source of truth = `/`
+- **`/` (home)** is an async server component: logged-in → redirect by `profiles.role`
+  (`shop` → `/dashboard`, else `/browse`); logged-out → marketing landing (CTA → /browse, /login).
+- **Middleware** redirects logged-in users off `/login`/`/register` to **`/`** (NOT /browse),
+  so role routing lives in exactly one place. Protected prefixes: `/order /orders /dashboard
+  /courier` (segment-precise). `/browse` + `/shop/[id]` are public.
+- **`/dashboard` layout** is a shop-only guard: re-checks auth + `role === 'shop'`, else
+  redirects to `/browse`. (Catalog page additionally needs a `shop_permissions` row to load.)
+- OAuth callback also routes by role (explicit `?next` wins, else role).
+
+## Color swatches on select options (FE, 2026-05-30) — schema EXTENSION
+Added an optional **`swatch`** (hex string) to a select option (`fieldOptionSchema`).
+Additive + backward-compatible (old documents without it stay valid). Display-only —
+NEVER affects pricing/validation (answers still send the option `value` string).
+- Builder: `ColorInput` per option in `FieldEditor` (shop sets the colors it stocks).
+- Renderer: if ANY option in a single/multi-select has a `swatch`, `ItemOrderForm` renders
+  a visual **`SwatchPicker`** (clickable `ColorSwatch`es) instead of radio/checkbox text.
+- Example: `samplePrintService` now has a "Culoare hârtie" field (alb/crem/albastru/roz).
+- **TODO(BE):** mirror `swatch?` in the Edge Function's document validator so saving/placing
+  documents that include it isn't rejected (it's an unknown key to a strict validator).
 
 ## Mixed cart — IMPLEMENTED (FE, 2026-05-30)
 Cart UX: zero-config items add instantly; configurable items open a modal with the

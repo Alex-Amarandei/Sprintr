@@ -6,9 +6,11 @@ import {
   Tag,
   User,
 } from "lucide-react";
+import { redirect } from "next/navigation";
 import { Box, Group, Stack, Text } from "@mantine/core";
 import { LinkAnchor, LinkNavItem } from "@/components/ui/links";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { createClient } from "@/lib/supabase/server";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -21,11 +23,25 @@ const navItems = [
 
 const SIDEBAR_WIDTH = 260;
 
-export default function ShopLayout({
+export default async function ShopLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Shop-only area. Middleware already requires auth; here we enforce the role.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (profile?.role !== "shop") redirect("/browse");
+
   return (
     <Box mih="100vh" bg="gray.0">
       <Box

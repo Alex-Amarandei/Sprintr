@@ -45,6 +45,35 @@ export const samplePrintService: Item = {
       ],
     },
     {
+      key: "culoare_hartie",
+      label: "Culoare hârtie",
+      type: "single_select",
+      required: true,
+      help: "Culoarea colii pe care se tipărește",
+      default: "alb",
+      options: [
+        { value: "alb", label: "Alb", swatch: "#ffffff" },
+        {
+          value: "crem",
+          label: "Crem",
+          swatch: "#f5f5dc",
+          price: { mode: "additive", amount: 2 },
+        },
+        {
+          value: "albastru",
+          label: "Albastru",
+          swatch: "#cfe2ff",
+          price: { mode: "additive", amount: 2 },
+        },
+        {
+          value: "roz",
+          label: "Roz",
+          swatch: "#ffd6e7",
+          price: { mode: "additive", amount: 2 },
+        },
+      ],
+    },
+    {
       key: "fata_verso",
       label: "Față-verso",
       type: "boolean",
