@@ -31,11 +31,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ro" {...mantineHtmlProps}>
+    <html lang="ro" {...mantineHtmlProps} className={inter.variable}>
       <head>
         <ColorSchemeScript />
       </head>
-      <body className={inter.variable}>
+      <body>
         <MantineProvider theme={theme}>{children}</MantineProvider>
         <Toaster position="top-right" richColors />
       </body>

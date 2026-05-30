@@ -862,3 +862,46 @@ of truth for the §7 formula and §8 validation. (`server/` folder was dropped.)
 - Client: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (public).
 - Server-only on Vercel: `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`,
   `STRIPE_WEBHOOK_SECRET` (and WhatsApp creds later). Never `NEXT_PUBLIC_`.
+
+---
+
+# Design system v2 — "Slate · Ink · Ember" (FE, append-only)
+
+> Visual system rebuilt from the bit.cloud prototype ("Design preview v2"). Live
+> reference page at **`/design`** — render it to see palette + components in-app.
+> 100% Mantine (theme tokens + component compositions), **no custom CSS / no className
+> utilities** (per the Mantine convention above).
+
+## Palette → `web/src/lib/theme.ts`
+Seven 10-shade Mantine ramps (0 = lightest, 9 = darkest). Reference by index, e.g. `c="slate.6"`:
+- **`brand`** = Ember — CTAs & primary. Vibrant base at **shade 6** (`#e77023`); `primaryColor:"brand"`, `primaryShade:6`, `autoContrast:true`.
+- **`slate`** / **`ink`** — structural blue / darkest charcoal (headings, dark bands, gradients, "Dark"/"Acceptă-dark" buttons).
+- **`teal`** — success / Deschis / Acceptată / online. **`cyan`** — info / În pregătire.
+- **`mist`** / **`stone`** — muted blue-grey / pure neutral (text, borders, surfaces).
+- Tokens: radius `{xs4 sm6 md8 lg12 xl16}` (button=md, card=lg, banner=xl); spacing `{xs8 sm12 md16 lg24 xl32}`; font Inter.
+- **Component defaults** live in `theme.components` as **plain objects** (`{ defaultProps, styles }`),
+  NOT `Component.extend()` — importing Mantine client components into this server-imported
+  module breaks under the App Router (`X.extend is not a function`). Badge is set to normal-case.
+
+## Status tokens → `web/src/lib/design/status.ts`
+`ORDER_STATUS` maps the DB enum `order_status` (`pending|accepted|rejected|in_progress|done`)
+→ Romanian label + palette colour: pending=brand · accepted=teal · in_progress=cyan ("În pregătire")
+· done=mist ("Finalizată") · rejected=red. Use `<StatusBadge status={...}/>` everywhere — don't hardcode.
+
+## Shared components → `web/src/components/ui/`
+`Dot`, `StatusBadge`, `OpenBadge`, `SectionHeader`, `EmptyState`, `StatCard` (all pure → usable
+in Server Components). More composites (ShopCard, PriceSummary, ChatPanel, StatusTimeline,
+field renderers) added as pages are built.
+
+## Scope decisions for the UI rebuild (agreed)
+- **Field types = our 5 model types only** (`single_select | multi_select | boolean | number | text`).
+  The prototype's "image-choice" (A4/A3/A5) and "color-picker" are just **`single_select` with
+  shop-defined enum options** rendered richly — not new types. The catalog/schema builder is where
+  shops define those enums.
+- **Payments (Stripe/card/cash/TVA/factură) + delivery tracking (ETA, "Livrată" step) = visual-only**
+  for now (Stripe integration planned → keep the designs).
+
+## Gotcha: next/font + Mantine font var
+next/font's `--font-geist-sans` must be exposed on **`<html>`** (not only `<body>`), else Mantine's
+`--mantine-font-family` (defined at `:root`) can't resolve the `var()` and the whole app falls back
+to serif. Fixed in `layout.tsx` (`className={inter.variable}` on `<html>`).
