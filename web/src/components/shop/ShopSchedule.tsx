@@ -47,7 +47,7 @@ export function ShopSchedule({ schedule }: { schedule: WeeklySchedule }) {
               )}
             </Text>
             {g.hours ? (
-              <Text fz="sm" fw={g.containsToday ? 700 : 500} c="ink.9">
+              <Text fz="sm" fw={g.containsToday ? 700 : 500} c="var(--mantine-color-text)">
                 {g.hours.open} – {g.hours.close}
               </Text>
             ) : (

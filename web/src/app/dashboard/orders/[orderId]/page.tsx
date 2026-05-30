@@ -171,7 +171,7 @@ export default async function ShopOrderDetailPage({ params }: Props) {
               </Group>
               <Group justify="space-between" mt={4}>
                 <Text fw={700}>Total</Text>
-                <Text fw={800} fz={20} c="ink.9">
+                <Text fw={800} fz={20} c="var(--mantine-color-text)">
                   {order.total.toFixed(2)} lei
                 </Text>
               </Group>
@@ -214,7 +214,7 @@ export default async function ShopOrderDetailPage({ params }: Props) {
               <Text fw={700} mb="xs">
                 Note de la client
               </Text>
-              <Text fz="sm" c="ink.9">
+              <Text fz="sm" c="var(--mantine-color-text)">
                 {order.notes}
               </Text>
             </Card>

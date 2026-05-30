@@ -61,7 +61,7 @@ export function ChatPanel({
         p="md"
         gap="sm"
         wrap="nowrap"
-        style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}
+        style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
       >
         <Avatar radius="xl" color="brand">
           {initials}
@@ -111,7 +111,7 @@ export function ChatPanel({
         p="sm"
         gap="xs"
         wrap="nowrap"
-        style={{ borderTop: "1px solid var(--mantine-color-gray-2)" }}
+        style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
       >
         <ActionIcon variant="subtle" color="gray" size="lg" aria-label="Atașează">
           <Paperclip size={18} />

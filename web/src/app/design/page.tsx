@@ -65,7 +65,7 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
 
 export default function DesignSystemPage() {
   return (
-    <Box mih="100vh" bg="gray.0">
+    <Box mih="100vh" bg="var(--mantine-color-body)">
       <Container size="lg" py="xl">
         <Stack gap="xl">
           <SectionHeader

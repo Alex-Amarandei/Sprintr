@@ -87,7 +87,7 @@ export const theme = createTheme({
   components: {
     Button: { defaultProps: { radius: "md" } },
     ActionIcon: { defaultProps: { radius: "md" } },
-    Title: { defaultProps: { c: "ink.9" } },
+    Title: { defaultProps: { c: "var(--mantine-color-text)" } },
     Card: { defaultProps: { radius: "lg", padding: "lg", withBorder: true } },
     Paper: { defaultProps: { radius: "lg" } },
     Badge: {

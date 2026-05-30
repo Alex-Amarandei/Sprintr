@@ -6,6 +6,7 @@ import { CartProvider } from "@/components/cart/CartContext";
 import { CartBar } from "@/components/cart/CartBar";
 import { SiteFooter } from "@/components/ui/SiteFooter";
 import { Wordmark } from "@/components/ui/Wordmark";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export default function CustomerLayout({
   children,
@@ -14,15 +15,15 @@ export default function CustomerLayout({
 }) {
   return (
     <CartProvider>
-      <Box mih="100vh" bg="gray.0">
+      <Box mih="100vh" bg="var(--mantine-color-body)">
         <Box
           component="header"
-          bg="white"
+          bg="var(--mantine-color-body)"
           style={{
             position: "sticky",
             top: 0,
             zIndex: 50,
-            borderBottom: "1px solid var(--mantine-color-gray-2)",
+            borderBottom: "1px solid var(--mantine-color-default-border)",
           }}
         >
           <Container size="lg" h={64}>
@@ -45,6 +46,7 @@ export default function CustomerLayout({
                 leftSection={<Search size={16} />}
               />
               <Group gap="sm" wrap="nowrap">
+                <ThemeToggle />
                 <CartBar />
                 <LinkActionIcon
                   href="/orders"

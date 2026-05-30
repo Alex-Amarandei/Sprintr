@@ -3,6 +3,7 @@ import { Box, Group } from "@mantine/core";
 import { LinkAnchor } from "@/components/ui/links";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { createClient } from "@/lib/supabase/server";
 
@@ -28,23 +29,23 @@ export default async function ShopLayout({
   if (profile?.role !== "shop" && profile?.role !== "admin") redirect("/browse");
 
   return (
-    <Box mih="100vh" bg="gray.0">
+    <Box mih="100vh" bg="var(--mantine-color-body)">
       {/* Desktop fixed sidebar */}
       <Box
         component="aside"
         visibleFrom="md"
         w={SIDEBAR_WIDTH}
-        bg="white"
+        bg="var(--mantine-color-body)"
         style={{
           position: "fixed",
           insetBlock: 0,
           left: 0,
-          borderRight: "1px solid var(--mantine-color-gray-2)",
+          borderRight: "1px solid var(--mantine-color-default-border)",
         }}
       >
         <Box
           p="lg"
-          style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}
+          style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
         >
           <Group justify="space-between" align="center" wrap="nowrap">
             <LinkAnchor
@@ -56,7 +57,10 @@ export default async function ShopLayout({
             >
               <Wordmark />
             </LinkAnchor>
-            <SignOutButton />
+            <Group gap="xs" wrap="nowrap">
+              <ThemeToggle />
+              <SignOutButton />
+            </Group>
           </Group>
         </Box>
         <DashboardNav />
@@ -65,12 +69,12 @@ export default async function ShopLayout({
       {/* Mobile top bar + nav */}
       <Box
         hiddenFrom="md"
-        bg="white"
+        bg="var(--mantine-color-body)"
         style={{
           position: "sticky",
           top: 0,
           zIndex: 50,
-          borderBottom: "1px solid var(--mantine-color-gray-2)",
+          borderBottom: "1px solid var(--mantine-color-default-border)",
         }}
       >
         <Group justify="space-between" align="center" wrap="nowrap" p="md">
@@ -83,7 +87,10 @@ export default async function ShopLayout({
           >
             <Wordmark />
           </LinkAnchor>
-          <SignOutButton />
+          <Group gap="xs" wrap="nowrap">
+            <ThemeToggle />
+            <SignOutButton />
+          </Group>
         </Group>
         <DashboardNav />
       </Box>

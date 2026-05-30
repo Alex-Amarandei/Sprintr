@@ -39,7 +39,7 @@ function OrderRow({ order }: { order: SampleOrder }) {
         justify="space-between"
         wrap="nowrap"
         p="md"
-        style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}
+        style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
       >
         <Group gap="md" wrap="nowrap" style={{ minWidth: 0 }}>
           <ThemeIcon variant="light" color="mist" size={40} radius="md">

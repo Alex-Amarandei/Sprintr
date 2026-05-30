@@ -42,7 +42,7 @@ export function ColorSwatch({ token, index }: { token: string; index: number }) 
         style={{
           position: "relative",
           borderRadius: 8,
-          border: "1px solid var(--mantine-color-gray-2)",
+          border: "1px solid var(--mantine-color-default-border)",
         }}
       >
         <Tooltip label={copied ? "Copiat!" : hex || "…"} withArrow position="top">

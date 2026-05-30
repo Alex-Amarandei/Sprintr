@@ -114,7 +114,7 @@ export function ShopOrderQueue({
         wrap="nowrap"
         p="md"
         gap="md"
-        style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}
+        style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
       >
         <Link
           href={`/dashboard/orders/${o.id}`}

@@ -388,7 +388,7 @@ export function ItemOrderForm({
       </Box>
 
       {/* Footer — total + CTA, always visible below the scroll area */}
-      <Box pt="md" style={{ borderTop: "1px solid var(--mantine-color-gray-2)" }}>
+      <Box pt="md" style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}>
         {attempted && !canOrder && (
           <Text fz="xs" c="red.7" mb="xs">
             Completează câmpurile obligatorii pentru a continua.
@@ -399,7 +399,7 @@ export function ItemOrderForm({
             <Text tt="uppercase" fz={10} fw={700} c="dimmed">
               Total
             </Text>
-            <Text fz={22} fw={800} c="ink.9" lh={1}>
+            <Text fz={22} fw={800} c="var(--mantine-color-text)" lh={1}>
               {formatPrice(price.total)}
             </Text>
           </div>

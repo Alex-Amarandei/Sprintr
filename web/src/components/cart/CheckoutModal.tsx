@@ -211,7 +211,7 @@ function DeliveryStep({
             <Text tt="uppercase" fz={10} fw={700} c="dimmed">
               Total
             </Text>
-            <Text fz={22} fw={800} c="ink.9" lh={1}>
+            <Text fz={22} fw={800} c="var(--mantine-color-text)" lh={1}>
               {formatPrice(total)}
             </Text>
           </div>
@@ -420,7 +420,7 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
       opened={opened}
       onClose={handleClose}
       title={
-        <Text fw={800} fz="lg" c="ink.9">
+        <Text fw={800} fz="lg" c="var(--mantine-color-text)">
           {titles[step]}
         </Text>
       }

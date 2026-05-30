@@ -74,7 +74,7 @@ export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
           onClose={close}
           title={
             <div>
-              <Text fw={800} fz="lg" lh={1.2} c="ink.9">
+              <Text fw={800} fz="lg" lh={1.2} c="var(--mantine-color-text)">
                 Configurează: {item.title}
               </Text>
               {item.description && (

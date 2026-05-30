@@ -33,10 +33,12 @@ export default function RootLayout({
   return (
     <html lang="ro" {...mantineHtmlProps} className={inter.variable}>
       <head>
-        <ColorSchemeScript />
+        <ColorSchemeScript defaultColorScheme="auto" />
       </head>
       <body>
-        <MantineProvider theme={theme}>{children}</MantineProvider>
+        <MantineProvider theme={theme} defaultColorScheme="auto">
+          {children}
+        </MantineProvider>
         <Toaster position="bottom-right" richColors closeButton />
       </body>
     </html>

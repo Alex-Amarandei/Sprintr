@@ -2,6 +2,7 @@ import { Bike, Wallet } from "lucide-react";
 import { Box, Container, Group } from "@mantine/core";
 import { LinkAnchor, LinkButton } from "@/components/ui/links";
 import { Wordmark } from "@/components/ui/Wordmark";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export default function CourierLayout({
   children,
@@ -9,15 +10,15 @@ export default function CourierLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Box mih="100vh" bg="gray.0">
+    <Box mih="100vh" bg="var(--mantine-color-body)">
       <Box
         component="header"
-        bg="white"
+        bg="var(--mantine-color-body)"
         style={{
           position: "sticky",
           top: 0,
           zIndex: 50,
-          borderBottom: "1px solid var(--mantine-color-gray-2)",
+          borderBottom: "1px solid var(--mantine-color-default-border)",
         }}
       >
         <Container size="sm" h={64}>
@@ -48,6 +49,7 @@ export default function CourierLayout({
               >
                 Câștiguri
               </LinkButton>
+              <ThemeToggle />
             </Group>
           </Group>
         </Container>

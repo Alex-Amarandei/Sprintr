@@ -46,7 +46,7 @@ export function CartBar() {
         padding="lg"
         title={
           <div>
-            <Text fw={800} fz="lg" c="ink.9">
+            <Text fw={800} fz="lg" c="var(--mantine-color-text)">
               Coșul tău
             </Text>
             {count > 0 && (
@@ -105,7 +105,7 @@ export function CartBar() {
             </Stack>
 
             {/* Summary */}
-            <Paper withBorder radius="md" p="md" bg="gray.0">
+            <Paper withBorder radius="md" p="md" bg="var(--mantine-color-body)">
               <Group justify="space-between" mb={6}>
                 <Text fz="sm" c="dimmed">
                   Subtotal
@@ -123,7 +123,7 @@ export function CartBar() {
               <Divider mb="xs" />
               <Group justify="space-between">
                 <Text fw={700}>Total</Text>
-                <Text fw={800} fz="xl" c="ink.9">
+                <Text fw={800} fz="xl" c="var(--mantine-color-text)">
                   {formatPrice(total)}
                 </Text>
               </Group>

@@ -179,7 +179,7 @@ export function ProfileEditor() {
                 Status profil
               </Text>
               <Group align="baseline" gap={4} mt="xs">
-                <Text fz={32} fw={800} c="ink.9" lh={1}>
+                <Text fz={32} fw={800} c="var(--mantine-color-text)" lh={1}>
                   92
                 </Text>
                 <Text fz="lg" c="dimmed">

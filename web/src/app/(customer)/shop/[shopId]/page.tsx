@@ -82,7 +82,7 @@ export default async function ShopDetailPage({ params }: Props) {
                 {shop.rating != null && (
                   <Group gap={4}>
                     <Star size={15} fill="var(--mantine-color-brand-6)" color="var(--mantine-color-brand-6)" />
-                    <Text fz="sm" fw={600} c="ink.9">
+                    <Text fz="sm" fw={600} c="var(--mantine-color-text)">
                       {shop.rating.toFixed(1)}
                     </Text>
                     {shop.reviews != null && (
@@ -147,7 +147,7 @@ export default async function ShopDetailPage({ params }: Props) {
             </Text>
             <Text c="dimmed" fz="sm" mt={4}>
               Aplică automat cu codul{" "}
-              <Text span fw={700} c="ink.9">
+              <Text span fw={700} c="var(--mantine-color-text)">
                 STUDENT10
               </Text>{" "}
               la coș.

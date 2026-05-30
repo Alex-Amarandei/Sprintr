@@ -47,11 +47,11 @@ export default async function HomePage() {
   }
 
   return (
-    <Box bg="white">
+    <Box bg="var(--mantine-color-body)">
       {/* Marketing nav */}
       <Box
         component="header"
-        style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}
+        style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
       >
         <Container size="lg" h={64}>
           <Group h="100%" justify="space-between">
@@ -83,7 +83,7 @@ export default async function HomePage() {
             >
               ● Acum în Iași
             </Badge>
-            <Title fz={{ base: 40, sm: 56 }} lh={1.05} c="ink.9">
+            <Title fz={{ base: 40, sm: 56 }} lh={1.05} c="var(--mantine-color-text)">
               Papetărie & printare,{" "}
               <Text span inherit c="brand.6">
                 livrate ca mâncarea.
@@ -112,15 +112,15 @@ export default async function HomePage() {
             </Group>
             <Group gap={40} mt="md">
               <div>
-                <Text fz={28} fw={800} c="ink.9">12+</Text>
+                <Text fz={28} fw={800} c="var(--mantine-color-text)">12+</Text>
                 <Text fz="sm" c="dimmed">magazine</Text>
               </div>
               <div>
-                <Text fz={28} fw={800} c="ink.9">&lt; 60 min</Text>
+                <Text fz={28} fw={800} c="var(--mantine-color-text)">&lt; 60 min</Text>
                 <Text fz="sm" c="dimmed">livrare</Text>
               </div>
               <div>
-                <Text fz={28} fw={800} c="ink.9">4.9 ★</Text>
+                <Text fz={28} fw={800} c="var(--mantine-color-text)">4.9 ★</Text>
                 <Text fz="sm" c="dimmed">rating mediu</Text>
               </div>
             </Group>
@@ -169,7 +169,7 @@ export default async function HomePage() {
               <Group justify="space-between" align="center">
                 <div>
                   <Text tt="uppercase" fz={10} fw={700} c="dimmed">Total</Text>
-                  <Text fz={28} fw={800} c="ink.9" lh={1}>
+                  <Text fz={28} fw={800} c="var(--mantine-color-text)" lh={1}>
                     75,00 <Text span fz="sm" c="dimmed">lei</Text>
                   </Text>
                 </div>
@@ -181,7 +181,7 @@ export default async function HomePage() {
       </Container>
 
       {/* How it works */}
-      <Box bg="gray.0" py={64}>
+      <Box bg="var(--mantine-color-body)" py={64}>
         <Container size="lg">
           <Stack align="center" gap={4} mb="xl">
             <Badge variant="light" color="mist" radius="xl">

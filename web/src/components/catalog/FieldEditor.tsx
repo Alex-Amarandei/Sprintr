@@ -76,7 +76,7 @@ export function FieldEditor({
     onChange({ ...field, options } as Field);
 
   return (
-    <Paper withBorder radius="md" bg="gray.0">
+    <Paper withBorder radius="md" bg="var(--mantine-color-body)">
       {/* Summary row — always visible, click to expand */}
       <Group justify="space-between" wrap="nowrap" gap="xs" p="sm">
         {dragHandle}

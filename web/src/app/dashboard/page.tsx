@@ -98,7 +98,7 @@ export default function ShopDashboardPage() {
         <Card>
           <Group justify="space-between">
             <Text fw={700}>Venit — ultimele 7 zile</Text>
-            <Text fw={800} fz={20} c="ink.9">
+            <Text fw={800} fz={20} c="var(--mantine-color-text)">
               8.420 lei
             </Text>
           </Group>

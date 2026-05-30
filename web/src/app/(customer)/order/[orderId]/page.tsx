@@ -109,7 +109,7 @@ export default async function OrderDetailPage({ params }: Props) {
               </Group>
               <Group justify="space-between" mt={4}>
                 <Text fw={700}>Total</Text>
-                <Text fw={800} fz="xl" c="ink.9">
+                <Text fw={800} fz="xl" c="var(--mantine-color-text)">
                   {order.total.toFixed(2)} lei
                 </Text>
               </Group>

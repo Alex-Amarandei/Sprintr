@@ -9,7 +9,7 @@ export function SiteFooter() {
       component="footer"
       py="xl"
       mt="xl"
-      style={{ borderTop: "1px solid var(--mantine-color-gray-2)" }}
+      style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
     >
       <Container size="lg">
         <Group justify="space-between" align="center" wrap="wrap" gap="md">

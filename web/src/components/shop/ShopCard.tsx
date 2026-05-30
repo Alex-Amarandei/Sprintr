@@ -56,7 +56,7 @@ export function ShopCard({ shop }: { shop: SampleShop }) {
       {/* Body */}
       <Stack gap="xs" p="md" justify="space-between" style={{ flex: 1 }}>
         <div>
-          <Text fw={700} c="ink.9">
+          <Text fw={700} c="var(--mantine-color-text)">
             {shop.name}
           </Text>
           <Text fz="xs" c="dimmed" lineClamp={2} mt={2}>
