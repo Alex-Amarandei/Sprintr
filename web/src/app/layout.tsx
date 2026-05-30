@@ -37,7 +37,7 @@ export default function RootLayout({
       </head>
       <body>
         <MantineProvider theme={theme}>{children}</MantineProvider>
-        <Toaster position="top-right" richColors />
+        <Toaster position="bottom-right" richColors closeButton />
       </body>
     </html>
   );

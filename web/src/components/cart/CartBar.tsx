@@ -3,7 +3,6 @@
 import { useDisclosure } from "@mantine/hooks";
 import {
   ActionIcon,
-  Badge,
   Button,
   Divider,
   Drawer,
@@ -12,9 +11,11 @@ import {
   Paper,
   Stack,
   Text,
+  ThemeIcon,
 } from "@mantine/core";
-import { ShoppingCart, Trash2 } from "lucide-react";
+import { ArrowRight, FileText, Package, ShoppingCart, Trash2 } from "lucide-react";
 import { formatPrice } from "@/lib/utils/format";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useCart } from "./CartContext";
 import { CheckoutModal } from "./CheckoutModal";
 
@@ -41,59 +42,105 @@ export function CartBar() {
         opened={drawerOpened}
         onClose={closeDrawer}
         position="right"
-        title="Coșul tău"
         size="md"
+        padding="lg"
+        title={
+          <div>
+            <Text fw={800} fz="lg" c="ink.9">
+              Coșul tău
+            </Text>
+            {count > 0 && (
+              <Text fz="sm" c="dimmed">
+                {count} {count === 1 ? "produs" : "produse"}
+              </Text>
+            )}
+          </div>
+        }
+        styles={{ header: { alignItems: "flex-start" } }}
       >
         {lines.length === 0 ? (
-          <Text c="dimmed" ta="center" mt="xl">
-            Coșul este gol.
-          </Text>
+          <EmptyState
+            icon={<ShoppingCart size={26} />}
+            title="Coșul este gol"
+            description="Adaugă produse sau servicii dintr-un magazin ca să începi o comandă."
+          />
         ) : (
-          <Stack gap="sm">
-            {lines.map((l) => (
-              <Paper key={l.lineId} withBorder radius="md" p="sm">
-                <Group justify="space-between" wrap="nowrap" align="flex-start">
-                  <div style={{ minWidth: 0 }}>
-                    <Group gap="xs">
-                      <Text fw={500} truncate>
-                        {l.title}
-                      </Text>
-                      <Badge size="xs" variant="light" color={l.kind === "service" ? "brand" : "blue"}>
-                        {l.kind === "service" ? "Serviciu" : "Produs"}
-                      </Badge>
+          <Stack gap="md">
+            <Stack gap="sm">
+              {lines.map((l) => {
+                const Icon = l.kind === "service" ? FileText : Package;
+                return (
+                  <Paper key={l.lineId} withBorder radius="md" p="sm">
+                    <Group justify="space-between" wrap="nowrap" align="flex-start">
+                      <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+                        <ThemeIcon variant="light" color="mist" size={40} radius="md">
+                          <Icon size={18} />
+                        </ThemeIcon>
+                        <div style={{ minWidth: 0 }}>
+                          <Text fw={600} fz="sm" truncate>
+                            {l.title}
+                          </Text>
+                          <Text fz="xs" c="dimmed" truncate>
+                            {l.fileName ?? (l.kind === "service" ? "Serviciu" : "Produs")}
+                          </Text>
+                        </div>
+                      </Group>
+                      <Group gap={4} wrap="nowrap">
+                        <Text fw={700} fz="sm" style={{ whiteSpace: "nowrap" }}>
+                          {formatPrice(l.total)}
+                        </Text>
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          onClick={() => removeLine(l.lineId)}
+                          aria-label="Elimină"
+                        >
+                          <Trash2 size={16} />
+                        </ActionIcon>
+                      </Group>
                     </Group>
-                    {l.fileName && (
-                      <Text size="xs" c="dimmed" truncate>
-                        📎 {l.fileName}
-                      </Text>
-                    )}
-                  </div>
-                  <Group gap="xs" wrap="nowrap">
-                    <Text fw={600}>{formatPrice(l.total)}</Text>
-                    <ActionIcon
-                      variant="subtle"
-                      color="red"
-                      onClick={() => removeLine(l.lineId)}
-                      aria-label="Elimină"
-                    >
-                      <Trash2 size={16} />
-                    </ActionIcon>
-                  </Group>
-                </Group>
-              </Paper>
-            ))}
+                  </Paper>
+                );
+              })}
+            </Stack>
 
-            <Divider />
-            <Group justify="space-between">
-              <Text fw={700}>Total</Text>
-              <Text fw={700} fz="xl" c="brand.7">
-                {formatPrice(total)}
-              </Text>
-            </Group>
-            <Button size="md" onClick={() => { closeDrawer(); openCheckout(); }}>
+            {/* Summary */}
+            <Paper withBorder radius="md" p="md" bg="gray.0">
+              <Group justify="space-between" mb={6}>
+                <Text fz="sm" c="dimmed">
+                  Subtotal
+                </Text>
+                <Text fz="sm">{formatPrice(total)}</Text>
+              </Group>
+              <Group justify="space-between" mb="xs">
+                <Text fz="sm" c="dimmed">
+                  Livrare
+                </Text>
+                <Text fz="sm" c="dimmed">
+                  Calculată la finalizare
+                </Text>
+              </Group>
+              <Divider mb="xs" />
+              <Group justify="space-between">
+                <Text fw={700}>Total</Text>
+                <Text fw={800} fz="xl" c="ink.9">
+                  {formatPrice(total)}
+                </Text>
+              </Group>
+            </Paper>
+
+            <Button
+              size="md"
+              fullWidth
+              rightSection={<ArrowRight size={16} />}
+              onClick={() => {
+                closeDrawer();
+                openCheckout();
+              }}
+            >
               Finalizează comanda
             </Button>
-            <Button variant="subtle" color="gray" onClick={clear}>
+            <Button variant="subtle" color="gray" fullWidth onClick={clear}>
               Golește coșul
             </Button>
           </Stack>

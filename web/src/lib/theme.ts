@@ -67,7 +67,7 @@ export const theme = createTheme({
     "var(--font-geist-mono), 'JetBrains Mono', ui-monospace, monospace",
   headings: {
     fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
-    fontWeight: "700",
+    fontWeight: "800",
   },
 
   // Component defaults — the prototype look without any custom CSS.
@@ -77,6 +77,7 @@ export const theme = createTheme({
   components: {
     Button: { defaultProps: { radius: "md" } },
     ActionIcon: { defaultProps: { radius: "md" } },
+    Title: { defaultProps: { c: "ink.9" } },
     Card: { defaultProps: { radius: "lg", padding: "lg", withBorder: true } },
     Paper: { defaultProps: { radius: "lg" } },
     Badge: {

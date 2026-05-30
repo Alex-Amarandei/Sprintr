@@ -15,6 +15,7 @@ import {
   Group,
   Modal,
   Radio,
+  SimpleGrid,
   Stack,
   Text,
   Textarea,
@@ -22,7 +23,14 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  AlertCircle,
+  Banknote,
+  CheckCircle2,
+  CreditCard,
+  Store,
+  Truck,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/utils/format";
 import { useCart } from "./CartContext";
@@ -78,17 +86,62 @@ function DeliveryStep({
     },
   });
 
+  const pickup = form.values.fulfilment === "pickup";
+
   return (
     <form onSubmit={form.onSubmit(onNext)}>
-      <Stack gap="md">
-        <Radio.Group label="Metoda de ridicare" {...form.getInputProps("fulfilment")}>
-          <Group mt="xs">
-            <Radio value="delivery" label="Livrare la domiciliu" />
-            <Radio value="pickup" label="Ridicare din magazin" />
-          </Group>
+      <Stack gap="lg">
+        {/* Fulfilment */}
+        <Radio.Group
+          label="Cum vrei să primești comanda?"
+          value={form.values.fulfilment}
+          onChange={(v) => {
+            form.setFieldValue("fulfilment", v as DeliveryFormValues["fulfilment"]);
+            // Keep the payment method valid for the chosen fulfilment.
+            if (v === "pickup" && form.values.payment_method === "cash_on_delivery") {
+              form.setFieldValue("payment_method", "cash_in_store");
+            } else if (v === "delivery" && form.values.payment_method === "cash_in_store") {
+              form.setFieldValue("payment_method", "cash_on_delivery");
+            }
+          }}
+        >
+          <SimpleGrid cols={2} spacing="sm" mt="xs">
+            <Radio.Card value="delivery" radius="md" p="md">
+              <Group gap="sm" wrap="nowrap" align="flex-start">
+                <Radio.Indicator />
+                <div>
+                  <Group gap={6}>
+                    <Truck size={16} />
+                    <Text fw={600} fz="sm">
+                      Livrare la domiciliu
+                    </Text>
+                  </Group>
+                  <Text fz="xs" c="dimmed" mt={2}>
+                    Sub 60 de minute
+                  </Text>
+                </div>
+              </Group>
+            </Radio.Card>
+            <Radio.Card value="pickup" radius="md" p="md">
+              <Group gap="sm" wrap="nowrap" align="flex-start">
+                <Radio.Indicator />
+                <div>
+                  <Group gap={6}>
+                    <Store size={16} />
+                    <Text fw={600} fz="sm">
+                      Ridicare din magazin
+                    </Text>
+                  </Group>
+                  <Text fz="xs" c="dimmed" mt={2}>
+                    Gratuit
+                  </Text>
+                </div>
+              </Group>
+            </Radio.Card>
+          </SimpleGrid>
         </Radio.Group>
 
-        {form.values.fulfilment === "delivery" && (
+        {!pickup && (
           <TextInput
             label="Adresă de livrare"
             placeholder="Str. Lăpușneanu 12, Iași"
@@ -107,29 +160,60 @@ function DeliveryStep({
         <Textarea
           label="Mențiuni (opțional)"
           placeholder="Orice detaliu suplimentar pentru magazin…"
-          rows={2}
+          autosize
+          minRows={2}
           {...form.getInputProps("notes")}
         />
 
         <Divider />
 
+        {/* Payment */}
         <Radio.Group label="Metodă de plată" {...form.getInputProps("payment_method")}>
-          <Stack mt="xs" gap="xs">
-            {form.values.fulfilment !== "pickup" && (
-              <Radio value="cash_on_delivery" label="Numerar la livrare" />
+          <Stack mt="xs" gap="sm">
+            {!pickup && (
+              <Radio.Card value="cash_on_delivery" radius="md" p="sm">
+                <Group gap="sm" wrap="nowrap">
+                  <Radio.Indicator />
+                  <Banknote size={18} />
+                  <Text fw={600} fz="sm">
+                    Numerar la livrare
+                  </Text>
+                </Group>
+              </Radio.Card>
             )}
-            <Radio value="cash_in_store" label="Numerar la magazin" />
-            <Radio value="online" label="Card online (Stripe)" />
+            {pickup && (
+              <Radio.Card value="cash_in_store" radius="md" p="sm">
+                <Group gap="sm" wrap="nowrap">
+                  <Radio.Indicator />
+                  <Store size={18} />
+                  <Text fw={600} fz="sm">
+                    Numerar la magazin
+                  </Text>
+                </Group>
+              </Radio.Card>
+            )}
+            <Radio.Card value="online" radius="md" p="sm">
+              <Group gap="sm" wrap="nowrap">
+                <Radio.Indicator />
+                <CreditCard size={18} />
+                <Text fw={600} fz="sm">
+                  Card online (Stripe)
+                </Text>
+              </Group>
+            </Radio.Card>
           </Stack>
         </Radio.Group>
 
         <Divider />
 
-        <Group justify="space-between">
+        <Group justify="space-between" align="center">
           <div>
-            <Text size="sm" c="dimmed">Total comandă</Text>
-            <Text fw={700} fz="xl" c="brand.7">{formatPrice(total)}</Text>
-            <Text size="xs" c="dimmed">include taxă platformă 6%</Text>
+            <Text tt="uppercase" fz={10} fw={700} c="dimmed">
+              Total
+            </Text>
+            <Text fz={26} fw={800} c="ink.9" lh={1}>
+              {formatPrice(total)}
+            </Text>
           </div>
           <Button type="submit" size="md" loading={loading}>
             {form.values.payment_method === "online"
@@ -335,8 +419,13 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
     <Modal
       opened={opened}
       onClose={handleClose}
-      title={titles[step]}
+      title={
+        <Text fw={800} fz="lg" c="ink.9">
+          {titles[step]}
+        </Text>
+      }
       size="lg"
+      padding="xl"
       centered
       closeOnClickOutside={step !== "payment"}
       closeOnEscape={step !== "payment"}
@@ -349,7 +438,7 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
 
       {step === "delivery" && (
         <DeliveryStep
-          total={total * 1.06} // preview with fee — actual total comes from server
+          total={total}
           onNext={handleDeliverySubmit}
           loading={loading}
         />
