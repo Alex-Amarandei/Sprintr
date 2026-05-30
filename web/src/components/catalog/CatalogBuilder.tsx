@@ -16,7 +16,14 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
-import { GripVertical, Pencil, Plus, Save, Trash2 } from "lucide-react";
+import {
+  ArrowUp,
+  GripVertical,
+  Pencil,
+  Plus,
+  Save,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   DndContext,
@@ -58,8 +65,14 @@ function SortableItemCard({
   onChange: (it: Item) => void;
   onRemove: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: item.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -81,7 +94,13 @@ function SortableItemCard({
   );
   return (
     <div ref={setNodeRef} style={style}>
-      <ItemCard item={item} categories={categories} onChange={onChange} onRemove={onRemove} dragHandle={handle} />
+      <ItemCard
+        item={item}
+        categories={categories}
+        onChange={onChange}
+        onRemove={onRemove}
+        dragHandle={handle}
+      />
     </div>
   );
 }
@@ -121,7 +140,9 @@ function CategorySection({
       radius="lg"
       p="md"
       style={{
-        background: isOver ? "var(--mantine-color-stone-1)" : "var(--mantine-color-gray-0)",
+        background: isOver
+          ? "var(--mantine-color-stone-1)"
+          : "var(--mantine-color-gray-0)",
         transition: "background 120ms",
       }}
     >
@@ -136,7 +157,12 @@ function CategorySection({
             placeholder="Nume categorie"
             value={name}
             onChange={(e) => onRename?.(e.currentTarget.value)}
-            styles={{ input: { fontWeight: 700, fontSize: "var(--mantine-font-size-md)" } }}
+            styles={{
+              input: {
+                fontWeight: 700,
+                fontSize: "var(--mantine-font-size-md)",
+              },
+            }}
             style={{ flex: 1 }}
           />
         )}
@@ -147,18 +173,31 @@ function CategorySection({
           {!isUncat && (
             <Menu shadow="md" position="bottom-end">
               <Menu.Target>
-                <Button variant="light" size="xs" leftSection={<Plus size={14} />}>
+                <Button
+                  variant="light"
+                  size="xs"
+                  leftSection={<Plus size={14} />}
+                >
                   Adaugă
                 </Button>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Item onClick={() => onAddItem?.("service")}>Serviciu</Menu.Item>
-                <Menu.Item onClick={() => onAddItem?.("product")}>Produs</Menu.Item>
+                <Menu.Item onClick={() => onAddItem?.("service")}>
+                  Serviciu
+                </Menu.Item>
+                <Menu.Item onClick={() => onAddItem?.("product")}>
+                  Produs
+                </Menu.Item>
               </Menu.Dropdown>
             </Menu>
           )}
           {!isUncat && (
-            <ActionIcon variant="subtle" color="red" onClick={onDelete} aria-label="Șterge categoria">
+            <ActionIcon
+              variant="subtle"
+              color="red"
+              onClick={onDelete}
+              aria-label="Șterge categoria"
+            >
               <Trash2 size={16} />
             </ActionIcon>
           )}
@@ -166,7 +205,10 @@ function CategorySection({
       </Group>
 
       <div ref={setNodeRef}>
-        <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+        <SortableContext
+          items={items.map((i) => i.id)}
+          strategy={verticalListSortingStrategy}
+        >
           <Stack gap="sm">
             {items.map((item) => (
               <SortableItemCard
@@ -214,13 +256,13 @@ export function CatalogBuilder({
   localMode = false,
 }: Props) {
   const [draftId, setDraftId] = useState<string | null>(
-    initialDraft?.id ?? (localMode ? "local" : null)
+    initialDraft?.id ?? (localMode ? "local" : null),
   );
   const [version, setVersion] = useState<number | null>(
-    initialDraft?.version ?? (localMode ? 0 : null)
+    initialDraft?.version ?? (localMode ? 0 : null),
   );
   const [doc, setDoc] = useState<CatalogDocument>(
-    initialDraft ? parseDocument(initialDraft.document) : activeDocument
+    initialDraft ? parseDocument(initialDraft.document) : activeDocument,
   );
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -263,7 +305,9 @@ export function CatalogBuilder({
     // Clear references to deleted categories from items.
     const ids = new Set(categories.map((c) => c.id));
     const items = doc.items.map((it) =>
-      it.category_id && !ids.has(it.category_id) ? { ...it, category_id: null } : it
+      it.category_id && !ids.has(it.category_id)
+        ? { ...it, category_id: null }
+        : it,
     );
     setDoc({ ...doc, categories, items });
     setDirty(true);
@@ -271,7 +315,9 @@ export function CatalogBuilder({
   const addCategory = () =>
     setCategories([...doc.categories, newCategory("", doc.categories.length)]);
   const renameCategory = (id: string, name: string) =>
-    setCategories(doc.categories.map((c) => (c.id === id ? { ...c, name } : c)));
+    setCategories(
+      doc.categories.map((c) => (c.id === id ? { ...c, name } : c)),
+    );
   const deleteCategory = (id: string) =>
     setCategories(doc.categories.filter((c) => c.id !== id));
 
@@ -279,7 +325,7 @@ export function CatalogBuilder({
     doc.items.filter((it) => (it.category_id ?? null) === categoryId);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
   );
   /** Cross-container drag: move an item into a category section and reorder. */
   function onDragEnd(e: DragEndEvent) {
@@ -314,10 +360,16 @@ export function CatalogBuilder({
       const sameCat = rest
         .map((it, k) => ((it.category_id ?? null) === targetCat ? k : -1))
         .filter((k) => k >= 0);
-      const insertAt = sameCat.length ? sameCat[sameCat.length - 1] + 1 : rest.length;
+      const insertAt = sameCat.length
+        ? sameCat[sameCat.length - 1] + 1
+        : rest.length;
       rest.splice(insertAt, 0, moved);
     }
     updateDoc(rest);
+  }
+
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function save() {
@@ -334,7 +386,7 @@ export function CatalogBuilder({
     if (!parsed.success) {
       const first = parsed.error.issues[0];
       return toast.error(
-        `Document invalid: ${first.path.join(".")} — ${first.message}`
+        `Document invalid: ${first.path.join(".")} — ${first.message}`,
       );
     }
 
@@ -410,12 +462,20 @@ export function CatalogBuilder({
       {editing ? (
         <>
           <Group>
-            <Button variant="default" leftSection={<Plus size={16} />} onClick={addCategory}>
+            <Button
+              variant="default"
+              leftSection={<Plus size={16} />}
+              onClick={addCategory}
+            >
               Adaugă categorie
             </Button>
           </Group>
 
-          <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={onDragEnd}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragEnd={onDragEnd}
+          >
             <Stack gap="md">
               {doc.categories.map((cat) => (
                 <CategorySection
@@ -493,6 +553,23 @@ export function CatalogBuilder({
           </Code>
         </>
       )}
+
+      <ActionIcon
+        onClick={scrollToTop}
+        variant="filled"
+        size="xl"
+        radius="xl"
+        style={{
+          position: "fixed",
+          bottom: 24,
+          right: 24,
+          zIndex: 1000,
+          boxShadow: "var(--mantine-shadow-md)",
+        }}
+        aria-label="Scroll to top"
+      >
+        <ArrowUp size={18} />
+      </ActionIcon>
     </Stack>
   );
 }
