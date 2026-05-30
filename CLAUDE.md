@@ -726,3 +726,18 @@ Offers are a **live** table (not part of `catalog_versions`). Two faces:
 
 No inventory tables yet. We add `inventory_items` + the `consumes`/`inventory_item_id`
 wiring (builder spec §11) **after the product POC** is finished.
+
+## Admin role — root access (migrations 7–8)
+
+Reverses the original "admin = dashboard only, not in the enum" line under "Roles".
+
+- **`user_role` now includes `admin`** (`customer | shop | admin`). Admins are the project's
+  trusted operators (the app-level equivalent of the Supabase collaborators).
+- **`is_admin()`** (SECURITY DEFINER) checks `profiles.role = 'admin'` for the caller.
+- **Root access everywhere:** every public table **and** `storage.objects` has a permissive
+  `"<t>_admin_all" FOR ALL USING (is_admin()) WITH CHECK (is_admin())` policy. Permissive
+  policies OR together, so an admin bypasses all ownership/role/status gating and can
+  read/insert/update/delete anything (incl. inserting orders directly, editing any catalog
+  version, any shop, etc.).
+- **Who's admin:** set `profiles.role='admin'`. Currently `georgecodefy@gmail.com` (George).
+  Alex + Ioana to be added once they have auth accounts (a profile needs an `auth.users` row).
