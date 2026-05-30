@@ -1,15 +1,18 @@
 import { Metadata } from "next";
+import { Paper, Title } from "@mantine/core";
 
 export const metadata: Metadata = { title: "Comenzi primite" };
 
 export default function ShopOrdersPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Comenzi primite</h1>
+      <Title order={2} mb="lg">
+        Comenzi primite
+      </Title>
       {/* TODO: fetch shop orders from Supabase */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center text-gray-400">
+      <Paper withBorder radius="lg" p={48} ta="center" c="dimmed">
         Nu există comenzi deocamdată.
-      </div>
+      </Paper>
     </div>
   );
 }

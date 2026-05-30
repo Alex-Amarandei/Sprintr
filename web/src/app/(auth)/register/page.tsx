@@ -1,68 +1,64 @@
 import { Metadata } from "next";
-import Link from "next/link";
+import {
+  Button,
+  Paper,
+  PasswordInput,
+  Select,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from "@mantine/core";
+import { LinkAnchor } from "@/components/ui/links";
 
 export const metadata: Metadata = { title: "Înregistrare" };
 
 export default function RegisterPage() {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Creează cont</h1>
-      <p className="text-gray-500 mb-8">Alătură-te comunității SprintR</p>
+    <Paper withBorder shadow="sm" radius="lg" p="xl">
+      <Title order={2} mb={4}>
+        Creează cont
+      </Title>
+      <Text c="dimmed" mb="lg">
+        Alătură-te comunității SprintR
+      </Text>
 
-      <form className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nume complet</label>
-          <input
-            type="text"
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-            placeholder="Ion Ionescu"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input
+      <form>
+        <Stack gap="md">
+          <TextInput label="Nume complet" placeholder="Ion Ionescu" required />
+          <TextInput
+            label="Email"
             type="email"
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             placeholder="email@exemplu.com"
+            required
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
-          <input
-            type="tel"
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-            placeholder="07xx xxx xxx"
+          <TextInput label="Telefon" type="tel" placeholder="07xx xxx xxx" />
+          <Select
+            label="Tip cont"
+            defaultValue="customer"
+            data={[
+              { value: "customer", label: "Client" },
+              { value: "shop", label: "Proprietar magazin" },
+            ]}
+            allowDeselect={false}
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tip cont</label>
-          <select className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
-            <option value="customer">Client</option>
-            <option value="shop_owner">Proprietar magazin</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Parolă</label>
-          <input
-            type="password"
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          <PasswordInput
+            label="Parolă"
             placeholder="Minim 8 caractere"
+            required
           />
-        </div>
-        <button
-          type="submit"
-          className="w-full py-3 bg-brand-500 text-white rounded-xl font-semibold hover:bg-brand-600 transition-colors"
-        >
-          Creează cont
-        </button>
+          <Button type="submit" fullWidth>
+            Creează cont
+          </Button>
+        </Stack>
       </form>
 
-      <p className="mt-6 text-center text-sm text-gray-500">
+      <Text ta="center" size="sm" c="dimmed" mt="lg">
         Ai deja cont?{" "}
-        <Link href="/login" className="text-brand-600 font-medium hover:underline">
+        <LinkAnchor href="/login" fw={500}>
           Autentifică-te
-        </Link>
-      </p>
-    </div>
+        </LinkAnchor>
+      </Text>
+    </Paper>
   );
 }

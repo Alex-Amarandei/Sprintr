@@ -1,15 +1,18 @@
 import { Metadata } from "next";
+import { Paper, Title } from "@mantine/core";
 
 export const metadata: Metadata = { title: "Livrările mele" };
 
 export default function DeliveriesPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Livrări disponibile</h1>
+      <Title order={2} mb="lg">
+        Livrări disponibile
+      </Title>
       {/* TODO: available delivery jobs */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center text-gray-400">
+      <Paper withBorder radius="lg" p={48} ta="center" c="dimmed">
         Nu există livrări disponibile momentan.
-      </div>
+      </Paper>
     </div>
   );
 }

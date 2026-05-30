@@ -1,5 +1,13 @@
-import Link from "next/link";
-import { LayoutDashboard, ShoppingBag, Package, Wrench, Tag, User } from "lucide-react";
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  Package,
+  Wrench,
+  Tag,
+  User,
+} from "lucide-react";
+import { Box, Stack, Text } from "@mantine/core";
+import { LinkAnchor, LinkNavItem } from "@/components/ui/links";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -10,30 +18,57 @@ const navItems = [
   { href: "/dashboard/profile", label: "Profil", icon: User },
 ];
 
-export default function ShopLayout({ children }: { children: React.ReactNode }) {
+const SIDEBAR_WIDTH = 260;
+
+export default function ShopLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <aside className="w-64 bg-white border-r border-gray-100 flex flex-col fixed inset-y-0">
-        <div className="p-6 border-b border-gray-100">
-          <Link href="/dashboard" className="text-2xl font-bold text-brand-600">
+    <Box mih="100vh" bg="gray.0">
+      <Box
+        component="aside"
+        w={SIDEBAR_WIDTH}
+        bg="white"
+        style={{
+          position: "fixed",
+          insetBlock: 0,
+          left: 0,
+          borderRight: "1px solid var(--mantine-color-gray-2)",
+        }}
+      >
+        <Box
+          p="lg"
+          style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}
+        >
+          <LinkAnchor
+            href="/dashboard"
+            fw={700}
+            fz="xl"
+            c="brand.6"
+            underline="never"
+          >
             SprintR
-          </Link>
-          <p className="text-xs text-gray-400 mt-1">Panou magazin</p>
-        </div>
-        <nav className="flex-1 p-4 space-y-1">
+          </LinkAnchor>
+          <Text size="xs" c="dimmed" mt={2}>
+            Panou magazin
+          </Text>
+        </Box>
+        <Stack gap={4} p="sm">
           {navItems.map(({ href, label, icon: Icon }) => (
-            <Link
+            <LinkNavItem
               key={href}
               href={href}
-              className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 hover:bg-brand-50 hover:text-brand-600 transition-colors text-sm font-medium"
-            >
-              <Icon className="w-5 h-5" />
-              {label}
-            </Link>
+              label={label}
+              leftSection={<Icon size={18} />}
+            />
           ))}
-        </nav>
-      </aside>
-      <main className="flex-1 ml-64 p-8">{children}</main>
-    </div>
+        </Stack>
+      </Box>
+      <Box component="main" ml={SIDEBAR_WIDTH} p="xl">
+        {children}
+      </Box>
+    </Box>
   );
 }

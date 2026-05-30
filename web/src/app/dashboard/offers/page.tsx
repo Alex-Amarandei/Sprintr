@@ -1,22 +1,20 @@
 import { Metadata } from "next";
 import { Plus } from "lucide-react";
+import { Button, Group, Paper, Title } from "@mantine/core";
 
 export const metadata: Metadata = { title: "Oferte" };
 
 export default function ShopOffersPage() {
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Oferte</h1>
-        <button className="flex items-center gap-2 px-4 py-2 bg-brand-500 text-white rounded-xl text-sm font-semibold hover:bg-brand-600 transition-colors">
-          <Plus className="w-4 h-4" />
-          Adaugă ofertă
-        </button>
-      </div>
+      <Group justify="space-between" mb="lg">
+        <Title order={2}>Oferte</Title>
+        <Button leftSection={<Plus size={16} />}>Adaugă ofertă</Button>
+      </Group>
       {/* TODO: offers list */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center text-gray-400">
+      <Paper withBorder radius="lg" p={48} ta="center" c="dimmed">
         Nu ai oferte active.
-      </div>
+      </Paper>
     </div>
   );
 }

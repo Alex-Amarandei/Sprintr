@@ -1,28 +1,29 @@
-import Link from "next/link";
+import { Container, Group, Stack, Text, Title } from "@mantine/core";
+import { LinkButton } from "@/components/ui/links";
 
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-orange-50 to-white px-4">
-      <div className="text-center max-w-2xl">
-        <h1 className="text-6xl font-bold text-brand-600 mb-4">SprintR</h1>
-        <p className="text-xl text-gray-600 mb-8">
+    <Container
+      size="sm"
+      h="100vh"
+      style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+    >
+      <Stack align="center" gap="lg">
+        <Title order={1} c="brand.6" style={{ fontSize: "3.5rem" }}>
+          SprintR
+        </Title>
+        <Text size="xl" c="dimmed" ta="center">
           Papetărie, printare și produse de birou livrate rapid în Iași.
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Link
-            href="/browse"
-            className="px-8 py-3 bg-brand-500 text-white rounded-xl font-semibold hover:bg-brand-600 transition-colors"
-          >
+        </Text>
+        <Group>
+          <LinkButton href="/browse" size="md">
             Comandă acum
-          </Link>
-          <Link
-            href="/register"
-            className="px-8 py-3 border-2 border-brand-500 text-brand-600 rounded-xl font-semibold hover:bg-brand-50 transition-colors"
-          >
+          </LinkButton>
+          <LinkButton href="/register" size="md" variant="outline">
             Înregistrează-te
-          </Link>
-        </div>
-      </div>
-    </main>
+          </LinkButton>
+        </Group>
+      </Stack>
+    </Container>
   );
 }

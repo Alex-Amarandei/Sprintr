@@ -1,16 +1,24 @@
-import Link from "next/link";
+import { Container, Stack, Text, Title } from "@mantine/core";
+import { LinkButton } from "@/components/ui/links";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
-      <h1 className="text-8xl font-bold text-brand-500 mb-4">404</h1>
-      <p className="text-xl text-gray-600 mb-8">Pagina nu a fost găsită.</p>
-      <Link
-        href="/"
-        className="px-6 py-3 bg-brand-500 text-white rounded-xl font-semibold hover:bg-brand-600 transition-colors"
-      >
-        Înapoi acasă
-      </Link>
-    </div>
+    <Container
+      size="sm"
+      h="100vh"
+      style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+    >
+      <Stack align="center" gap="md">
+        <Title order={1} c="brand.5" style={{ fontSize: "5rem" }}>
+          404
+        </Title>
+        <Text size="xl" c="dimmed">
+          Pagina nu a fost găsită.
+        </Text>
+        <LinkButton href="/" size="md">
+          Înapoi acasă
+        </LinkButton>
+      </Stack>
+    </Container>
   );
 }

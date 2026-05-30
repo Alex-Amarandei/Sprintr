@@ -1,24 +1,33 @@
 import { Metadata } from "next";
+import { Paper, SimpleGrid, Text, Title } from "@mantine/core";
 
 export const metadata: Metadata = { title: "Dashboard magazin" };
+
+const stats = [
+  { label: "Comenzi noi", value: "0", color: "orange" },
+  { label: "În procesare", value: "0", color: "blue" },
+  { label: "Finalizate azi", value: "0", color: "green" },
+  { label: "Venituri azi", value: "0 RON", color: "grape" },
+];
 
 export default function ShopDashboardPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Dashboard</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {[
-          { label: "Comenzi noi", value: "0", color: "bg-orange-50 text-orange-600" },
-          { label: "În procesare", value: "0", color: "bg-blue-50 text-blue-600" },
-          { label: "Finalizate azi", value: "0", color: "bg-green-50 text-green-600" },
-          { label: "Venituri azi", value: "0 RON", color: "bg-purple-50 text-purple-600" },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <p className="text-sm text-gray-500 mb-2">{label}</p>
-            <p className={`text-3xl font-bold rounded-lg px-2 py-1 inline-block ${color}`}>{value}</p>
-          </div>
+      <Title order={2} mb="xl">
+        Dashboard
+      </Title>
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">
+        {stats.map(({ label, value, color }) => (
+          <Paper key={label} withBorder radius="lg" p="lg">
+            <Text size="sm" c="dimmed" mb="xs">
+              {label}
+            </Text>
+            <Text fz={28} fw={700} c={`${color}.7`}>
+              {value}
+            </Text>
+          </Paper>
         ))}
-      </div>
+      </SimpleGrid>
       {/* TODO: recent orders table */}
     </div>
   );

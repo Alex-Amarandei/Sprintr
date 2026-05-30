@@ -1,23 +1,6 @@
-@import "tailwindcss";
-@config "../../tailwind.config.ts";
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 20 14.3% 4.1%;
-  }
-
-  * {
-    @apply border-gray-200;
-  }
-
-  body {
-    @apply bg-white text-gray-900 antialiased;
-  }
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Mantine provides the CSS reset and design tokens. Keep only app-level globals here. */
+html,
+body {
+  padding: 0;
+  margin: 0;
 }

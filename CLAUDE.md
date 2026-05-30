@@ -312,12 +312,19 @@ caches). Run `get_advisors` after every migration. Helper/trigger functions
 - `web/` — Next.js frontend (built). `server/` — backend, placeholder so far.
 - Run the frontend from `web/`. Bun, not npm (`bun install`, `bun run dev`).
 
-## Stack versions (bumped to latest on purpose, 2026-05-30)
-- Next.js 16 (App Router, Turbopack) · React 19 · TypeScript 6.
-- Tailwind v4: `@import "tailwindcss"` + `@config` in `web/src/styles/globals.css`, and
-  `@tailwindcss/postcss` in `postcss.config.mjs`. Do NOT reintroduce v3
-  `@tailwind base/...` directives.
-- Supabase JS + `@supabase/ssr`; two clients in `web/src/lib/supabase/{client,server}.ts`.
+## Confirmed stack versions (bumped to latest on purpose, 2026-05-30)
+- Next.js **16** (App Router, Turbopack) · React **19** · TypeScript 6
+- **UI: Mantine v9** (switched away from Tailwind on 2026-05-30). No Tailwind anymore.
+  - Setup: `MantineProvider` + `ColorSchemeScript` in `web/src/app/layout.tsx`, theme in
+    `web/src/lib/theme.ts` (brand orange = `primaryColor: "brand"`), `postcss.config.cjs`
+    with `postcss-preset-mantine`. `globals.css` is now minimal (Mantine owns the reset).
+  - Style with Mantine components + props (`c`, `fw`, `p`, `bg`, etc.), NOT className utilities.
+  - GOTCHA: don't pass `component={Link}` from a Server Component (RSC error). Use the
+    client wrappers in `web/src/components/ui/links.tsx` (`LinkAnchor`, `LinkButton`,
+    `LinkActionIcon`, `LinkNavItem`) which take a string `href`.
+  - Account-type values in the register form are `customer` / `shop` (match profiles.role).
+- Supabase JS + `@supabase/ssr`. Two clients: `web/src/lib/supabase/{client,server}.ts`.
+- Package manager: **Bun** (`web/bun.lock` is the lockfile; no package-lock.json).
 
 ## Routing (route-group collision was fixed — don't undo it)
 - Customer: `/browse`, `/orders`, `/shop/[shopId]`, `/order/[orderId]` (root level).
@@ -329,6 +336,23 @@ caches). Run `get_advisors` after every migration. Helper/trigger functions
 
 ## Env
 - Each teammate needs their own `web/.env.local` (copy from `.env.local.example`; gitignored).
+## AI tooling for Mantine (all teammates get these via the committed files)
+- **Skills** in `.agents/skills/` (symlinked to Claude Code): `mantine-form`,
+  `mantine-combobox`, `mantine-custom-components`. Use them when building forms / custom
+  selects / custom components. There's also the `supabase` skill.
+- **Mantine MCP server** added to `.mcp.json` (`bunx @mantine/mcp-server`). Tools:
+  list_items, get_item_doc, get_item_props, search_docs. Restart to load it.
+- **REGISTRY GOTCHA (we use Bun):** the machine's global npm registry points to a private
+  JFrog (FanDuel) that 403s on public packages. Root `.npmrc` + `web/.npmrc` pin
+  `registry=https://registry.npmjs.org/`. For `bunx` one-offs that ignore .npmrc, prefix:
+  `NPM_CONFIG_REGISTRY=https://registry.npmjs.org/ bunx ...` (the Mantine MCP entry already
+  sets this via its `env`).
+
+## Supabase project
+- Project ref: `qborcngytmztfucjuwgw` · URL: `https://qborcngytmztfucjuwgw.supabase.co`
+- **Postgres 17.6** → NO native `uuidv7()`. We add `public.uuid_generate_v7()` (Fabio Lima).
+- MCP server configured in `.mcp.json` (each teammate authenticates via OAuth on their machine).
+- Each teammate needs their own `web/.env.local` (copy from `.env.local.example`, gitignored).
 
 ## Seed data (FE-provided catalog inputs)
 - `web/seed/pimcopy.json` — real PIM Copy (pimcopy.ro) catalog; `price_estimated:true` =

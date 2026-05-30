@@ -1,35 +1,68 @@
-import Link from "next/link";
 import { ShoppingBag, Search, User } from "lucide-react";
+import { Box, Container, Group, TextInput } from "@mantine/core";
+import { LinkAnchor, LinkActionIcon } from "@/components/ui/links";
 
-export default function CustomerLayout({ children }: { children: React.ReactNode }) {
+export default function CustomerLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/browse" className="text-2xl font-bold text-brand-600">
-            SprintR
-          </Link>
-          <div className="flex-1 max-w-md mx-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="search"
-                placeholder="Caută magazine sau servicii..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-              />
-            </div>
-          </div>
-          <nav className="flex items-center gap-4">
-            <Link href="/orders" className="relative">
-              <ShoppingBag className="w-6 h-6 text-gray-600 hover:text-brand-600" />
-            </Link>
-            <Link href="/profile">
-              <User className="w-6 h-6 text-gray-600 hover:text-brand-600" />
-            </Link>
-          </nav>
-        </div>
-      </header>
-      <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
-    </div>
+    <Box mih="100vh" bg="gray.0">
+      <Box
+        component="header"
+        bg="white"
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
+          borderBottom: "1px solid var(--mantine-color-gray-2)",
+        }}
+      >
+        <Container size="lg" h={64}>
+          <Group h="100%" justify="space-between" wrap="nowrap">
+            <LinkAnchor
+              href="/browse"
+              fw={700}
+              fz="xl"
+              c="brand.6"
+              underline="never"
+            >
+              SprintR
+            </LinkAnchor>
+            <TextInput
+              flex={1}
+              maw={420}
+              mx="md"
+              placeholder="Caută magazine sau servicii..."
+              leftSection={<Search size={16} />}
+            />
+            <Group gap="sm">
+              <LinkActionIcon
+                href="/orders"
+                variant="subtle"
+                color="gray"
+                size="lg"
+                aria-label="Comenzi"
+              >
+                <ShoppingBag size={22} />
+              </LinkActionIcon>
+              <LinkActionIcon
+                href="/profile"
+                variant="subtle"
+                color="gray"
+                size="lg"
+                aria-label="Profil"
+              >
+                <User size={22} />
+              </LinkActionIcon>
+            </Group>
+          </Group>
+        </Container>
+      </Box>
+      <Container size="lg" py="xl">
+        {children}
+      </Container>
+    </Box>
   );
 }

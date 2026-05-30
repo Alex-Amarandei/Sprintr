@@ -1,14 +1,17 @@
 import { Metadata } from "next";
+import { Paper, Title } from "@mantine/core";
 
 export const metadata: Metadata = { title: "Câștiguri" };
 
 export default function EarningsPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Câștiguri</h1>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center text-gray-400">
+      <Title order={2} mb="lg">
+        Câștiguri
+      </Title>
+      <Paper withBorder radius="lg" p={48} ta="center" c="dimmed">
         Istoricul câștigurilor va apărea aici.
-      </div>
+      </Paper>
     </div>
   );
 }

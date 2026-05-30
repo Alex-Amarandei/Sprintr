@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Paper, Text } from "@mantine/core";
 
 export const metadata: Metadata = { title: "Magazin" };
 
@@ -11,11 +12,13 @@ export default async function ShopDetailPage({ params }: Props) {
 
   return (
     <div>
-      <p className="text-gray-400 text-sm mb-6">Shop ID: {shopId}</p>
+      <Text c="dimmed" size="sm" mb="lg">
+        Shop ID: {shopId}
+      </Text>
       {/* TODO: fetch shop details, services and products from Supabase */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center text-gray-400">
+      <Paper withBorder radius="lg" p={48} ta="center" c="dimmed">
         Detaliile magazinului vor apărea aici.
-      </div>
+      </Paper>
     </div>
   );
 }

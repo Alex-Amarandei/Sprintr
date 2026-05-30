@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Paper, Title } from "@mantine/core";
 
 export const metadata: Metadata = { title: "Detalii comandă" };
 
@@ -11,11 +12,13 @@ export default async function OrderDetailPage({ params }: Props) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Comanda #{orderId.slice(0, 8)}</h1>
+      <Title order={2} mb="lg">
+        Comanda #{orderId.slice(0, 8)}
+      </Title>
       {/* TODO: fetch order details from Supabase */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center text-gray-400">
+      <Paper withBorder radius="lg" p={48} ta="center" c="dimmed">
         Detaliile comenzii vor apărea aici.
-      </div>
+      </Paper>
     </div>
   );
 }
