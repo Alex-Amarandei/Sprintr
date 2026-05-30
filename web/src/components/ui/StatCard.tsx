@@ -28,7 +28,7 @@ export function StatCard({
           </Text>
         )}
       </Group>
-      <Text fz={28} fw={700} mt="sm" lh={1.1}>
+      <Text fz={24} fw={700} mt="sm" lh={1.1}>
         {value}
       </Text>
       <Text c="dimmed" fz="sm" mt={2}>

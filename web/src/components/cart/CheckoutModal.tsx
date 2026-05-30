@@ -211,7 +211,7 @@ function DeliveryStep({
             <Text tt="uppercase" fz={10} fw={700} c="dimmed">
               Total
             </Text>
-            <Text fz={26} fw={800} c="ink.9" lh={1}>
+            <Text fz={22} fw={800} c="ink.9" lh={1}>
               {formatPrice(total)}
             </Text>
           </div>

@@ -4,3 +4,8 @@ body {
   padding: 0;
   margin: 0;
 }
+
+:root {
+  /* Higher-contrast secondary text — Mantine's default dimmed (gray.6) reads too light. */
+  --mantine-color-dimmed: var(--mantine-color-mist-5);
+}

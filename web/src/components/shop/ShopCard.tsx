@@ -58,7 +58,7 @@ export function ShopCard({ shop }: { shop: SampleShop }) {
           <Text fw={700} c="ink.9">
             {shop.name}
           </Text>
-          <Text fz="sm" c="dimmed" lineClamp={2} mt={2}>
+          <Text fz="xs" c="dimmed" lineClamp={2} mt={2}>
             {shop.description}
           </Text>
           {shop.tags && shop.tags.length > 0 && (

@@ -45,7 +45,7 @@ export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
             </Badge>
           </Group>
           {item.description && (
-            <Text c="dimmed" size="sm" mt={4}>
+            <Text c="dimmed" fz="xs" mt={4}>
               {item.description}
             </Text>
           )}

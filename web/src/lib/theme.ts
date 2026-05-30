@@ -62,12 +62,22 @@ export const theme = createTheme({
   // Spacing rhythm from the prototype: 4 · 8 · 12 · 16 · 24 · 32 · 48.
   spacing: { xs: "8px", sm: "12px", md: "16px", lg: "24px", xl: "32px" },
 
+  // Nudge `xs` up from Mantine's 12px → 13px (12px reads a touch small for body copy).
+  fontSizes: { xs: "0.8125rem" },
+
   fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
   fontFamilyMonospace:
     "var(--font-geist-mono), 'JetBrains Mono', ui-monospace, monospace",
   headings: {
     fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
     fontWeight: "800",
+    // Slightly tighter than Mantine defaults — page/section titles read big otherwise.
+    sizes: {
+      h1: { fontSize: "1.75rem", lineHeight: "1.2" },
+      h2: { fontSize: "1.375rem", lineHeight: "1.25" },
+      h3: { fontSize: "1.1875rem", lineHeight: "1.3" },
+      h4: { fontSize: "1.0625rem", lineHeight: "1.35" },
+    },
   },
 
   // Component defaults — the prototype look without any custom CSS.
