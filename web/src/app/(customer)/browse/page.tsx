@@ -10,7 +10,7 @@ import {
   Title,
 } from "@mantine/core";
 import { Copy, Layers, PenTool, Printer, Upload, Zap } from "lucide-react";
-import { sampleShops } from "@/lib/catalog/samples";
+import { getShops } from "@/lib/catalog/shops";
 import { createClient } from "@/lib/supabase/server";
 import { ShopCard } from "@/components/shop/ShopCard";
 import { LinkButton } from "@/components/ui/links";
@@ -43,7 +43,8 @@ export default async function BrowsePage() {
     firstName = profile?.full_name?.split(" ")[0] ?? "";
   }
 
-  const openCount = sampleShops.filter((s) => s.isOpen ?? true).length;
+  const shops = await getShops();
+  const openCount = shops.filter((s) => s.isOpen ?? true).length;
 
   return (
     <Stack gap="xl">
@@ -65,13 +66,15 @@ export default async function BrowsePage() {
               {openCount} magazine sunt deschise acum în Iași. De unde comanzi azi?
             </Text>
           </div>
-          <LinkButton
-            href={`/shop/${sampleShops[0].id}`}
-            size="md"
-            leftSection={<Upload size={18} />}
-          >
-            Încarcă PDF & comandă rapid
-          </LinkButton>
+          {shops[0] && (
+            <LinkButton
+              href={`/shop/${shops[0].id}`}
+              size="md"
+              leftSection={<Upload size={18} />}
+            >
+              Încarcă PDF & comandă rapid
+            </LinkButton>
+          )}
         </Group>
       </Paper>
 
@@ -96,12 +99,11 @@ export default async function BrowsePage() {
         <Group justify="space-between" align="baseline" mb="md">
           <Title order={3}>Magazine în Iași</Title>
           <Text fz="sm" c="dimmed">
-            {sampleShops.length} magazine
+            {shops.length} magazine
           </Text>
         </Group>
-        {/* TODO(BE): replace sampleShops with shops read from Supabase */}
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">
-          {sampleShops.map((shop) => (
+          {shops.map((shop) => (
             <ShopCard key={shop.id} shop={shop} />
           ))}
         </SimpleGrid>

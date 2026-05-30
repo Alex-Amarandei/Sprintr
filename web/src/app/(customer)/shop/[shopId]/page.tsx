@@ -21,7 +21,7 @@ import {
   Star,
   Upload,
 } from "lucide-react";
-import { getSampleShop, getSampleCatalog } from "@/lib/catalog/samples";
+import { getShopView, getShopCatalog } from "@/lib/catalog/shops";
 import { SHOP_CATEGORY } from "@/components/shop/category";
 import { OpenBadge } from "@/components/ui/OpenBadge";
 import { ShopCatalogTabs } from "@/components/shop/ShopCatalogTabs";
@@ -45,11 +45,11 @@ const DAYS = [
 export default async function ShopDetailPage({ params }: Props) {
   const { shopId } = await params;
 
-  // TODO(BE): read the shop + its active catalog document from Supabase.
-  const shop = getSampleShop(shopId);
+  const [shop, items] = await Promise.all([
+    getShopView(shopId),
+    getShopCatalog(shopId),
+  ]);
   if (!shop) notFound();
-
-  const items = getSampleCatalog(shopId);
   const cat = SHOP_CATEGORY[shop.category ?? "print"];
   const Icon = cat.icon;
   const open = shop.isOpen ?? true;

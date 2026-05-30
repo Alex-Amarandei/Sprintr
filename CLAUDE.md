@@ -428,6 +428,20 @@ in the actual app, using sample data until backend reads land:
 - TODO(BE) markers flag where `sampleShops`/`getSampleCatalog` get replaced by Supabase reads,
   and where cart checkout calls the pricing/placement Edge Function.
 
+## Browse/shop wired to REAL Supabase reads (FE, 2026-05-30) ✅
+Seed is live: 3 published shops (PIM Copy 10 items, PrintHaus 16, STEF 13) via
+`scripts/seed-db.mjs` + `scripts/seed-to-document.mjs` (seed JSON → catalog `document`).
+- **`lib/catalog/shops.ts`** (server-only) = the read layer: `getShops()`, `getShopView(id)`,
+  `getShopCatalog(id)` (reads `shops.active_version_id` → `catalog_versions.document` →
+  `parseDocument`). Maps DB rows into the `SampleShop` UI shape; `isOpenNow()` from the
+  `schedule` jsonb; rating/eta/reviews not in DB yet → undefined (cards degrade gracefully).
+- `/browse` now lists DB shops via `getShops()`; `/shop/[shopId]` reads `getShopView` +
+  `getShopCatalog` (shopId is the real **uuid** now, not a slug). `sampleShops`/`getSampleCatalog`
+  are unused (kept for now; safe to delete later).
+- Anon SSR client reads work because shops + active catalog version are public-read by RLS.
+- STILL sample/stub: cart **checkout** (needs place-order action), offers sidebar, the
+  shop ratings/eta/program (hardcoded DAYS). Next: wire checkout → orders insert.
+
 ## Role-based routing (FE, 2026-05-30) — single source of truth = `/`
 - **`/` (home)** is an async server component: logged-in → redirect by `profiles.role`
   (`shop` → `/dashboard`, else `/browse`); logged-out → marketing landing (CTA → /browse, /login).

@@ -1,0 +1,99 @@
+import "server-only";
+import { createClient } from "@/lib/supabase/server";
+import { parseDocument, type Item } from "./schema";
+import type { SampleShop, ShopCategory } from "./samples";
+
+/**
+ * Server-side reads of real shops + their live catalog from Supabase.
+ * Maps DB rows into the `SampleShop` shape the UI already consumes (rating/eta/etc.
+ * are not in the DB yet → left undefined; the cards degrade gracefully).
+ */
+
+type ScheduleDay = { open: string; close: string } | null;
+type Schedule = Record<string, ScheduleDay>;
+
+const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
+
+function deriveCategory(name: string): ShopCategory {
+  const n = name.toLowerCase();
+  if (/copy|copie|copiere/.test(n)) return "copy";
+  if (/legat|bind|broșur|brosur/.test(n)) return "binding";
+  if (/birot|papet|stationery/.test(n)) return "stationery";
+  return "print";
+}
+
+/** Open-now per CLAUDE.md: overrides[today] wins, else weekly schedule[weekday]. */
+function isOpenNow(
+  schedule: Schedule | null,
+  overrides: Record<string, ScheduleDay> | null
+): boolean | undefined {
+  if (!schedule && !overrides) return undefined;
+  const now = new Date();
+  const dateKey = now.toISOString().slice(0, 10);
+  let hours: ScheduleDay | undefined;
+  if (overrides && dateKey in overrides) hours = overrides[dateKey];
+  else hours = schedule?.[DAY_KEYS[now.getDay()]];
+  if (!hours) return false;
+  const cur = now.toTimeString().slice(0, 5);
+  return cur >= hours.open && cur <= hours.close;
+}
+
+function toView(row: {
+  id: string;
+  name: string;
+  description: string | null;
+  address: string | null;
+  phone: string | null;
+  schedule: unknown;
+  schedule_overrides: unknown;
+}): SampleShop {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description ?? "",
+    address: row.address ?? "Iași",
+    phone: row.phone ?? undefined,
+    category: deriveCategory(row.name),
+    isOpen: isOpenNow(
+      row.schedule as Schedule | null,
+      row.schedule_overrides as Record<string, ScheduleDay> | null
+    ),
+  };
+}
+
+export async function getShops(): Promise<SampleShop[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("shops")
+    .select("id, name, description, address, phone, schedule, schedule_overrides")
+    .order("created_at", { ascending: true });
+  if (error || !data) return [];
+  return data.map(toView);
+}
+
+export async function getShopView(id: string): Promise<SampleShop | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("shops")
+    .select("id, name, description, address, phone, schedule, schedule_overrides")
+    .eq("id", id)
+    .maybeSingle();
+  return data ? toView(data) : null;
+}
+
+/** Items from the shop's live (active) catalog version. */
+export async function getShopCatalog(id: string): Promise<Item[]> {
+  const supabase = await createClient();
+  const { data: shop } = await supabase
+    .from("shops")
+    .select("active_version_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (!shop?.active_version_id) return [];
+  const { data: version } = await supabase
+    .from("catalog_versions")
+    .select("document")
+    .eq("id", shop.active_version_id)
+    .maybeSingle();
+  return parseDocument(version?.document).items.filter((it) => it.is_active);
+}
