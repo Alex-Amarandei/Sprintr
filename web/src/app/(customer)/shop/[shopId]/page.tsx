@@ -36,7 +36,7 @@ export default async function ShopDetailPage({ params }: Props) {
       <Title order={3}>Produse și servicii</Title>
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
         {items.map((item) => (
-          <AddItemCard key={item.id} item={item} />
+          <AddItemCard key={item.id} item={item} shopId={shopId} />
         ))}
       </SimpleGrid>
     </Stack>

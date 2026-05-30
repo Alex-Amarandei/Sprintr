@@ -434,8 +434,9 @@ in the actual app, using sample data until backend reads land:
 - **Middleware** redirects logged-in users off `/login`/`/register` to **`/`** (NOT /browse),
   so role routing lives in exactly one place. Protected prefixes: `/order /orders /dashboard
   /courier` (segment-precise). `/browse` + `/shop/[id]` are public.
-- **`/dashboard` layout** is a shop-only guard: re-checks auth + `role === 'shop'`, else
-  redirects to `/browse`. (Catalog page additionally needs a `shop_permissions` row to load.)
+- **`/dashboard` layout** guards `role === 'shop' || role === 'admin'`, else redirects to
+  `/browse`. Admin role gets full dashboard access (DB root access already covered by
+  `is_admin()` policies). (Catalog page additionally needs a `shop_permissions` row to load.)
 - OAuth callback also routes by role (explicit `?next` wins, else role).
 
 ## Color swatches on select options (FE, 2026-05-30) — schema EXTENSION
@@ -455,12 +456,49 @@ dynamic form first (matches the "order = mixed cart of N lines" model).
 - `lib/catalog/cart.ts` — `CartLine` type, `needsConfiguration(item)` (true if it has
   fields or requires_upload), `buildCartLine(item, answers, fileName)` (freezes total).
 - `components/cart/CartContext.tsx` — `<CartProvider>` + `useCart()` (lines/total/add/remove/clear).
-- `components/cart/AddItemCard.tsx` — card with instant-add OR a `<Modal>` wrapping
-  `ItemOrderForm` (submitLabel "Adaugă în coș") for configurable items.
-- `components/cart/CartBar.tsx` — cart indicator + `<Drawer>` with lines, remove, total,
-  checkout (preview only — real placement = Edge Function).
+  Also tracks `shopId` (single-shop cart; switching shops clears the cart automatically).
+- `components/cart/AddItemCard.tsx` — accepts `shopId` prop, passes it to `addLine`.
+- `components/cart/CartBar.tsx` — cart indicator + `<Drawer>` with lines, remove, total;
+  "Finalizează comanda" opens `<CheckoutModal>` (real flow, not a preview toast).
+- `components/cart/CheckoutModal.tsx` — 3-step modal: (1) delivery details + payment method,
+  (2) Stripe `<PaymentElement>` for online payments, (3) success screen + redirect to order.
 - Sample catalog in `lib/catalog/samples.ts`: `samplePencil` (instant), `sampleNotebook`
   (modal/product), `samplePrintService` (modal/service). **Login-free demo:** `/cart-demo`.
+
+## Stripe + order placement — IMPLEMENTED (2026-05-30)
+
+**No Supabase Edge Functions** — all server logic runs as **Vercel API Routes** (Next.js
+App Router route handlers under `web/src/app/api/`). The two deployed Supabase Edge
+Functions (`place-order`, `stripe-webhook`) are superseded and unused.
+
+- **`/api/place-order`** (`web/src/app/api/place-order/route.ts`):
+  - Requires `Authorization: Bearer <access_token>` (customer must be logged in).
+  - Receives `{ shop_id, lines[], fulfilment, delivery_address, contact_phone, notes, payment_method }`.
+  - Loads the shop's active catalog version, **reprices every line server-side** (same §7
+    algorithm as the client), rejects if client total differs by > 1 cent (tamper-proof).
+  - Applies **6% platform fee** on top of subtotal → `total`.
+  - Inserts `orders` + `order_items` via the **service role** (clients never insert directly).
+  - For `payment_method = 'online'`: creates a Stripe `PaymentIntent` (RON, bani), stores
+    `payment_ref = pi.id`, returns `client_secret` to the browser.
+  - For cash methods: returns `order_id` + totals only (`client_secret: null`).
+
+- **`/api/stripe-webhook`** (`web/src/app/api/stripe-webhook/route.ts`):
+  - `verify_jwt: false` (Stripe calls this, not a user).
+  - Verifies `stripe-signature` header with `STRIPE_WEBHOOK_SECRET`.
+  - `payment_intent.succeeded` → sets `payment_status='paid'`, `paid_at`, `payment_ref`.
+  - `payment_intent.payment_failed` → sets `payment_status='failed'`.
+
+**Stripe keys** (never commit; gitignored in `.env.local`; add to Vercel env vars for prod):
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — client-side (safe to expose).
+- `STRIPE_SECRET_KEY` — server-side only.
+- `STRIPE_WEBHOOK_SECRET` — from Stripe dashboard webhook endpoint or `stripe listen` CLI.
+
+**To test locally:** `stripe listen --forward-to localhost:3000/api/stripe-webhook` (Stripe
+CLI) prints a local `whsec_...` secret — paste into `.env.local` as `STRIPE_WEBHOOK_SECRET`.
+Test card: `4242 4242 4242 4242`, any future date, any CVC.
+
+**Platform fee:** 6% (`PLATFORM_FEE_PERCENT = 0.06` in the route handler). Charged on top
+of the order subtotal; visible to the customer in `CheckoutModal` as "include taxă platformă 6%".
 
 ---
 

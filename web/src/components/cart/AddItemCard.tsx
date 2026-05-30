@@ -21,7 +21,7 @@ import { formatPrice } from "@/lib/utils/format";
 import { ItemOrderForm } from "@/components/catalog/ItemOrderForm";
 import { useCart } from "./CartContext";
 
-export function AddItemCard({ item }: { item: Item }) {
+export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
   const { addLine } = useCart();
   const [opened, { open, close }] = useDisclosure(false);
   const configurable = needsConfiguration(item);
@@ -30,7 +30,7 @@ export function AddItemCard({ item }: { item: Item }) {
   const fromPrice = computeItemPrice(item, defaultAnswers(item)).total;
 
   function quickAdd() {
-    addLine(buildCartLine(item));
+    addLine(buildCartLine(item), shopId);
     toast.success(`${item.title} adăugat în coș`);
   }
 
@@ -80,15 +80,18 @@ export function AddItemCard({ item }: { item: Item }) {
             item={item}
             submitLabel="Adaugă în coș"
             onPlaceOrder={(p) => {
-              addLine({
-                lineId: crypto.randomUUID(),
-                itemId: p.itemId,
-                title: item.title,
-                kind: item.kind,
-                answers: p.answers,
-                total: p.total,
-                fileName: p.fileName,
-              });
+              addLine(
+                {
+                  lineId: crypto.randomUUID(),
+                  itemId: p.itemId,
+                  title: item.title,
+                  kind: item.kind,
+                  answers: p.answers,
+                  total: p.total,
+                  fileName: p.fileName,
+                },
+                shopId
+              );
               toast.success(`${item.title} adăugat în coș`);
               close();
             }}

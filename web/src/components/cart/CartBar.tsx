@@ -14,36 +14,32 @@ import {
   Text,
 } from "@mantine/core";
 import { ShoppingCart, Trash2 } from "lucide-react";
-import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils/format";
 import { useCart } from "./CartContext";
+import { CheckoutModal } from "./CheckoutModal";
 
 export function CartBar() {
   const { lines, count, total, removeLine, clear } = useCart();
-  const [opened, { open, close }] = useDisclosure(false);
-
-  function checkout() {
-    console.log("[cart checkout preview]", { lines, total });
-    toast.success(
-      `Comandă (preview): ${count} produse · ${formatPrice(total)} — vezi consola`
-    );
-  }
+  const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
+  const [checkoutOpened, { open: openCheckout, close: closeCheckout }] = useDisclosure(false);
 
   return (
     <>
+      <CheckoutModal opened={checkoutOpened} onClose={closeCheckout} />
+
       <Indicator label={count} size={18} disabled={count === 0} color="brand">
         <Button
           variant="default"
           leftSection={<ShoppingCart size={18} />}
-          onClick={open}
+          onClick={openDrawer}
         >
           {formatPrice(total)}
         </Button>
       </Indicator>
 
       <Drawer
-        opened={opened}
-        onClose={close}
+        opened={drawerOpened}
+        onClose={closeDrawer}
         position="right"
         title="Coșul tău"
         size="md"
@@ -94,7 +90,7 @@ export function CartBar() {
                 {formatPrice(total)}
               </Text>
             </Group>
-            <Button size="md" onClick={checkout}>
+            <Button size="md" onClick={() => { closeDrawer(); openCheckout(); }}>
               Finalizează comanda
             </Button>
             <Button variant="subtle" color="gray" onClick={clear}>

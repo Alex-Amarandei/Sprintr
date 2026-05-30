@@ -40,7 +40,7 @@ export default async function ShopLayout({
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
-  if (profile?.role !== "shop") redirect("/browse");
+  if (profile?.role !== "shop" && profile?.role !== "admin") redirect("/browse");
 
   return (
     <Box mih="100vh" bg="gray.0">

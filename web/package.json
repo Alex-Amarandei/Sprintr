@@ -13,7 +13,10 @@
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
     "@mantine/core": "^9.2.2",
+    "@mantine/form": "^9.2.2",
     "@mantine/hooks": "^9.2.2",
+    "@stripe/react-stripe-js": "^6.5.0",
+    "@stripe/stripe-js": "^9.7.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.106.2",
     "clsx": "^2.1.1",
@@ -26,6 +29,7 @@
     "react-dropzone": "^15.0.0",
     "react-hook-form": "^7.76.1",
     "sonner": "^2.0.7",
+    "stripe": "^22.2.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
