@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   Group,
+  SimpleGrid,
   Stack,
   Switch,
   Text,
@@ -142,24 +143,24 @@ export function ProfileEditor({
               Informații magazin
             </Text>
             <Stack gap="sm">
-              <Group grow>
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
                 <TextInput label="Nume" {...field("name")} />
                 {/* Not a column on `shops` — visual only for now. */}
                 <TextInput
                   label="Tip activitate"
                   defaultValue="Centru de printare & papetărie"
                 />
-              </Group>
+              </SimpleGrid>
               <Textarea label="Descriere" autosize minRows={2} {...field("description")} />
-              <Group grow>
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
                 <TextInput label="Telefon" {...field("phone")} />
                 {/* No email column on `shops` — visual only. */}
                 <TextInput label="Email" defaultValue="contact@pimcopy.ro" />
-              </Group>
-              <Group grow>
+              </SimpleGrid>
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
                 <TextInput label="Adresă" {...field("address")} />
                 <TextInput label="Oraș" defaultValue="Iași" disabled />
-              </Group>
+              </SimpleGrid>
             </Stack>
           </Card>
 
@@ -168,9 +169,9 @@ export function ProfileEditor({
             <Text fw={700} mb="md">
               Program de funcționare
             </Text>
-            <Stack gap="xs">
+            <Stack gap="sm">
               {days.map((d, i) => (
-                <Group key={d.label} justify="space-between" wrap="nowrap">
+                <Group key={d.label} justify="space-between" wrap="wrap" gap="xs">
                   <Group gap="md" wrap="nowrap">
                     <Text fw={500} w={88}>
                       {d.label}

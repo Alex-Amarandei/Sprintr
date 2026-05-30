@@ -74,6 +74,42 @@ export default async function ShopOrderDetailPage({ params }: Props) {
   const prev = idx > 0 ? queue[idx - 1] : null;
   const next = idx >= 0 && idx < queue.length - 1 ? queue[idx + 1] : null;
 
+  // Client + chat — shown in a desktop sidebar and stacked below on mobile.
+  const sidebar = (
+    <Stack gap="lg">
+      <Card>
+        <Text fw={700} mb="md">
+          Client & livrare
+        </Text>
+        <Stack gap="md">
+          <InfoRow
+            icon={<Phone size={15} />}
+            label="Contact"
+            value={`${order.customerName}${order.contactPhone ? ` · ${order.contactPhone}` : ""}`}
+          />
+          <InfoRow
+            icon={order.fulfilment === "pickup" ? <Store size={15} /> : <Truck size={15} />}
+            label="Livrare"
+            value={order.fulfilment === "pickup" ? "Ridicare din magazin" : "Livrare la domiciliu"}
+          />
+          {order.fulfilment !== "pickup" && order.deliveryAddress && (
+            <InfoRow icon={<MapPin size={15} />} label="Adresă" value={order.deliveryAddress} />
+          )}
+          {order.paymentMethod && (
+            <InfoRow icon={<FileText size={15} />} label="Plată" value={order.paymentMethod} />
+          )}
+        </Stack>
+      </Card>
+
+      <ChatPanel
+        peerName={order.customerName}
+        perspective="shop"
+        initialMessages={order.messages}
+        height={420}
+      />
+    </Stack>
+  );
+
   return (
     <Stack gap="lg">
       <Group justify="space-between" align="center">
@@ -221,38 +257,14 @@ export default async function ShopOrderDetailPage({ params }: Props) {
           )}
         </Stack>
 
-        {/* Right: customer/delivery + chat */}
+        {/* Right: customer/delivery + chat (desktop) */}
         <Box w={360} visibleFrom="md" style={{ flexShrink: 0 }}>
-          <Stack gap="lg">
-            <Card>
-              <Text fw={700} mb="md">
-                Client & livrare
-              </Text>
-              <Stack gap="md">
-                <InfoRow icon={<Phone size={15} />} label="Contact" value={`${order.customerName}${order.contactPhone ? ` · ${order.contactPhone}` : ""}`} />
-                <InfoRow
-                  icon={order.fulfilment === "pickup" ? <Store size={15} /> : <Truck size={15} />}
-                  label="Livrare"
-                  value={order.fulfilment === "pickup" ? "Ridicare din magazin" : "Livrare la domiciliu"}
-                />
-                {order.fulfilment !== "pickup" && order.deliveryAddress && (
-                  <InfoRow icon={<MapPin size={15} />} label="Adresă" value={order.deliveryAddress} />
-                )}
-                {order.paymentMethod && (
-                  <InfoRow icon={<FileText size={15} />} label="Plată" value={order.paymentMethod} />
-                )}
-              </Stack>
-            </Card>
-
-            <ChatPanel
-              peerName={order.customerName}
-              perspective="shop"
-              initialMessages={order.messages}
-              height={420}
-            />
-          </Stack>
+          {sidebar}
         </Box>
       </Group>
+
+      {/* Client + chat on mobile (below the main content) */}
+      <Box hiddenFrom="md">{sidebar}</Box>
     </Stack>
   );
 }

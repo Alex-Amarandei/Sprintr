@@ -4,6 +4,7 @@ import { LinkAnchor } from "@/components/ui/links";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
+import { MobileNav } from "@/components/dashboard/MobileNav";
 import { createClient } from "@/lib/supabase/server";
 
 const SIDEBAR_WIDTH = 260;
@@ -62,31 +63,8 @@ export default async function ShopLayout({
         <DashboardNav />
       </Box>
 
-      {/* Mobile top bar + nav */}
-      <Box
-        hiddenFrom="md"
-        bg="white"
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 50,
-          borderBottom: "1px solid var(--mantine-color-gray-2)",
-        }}
-      >
-        <Group justify="space-between" align="center" wrap="nowrap" p="md">
-          <LinkAnchor
-            href="/dashboard"
-            fw={700}
-            fz="xl"
-            c="brand.6"
-            underline="never"
-          >
-            <Wordmark />
-          </LinkAnchor>
-          <SignOutButton />
-        </Group>
-        <DashboardNav />
-      </Box>
+      {/* Mobile top bar + nav (hamburger → Drawer) */}
+      <MobileNav />
 
       <Box
         component="main"

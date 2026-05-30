@@ -123,57 +123,64 @@ export function ShopOrderQueue({
 
   const row = (o: SampleOrder) => {
     const hasPdf = o.lines.some((l) => l.pdfName);
+    const act = actions(o);
     return (
-      <Group
+      <Box
         key={o.id}
-        justify="space-between"
-        wrap="nowrap"
         p="md"
-        gap="md"
         style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}
       >
-        <Link
-          href={`/dashboard/orders/${o.id}`}
-          style={{ textDecoration: "none", color: "inherit", minWidth: 0, flex: 1 }}
-        >
-          <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-            <Avatar radius="xl" color="brand" size={38}>
-              {initials(o.customerName)}
-            </Avatar>
-            <div style={{ minWidth: 0 }}>
-              <Group gap={6}>
-                <Text fw={600} fz="sm">
-                  #{short(o.id)}
+        <Group justify="space-between" wrap="nowrap" gap="md">
+          <Link
+            href={`/dashboard/orders/${o.id}`}
+            style={{ textDecoration: "none", color: "inherit", minWidth: 0, flex: 1 }}
+          >
+            <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+              <Avatar radius="xl" color="brand" size={38}>
+                {initials(o.customerName)}
+              </Avatar>
+              <div style={{ minWidth: 0 }}>
+                <Group gap={6}>
+                  <Text fw={600} fz="sm">
+                    #{short(o.id)}
+                  </Text>
+                  <Text fz="xs" c="dimmed">
+                    · {o.placedAt}
+                  </Text>
+                </Group>
+                <Text fz="sm" truncate>
+                  {o.customerName} · {o.lines[0]?.title}
+                  {o.itemsCount > 1 ? ` +${o.itemsCount - 1}` : ""}
                 </Text>
-                <Text fz="xs" c="dimmed">
-                  · {o.placedAt}
-                </Text>
-              </Group>
-              <Text fz="sm" truncate>
-                {o.customerName} · {o.lines[0]?.title}
-                {o.itemsCount > 1 ? ` +${o.itemsCount - 1}` : ""}
-              </Text>
-            </div>
-          </Group>
-        </Link>
+              </div>
+            </Group>
+          </Link>
 
-        <Group gap="md" wrap="nowrap">
-          {hasPdf && (
-            <Badge variant="light" color="red" leftSection={<FileText size={12} />} visibleFrom="md">
-              PDF
-            </Badge>
-          )}
-          <Text fw={700} fz="sm" w={84} ta="right" style={{ whiteSpace: "nowrap" }}>
-            {o.total.toFixed(2)} lei
-          </Text>
-          <Box w={118} visibleFrom="sm">
-            <StatusBadge status={o.status} />
-          </Box>
-          <Box w={170} style={{ display: "flex", justifyContent: "flex-end" }}>
-            {actions(o)}
-          </Box>
+          <Group gap="md" wrap="nowrap">
+            {hasPdf && (
+              <Badge variant="light" color="red" leftSection={<FileText size={12} />} visibleFrom="md">
+                PDF
+              </Badge>
+            )}
+            <Text fw={700} fz="sm" ta="right" style={{ whiteSpace: "nowrap" }}>
+              {o.total.toFixed(2)} lei
+            </Text>
+            {/* Desktop: status + actions inline */}
+            <Box w={118} visibleFrom="sm">
+              <StatusBadge status={o.status} />
+            </Box>
+            <Box w={170} visibleFrom="sm" style={{ display: "flex", justifyContent: "flex-end" }}>
+              {act}
+            </Box>
+          </Group>
         </Group>
-      </Group>
+
+        {/* Mobile: status + actions on their own row */}
+        <Group justify="space-between" hiddenFrom="sm" mt="sm" wrap="nowrap">
+          <StatusBadge status={o.status} />
+          {act}
+        </Group>
+      </Box>
     );
   };
 

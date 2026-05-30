@@ -8,6 +8,7 @@ import {
   Card,
   Group,
   NumberInput,
+  SimpleGrid,
   Stack,
   Switch,
   Text,
@@ -156,7 +157,7 @@ export function ProductEditor({
               </Stack>
             </Group>
 
-            <Group grow mt="sm">
+            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm" mt="sm">
               <NumberInput
                 label="Preț de bază"
                 suffix=" lei"
@@ -179,7 +180,7 @@ export function ProductEditor({
                 value={p.sku}
                 onChange={(e) => set("sku", e.currentTarget.value)}
               />
-            </Group>
+            </SimpleGrid>
           </Card>
 
           <Card>

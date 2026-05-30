@@ -1084,3 +1084,26 @@ with `kind === "product"` inside the same versioned `catalog_versions.document` 
 - **Still not persisted by the simple editor:** SKU + unit (cosmetic — no schema column / the
   simple editor doesn't manage `number`/`is_quantity` fields), and image upload. Configurable
   products (with `fields`) also list here; editing them via this simple form preserves their fields.
+
+## Responsive / mobile pass — dashboard (FE, 2026-05-31) ✅
+Made the shop dashboard area usable on phones (was: 6 stacked nav links atop every page;
+order-detail client+chat invisible on mobile; cramped fixed-width input/queue rows).
+- **`components/dashboard/MobileNav.tsx`** (new, client) — mobile sticky top bar with a
+  **Burger → Drawer** nav (replaces the always-expanded vertical `DashboardNav` in the mobile
+  bar). Drawer auto-closes on route change + on link click (`DashboardNav` gained an optional
+  `onNavigate` cb). Desktop fixed sidebar (`visibleFrom md`) is unchanged.
+- **`/dashboard/orders/[orderId]`** — the "Client & livrare" card + `ChatPanel` were
+  `visibleFrom md` with NO mobile fallback (invisible on phones). Extracted to a `sidebar`
+  const, rendered in the desktop side column AND stacked below the main content on mobile
+  (`hiddenFrom md`). (Customer `/order/[id]` already had a mobile chat fallback.)
+- **`ShopOrderQueue`** rows — were one `nowrap` row packing total+status+2 buttons (overflowed
+  on phones). Now: desktop unchanged (status+actions inline, `visibleFrom sm`); on mobile a
+  second row carries `StatusBadge` + the action buttons (`hiddenFrom sm`).
+- **`ProductEditor`** — the 3-up Preț/Unitate/SKU `Group grow` → `SimpleGrid cols={{base:1,sm:3}}`.
+- **`ProfileEditor`** — info `Group grow` rows → `SimpleGrid cols={{base:1,sm:2}}`; schedule rows
+  now `wrap` (time inputs + badge drop below the day/switch on narrow screens).
+- **`ShopOrderActions`** (detail header) — `wrap="wrap"` so buttons reflow.
+- Verified via production build (all routes compile, dynamic). NOTE: true mobile-viewport
+  rendering couldn't be exercised in-tool — the remote Chrome renders at a fixed 1440 viewport
+  and `/dashboard/*` never reaches network-idle (screenshots/JS eval hang). Desktop confirmed
+  clean (sidebar visible, no horizontal overflow).

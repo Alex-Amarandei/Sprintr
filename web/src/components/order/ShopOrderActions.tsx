@@ -39,7 +39,7 @@ export function ShopOrderActions({
   };
 
   return (
-    <Group gap="sm" wrap="nowrap" align="center">
+    <Group gap="sm" wrap="wrap" align="center">
       <StatusBadge status={status} />
       {status === "pending" && (
         <>
