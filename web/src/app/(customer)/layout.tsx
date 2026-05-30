@@ -1,6 +1,7 @@
 import { ShoppingBag, Search, User } from "lucide-react";
 import { Box, Container, Group, TextInput } from "@mantine/core";
 import { LinkAnchor, LinkActionIcon } from "@/components/ui/links";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 
 export default function CustomerLayout({
   children,
@@ -56,6 +57,7 @@ export default function CustomerLayout({
               >
                 <User size={22} />
               </LinkActionIcon>
+              <SignOutButton />
             </Group>
           </Group>
         </Container>

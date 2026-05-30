@@ -1,14 +1,6 @@
 import { Metadata } from "next";
-import {
-  Button,
-  Paper,
-  PasswordInput,
-  Select,
-  Stack,
-  Text,
-  TextInput,
-  Title,
-} from "@mantine/core";
+import { Paper, Stack, Text, Title } from "@mantine/core";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { LinkAnchor } from "@/components/ui/links";
 
 export const metadata: Metadata = { title: "Înregistrare" };
@@ -20,38 +12,13 @@ export default function RegisterPage() {
         Creează cont
       </Title>
       <Text c="dimmed" mb="lg">
-        Alătură-te comunității SprintR
+        Folosește contul tău Google — creăm contul automat la prima
+        autentificare.
       </Text>
 
-      <form>
-        <Stack gap="md">
-          <TextInput label="Nume complet" placeholder="Ion Ionescu" required />
-          <TextInput
-            label="Email"
-            type="email"
-            placeholder="email@exemplu.com"
-            required
-          />
-          <TextInput label="Telefon" type="tel" placeholder="07xx xxx xxx" />
-          <Select
-            label="Tip cont"
-            defaultValue="customer"
-            data={[
-              { value: "customer", label: "Client" },
-              { value: "shop", label: "Proprietar magazin" },
-            ]}
-            allowDeselect={false}
-          />
-          <PasswordInput
-            label="Parolă"
-            placeholder="Minim 8 caractere"
-            required
-          />
-          <Button type="submit" fullWidth>
-            Creează cont
-          </Button>
-        </Stack>
-      </form>
+      <Stack gap="md">
+        <GoogleSignInButton next="/browse" label="Înregistrează-te cu Google" />
+      </Stack>
 
       <Text ta="center" size="sm" c="dimmed" mt="lg">
         Ai deja cont?{" "}

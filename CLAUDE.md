@@ -334,6 +334,22 @@ caches). Run `get_advisors` after every migration. Helper/trigger functions
 - `middleware.ts` skips Supabase auth when env keys are missing/placeholder (app browsable
   before keys are set). Protected prefixes: `/browse /order /orders /dashboard /courier`.
 
+## Auth — Google OAuth (DECISION 2026-05-30, supersedes "email/password" scope line)
+We switched login to **Google OAuth only** (was: email/password in Scope-IN line 35).
+- FE wired: `signInWithOAuth({provider:'google', redirectTo:/auth/callback})` in
+  `components/auth/GoogleSignInButton.tsx`; callback route `app/auth/callback/route.ts`
+  (`exchangeCodeForSession`); `/login` + `/register` now show the Google button; a
+  `SignOutButton` is in the customer header + dashboard sidebar.
+- After login we redirect to `/browse` (customers). Shop owners navigate to `/dashboard`.
+  `handle_new_user` gives OAuth users role `customer` by default (no metadata) — shop
+  accounts are still admin-pre-created with role/permissions.
+- `forgot-password` page is now dead (no passwords); left in place, unlinked.
+- **MANUAL CONFIG REQUIRED (dashboard, not code):** (1) Google Cloud OAuth Web client →
+  Client ID+Secret, authorized redirect URI `https://qborcngytmztfucjuwgw.supabase.co/auth/v1/callback`;
+  (2) Supabase → Auth → Providers → enable Google + paste creds; (3) Supabase → Auth →
+  URL config: Site URL `http://localhost:3000`, redirect allow-list `http://localhost:3000/**`.
+  Until this is done the button errors out.
+
 ## Env
 - Each teammate needs their own `web/.env.local` (copy from `.env.local.example`; gitignored).
 ## AI tooling for Mantine (all teammates get these via the committed files)
@@ -364,6 +380,22 @@ caches). Run `get_advisors` after every migration. Helper/trigger functions
 - These JSONs use richer option types (`number`, `radio`) + per-unit pricing that **don't**
   match our MVP model (`single_select|boolean|text`, additive-only). **Down-map** when we
   write the seed migration. Seeding ownership (FE script vs seed migration) is TBD.
+
+## Catalog builder — IMPLEMENTED (FE, 2026-05-30)
+First cut of the shop catalog configurator lives in `web/src`:
+- `lib/catalog/schema.ts` — **Zod** mirror of the builder spec (Item/Field/PriceRule,
+  5 field types). Shared source of truth for builder + (future) renderer + price preview.
+- `lib/catalog/factories.ts` — blank Item/Field/Option builders. `lib/catalog/api.ts` —
+  client RPC/CRUD: `getOrCreateDraft`, `createDraft` (→ `create_catalog_draft`),
+  `saveDraftDocument` (updates `catalog_versions.document`).
+- `components/catalog/{CatalogBuilder,ItemCard,FieldEditor,PriceRuleInput}.tsx` — the UI.
+- Mounted at **`/dashboard/services`** (server page resolves the user's shop via
+  `shop_permissions`, loads latest draft + active doc, renders `<CatalogBuilder>`).
+- Scope of this cut: editor core (items + fields + price rules + save to draft).
+  **Deferred:** publish/version-history UI (`set_active_catalog_version`), image upload,
+  drag-reorder (uses up/down buttons for now), customer-facing renderer.
+- **To test live you need:** (1) working login (auth forms not wired yet) and (2) a seeded
+  `shops` row + a `shop_permissions` row (role `catalog`/`owner`) for the logged-in user.
 
 ---
 

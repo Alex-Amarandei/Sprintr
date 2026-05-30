@@ -6,8 +6,9 @@ import {
   Tag,
   User,
 } from "lucide-react";
-import { Box, Stack, Text } from "@mantine/core";
+import { Box, Group, Stack, Text } from "@mantine/core";
 import { LinkAnchor, LinkNavItem } from "@/components/ui/links";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -51,9 +52,12 @@ export default function ShopLayout({
           >
             SprintR
           </LinkAnchor>
-          <Text size="xs" c="dimmed" mt={2}>
-            Panou magazin
-          </Text>
+          <Group justify="space-between" align="center" mt={2}>
+            <Text size="xs" c="dimmed">
+              Panou magazin
+            </Text>
+            <SignOutButton />
+          </Group>
         </Box>
         <Stack gap={4} p="sm">
           {navItems.map(({ href, label, icon: Icon }) => (
