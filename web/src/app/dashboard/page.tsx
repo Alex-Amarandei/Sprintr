@@ -12,29 +12,11 @@ import { Check, Clock, Package, Plus, TrendingUp } from "lucide-react";
 import { getMyShop, getShopOrders } from "@/lib/orders/queries";
 import { roCount } from "@/lib/utils/format";
 import { StatCard } from "@/components/ui/StatCard";
-import { RevenueBars } from "@/components/dashboard/RevenueBars";
 import { DashboardGreeting } from "@/components/dashboard/DashboardGreeting";
 import { ExportReportButton } from "@/components/dashboard/ExportReportButton";
 import { ShopOrderQueue } from "@/components/dashboard/ShopOrderQueue";
 
 export const metadata: Metadata = { title: "Dashboard magazin" };
-
-const REVENUE = [
-  { label: "L", value: 620 },
-  { label: "Ma", value: 880 },
-  { label: "Mi", value: 540 },
-  { label: "J", value: 1120 },
-  { label: "V", value: 1320 },
-  { label: "S", value: 980 },
-  { label: "D", value: 1240 },
-];
-
-const TOP = [
-  { name: "Listare licență", orders: 42, revenue: 3150 },
-  { name: "Legare termică", orders: 28, revenue: 700 },
-  { name: "Printare A3 color", orders: 19, revenue: 855 },
-  { name: "Caiet A4 80 file", orders: 64, revenue: 954 },
-];
 
 export default async function ShopDashboardPage() {
   const [shop, orders] = await Promise.all([getMyShop(), getShopOrders()]);
@@ -48,6 +30,22 @@ export default async function ShopDashboardPage() {
     (o) => o.status === "accepted" || o.status === "in_progress",
   ).length;
   const doneCount = orders.filter((o) => o.status === "done").length;
+  const doneRevenue = orders
+    .filter((o) => o.status === "done")
+    .reduce((sum, o) => sum + o.total, 0);
+
+  // Top services by revenue — aggregated from real order line items.
+  const byTitle = new Map<string, { revenue: number; count: number }>();
+  for (const o of orders) {
+    for (const l of o.lines) {
+      const cur = byTitle.get(l.title) ?? { revenue: 0, count: 0 };
+      byTitle.set(l.title, { revenue: cur.revenue + l.lineTotal, count: cur.count + 1 });
+    }
+  }
+  const topServices = [...byTitle.entries()]
+    .map(([name, v]) => ({ name, ...v }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 4);
 
   return (
     <Stack gap="xl">
@@ -72,7 +70,6 @@ export default async function ShopDashboardPage() {
           icon={<Clock size={20} />}
           value={String(newCount)}
           label="Comenzi noi"
-          delta="+2 vs ieri"
           color="brand"
         />
         <StatCard
@@ -87,47 +84,50 @@ export default async function ShopDashboardPage() {
           label="Finalizate"
           color="teal"
         />
-        {/* TODO(BE): revenue aggregation not computed yet — visual placeholder. */}
         <StatCard
           icon={<TrendingUp size={20} />}
-          value="1.240 lei"
-          label="Venit azi"
-          delta="+24%"
+          value={`${doneRevenue.toFixed(0)} lei`}
+          label="Venit finalizat"
           color="brand"
         />
       </SimpleGrid>
 
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
         <Card>
-          <Group justify="space-between">
-            <Text fw={700}>Venit — ultimele 7 zile</Text>
-            <Text fw={800} fz={20} c="var(--mantine-color-text)">
-              8.420 lei
-            </Text>
-          </Group>
-          <RevenueBars data={REVENUE} />
+          <Text fw={700} mb="md">
+            Venit — ultimele 7 zile
+          </Text>
+          <Text c="dimmed" fz="sm" ta="center" py="xl">
+            Graficul de venit pe zile apare aici odată ce avem istoric de comenzi.
+          </Text>
         </Card>
         <Card>
           <Text fw={700} mb="md">
             Top servicii
           </Text>
-          <Stack gap="sm">
-            {TOP.map((t) => (
-              <Group key={t.name} justify="space-between">
-                <div>
-                  <Text fz="sm" fw={600}>
-                    {t.name}
+          {topServices.length === 0 ? (
+            <Text c="dimmed" fz="sm" ta="center" py="xl">
+              Nicio comandă încă.
+            </Text>
+          ) : (
+            <Stack gap="sm">
+              {topServices.map((t) => (
+                <Group key={t.name} justify="space-between">
+                  <div>
+                    <Text fz="sm" fw={600}>
+                      {t.name}
+                    </Text>
+                    <Text fz="xs" c="dimmed">
+                      {roCount(t.count, "comandă", "comenzi")}
+                    </Text>
+                  </div>
+                  <Text fw={700} fz="sm">
+                    {t.revenue.toFixed(0)} lei
                   </Text>
-                  <Text fz="xs" c="dimmed">
-                    {roCount(t.orders, "comandă", "comenzi")}
-                  </Text>
-                </div>
-                <Text fw={700} fz="sm">
-                  {t.revenue} lei
-                </Text>
-              </Group>
-            ))}
-          </Stack>
+                </Group>
+              ))}
+            </Stack>
+          )}
         </Card>
       </SimpleGrid>
 
