@@ -3,8 +3,16 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2025-05-28.basil" as any });
+export const dynamic = "force-dynamic";
+
+let _stripe: Stripe | null = null;
+function getStripe() {
+  if (!_stripe) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2025-05-28.basil" as any });
+  }
+  return _stripe;
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -17,7 +25,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
+    event = getStripe().webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err) {
     console.error("Webhook signature verification failed:", err);
     return NextResponse.json({ error: "Bad signature" }, { status: 400 });

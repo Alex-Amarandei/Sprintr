@@ -3,10 +3,19 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 
+export const dynamic = "force-dynamic";
+
 const PLATFORM_FEE_PERCENT = 0.06;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2025-05-28.basil" as any });
+// Lazily initialized so the module can be imported at build time without env vars
+let _stripe: Stripe | null = null;
+function getStripe() {
+  if (!_stripe) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2025-05-28.basil" as any });
+  }
+  return _stripe;
+}
 
 function serviceSupabase() {
   return createClient<Database>(
@@ -185,7 +194,7 @@ export async function POST(req: NextRequest) {
     let clientSecret: string | null = null;
 
     if (payment_method === "online") {
-      const pi = await stripe.paymentIntents.create({
+      const pi = await getStripe().paymentIntents.create({
         amount: Math.round(total * 100), // RON → bani
         currency: "ron",
         metadata: { order_id: order.id, shop_id },
