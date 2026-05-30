@@ -658,6 +658,20 @@ Offers are a **live** table (not part of `catalog_versions`). Two faces:
   Edge Function. Stored flexibly as `type` + `config jsonb` (same data-driven spirit as the
   configurator), plus an active window. `catalog`+ manage; public reads active offers.
 
+## Reviews (migration 6, applied)
+
+- **`reviews`** target one of three things via `target_type` + `target_id`: **`shop`**
+  (shop id), **`employee`** (the `profiles.id` who handled the order), **`item`** (a catalog
+  item's stable id — service or product). `rating` 1–5 **required**, `comment` optional.
+- **Verified-purchase only** (enforced in RLS): the author must have a **`done`** order from
+  that shop whose `order_id` justifies the target — the shop itself, the order's `handled_by`
+  employee, or an `order_items` line. One review per `(author, shop, target)`.
+- **Immutable** — no edit; the author may **delete (retract)** their own. Public read.
+- **`orders.handled_by`** (new column) records the shop member who took the order; a member
+  sets it via the existing orders update (it's what employee reviews point at).
+- **`review_replies`** — shop **`staff`+** members reply to a review (public read; author may
+  delete own). Customers don't reply.
+
 ## Inventory — deferred (Phase 2)
 
 No inventory tables yet. We add `inventory_items` + the `consumes`/`inventory_item_id`

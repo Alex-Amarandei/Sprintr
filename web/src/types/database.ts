@@ -166,6 +166,7 @@ export type Database = {
           customer_id: string
           delivery_address: string | null
           fulfilment: Database["public"]["Enums"]["fulfilment_type"]
+          handled_by: string | null
           id: string
           notes: string | null
           paid_at: string | null
@@ -188,6 +189,7 @@ export type Database = {
           customer_id: string
           delivery_address?: string | null
           fulfilment?: Database["public"]["Enums"]["fulfilment_type"]
+          handled_by?: string | null
           id?: string
           notes?: string | null
           paid_at?: string | null
@@ -210,6 +212,7 @@ export type Database = {
           customer_id?: string
           delivery_address?: string | null
           fulfilment?: Database["public"]["Enums"]["fulfilment_type"]
+          handled_by?: string | null
           id?: string
           notes?: string | null
           paid_at?: string | null
@@ -234,6 +237,13 @@ export type Database = {
           {
             foreignKeyName: "orders_customer_id_fkey"
             columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_handled_by_fkey"
+            columns: ["handled_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -273,6 +283,103 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"]
         }
         Relationships: []
+      }
+      review_replies: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          review_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          review_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          review_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_replies_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_replies_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          author_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          order_id: string
+          rating: number
+          shop_id: string
+          target_id: string
+          target_type: Database["public"]["Enums"]["review_target"]
+        }
+        Insert: {
+          author_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id: string
+          rating: number
+          shop_id: string
+          target_id: string
+          target_type: Database["public"]["Enums"]["review_target"]
+        }
+        Update: {
+          author_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string
+          rating?: number
+          shop_id?: string
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["review_target"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       shop_legal: {
         Row: {
@@ -454,6 +561,7 @@ export type Database = {
       order_status: "pending" | "accepted" | "rejected" | "in_progress" | "done"
       payment_method: "cash_in_store" | "cash_on_delivery" | "online"
       payment_status: "pending" | "paid" | "failed" | "refunded"
+      review_target: "shop" | "employee" | "item"
       shop_role: "staff" | "catalog" | "owner"
       user_role: "customer" | "shop"
     }
@@ -589,6 +697,7 @@ export const Constants = {
       order_status: ["pending", "accepted", "rejected", "in_progress", "done"],
       payment_method: ["cash_in_store", "cash_on_delivery", "online"],
       payment_status: ["pending", "paid", "failed", "refunded"],
+      review_target: ["shop", "employee", "item"],
       shop_role: ["staff", "catalog", "owner"],
       user_role: ["customer", "shop"],
     },
