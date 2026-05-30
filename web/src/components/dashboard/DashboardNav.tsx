@@ -40,7 +40,7 @@ export function DashboardNav() {
             leftSection={<Icon size={18} />}
             styles={{
               root: {
-                color: "var(--mantine-color-teal-7)",
+                color: "var(--mantine-color-stone-8)",
                 borderRadius: "var(--mantine-radius-md)",
                 backgroundColor: active
                   ? "var(--mantine-color-stone-1)"
@@ -49,7 +49,7 @@ export function DashboardNav() {
               // Tighter gap between icon and label.
               section: { marginInlineEnd: 8 },
               // Semibold menu labels.
-              label: { fontWeight: 600, color: "var(--mantine-color-teal-7)" },
+              label: { fontWeight: 600, color: "var(--mantine-color-stone-8)" },
             }}
           />
         );

@@ -20,25 +20,29 @@ import { Dot } from "@/components/ui/Dot";
  * TODO(BE): wire to Supabase Realtime on the messages table.
  */
 export function ChatPanel({
-  shopName,
+  peerName,
   initialMessages,
   height = 520,
+  perspective = "customer",
 }: {
-  shopName: string;
+  /** The other party's name (shop on the customer side, customer on the shop side). */
+  peerName: string;
   initialMessages: SampleMessage[];
   height?: number;
+  perspective?: "customer" | "shop";
 }) {
+  const mySide = perspective === "shop" ? "shop" : "customer";
   const [messages, setMessages] = useState<SampleMessage[]>(initialMessages);
   const [text, setText] = useState("");
 
   function send() {
     const body = text.trim();
     if (!body) return;
-    setMessages((m) => [...m, { from: "customer", body, at: "acum" }]);
+    setMessages((m) => [...m, { from: mySide, body, at: "acum" }]);
     setText("");
   }
 
-  const initials = shopName
+  const initials = peerName
     .split(" ")
     .slice(0, 2)
     .map((w) => w[0])
@@ -64,7 +68,7 @@ export function ChatPanel({
         </Avatar>
         <div>
           <Text fw={600} fz="sm">
-            {shopName}
+            {peerName}
           </Text>
           <Group gap={6}>
             <Dot color="teal" />
@@ -78,7 +82,7 @@ export function ChatPanel({
       {/* Messages */}
       <Stack p="md" gap="sm" style={{ flex: 1, overflowY: "auto" }}>
         {messages.map((m, i) => {
-          const mine = m.from === "customer";
+          const mine = m.from === mySide;
           return (
             <Box
               key={i}

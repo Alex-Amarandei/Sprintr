@@ -29,12 +29,23 @@ export interface SampleOrder {
   subtotal: number;
   delivery: number;
   messages: SampleMessage[];
+  // Shop-side fulfilment details.
+  notes?: string;
+  contactPhone?: string;
+  deliveryAddress?: string;
+  fulfilment?: "delivery" | "pickup";
+  paymentMethod?: string;
 }
 
 export const sampleOrders: SampleOrder[] = [
   {
     id: "SR-1042",
     customerName: "Andrei Popescu",
+    fulfilment: "delivery",
+    contactPhone: "+40 745 123 456",
+    deliveryAddress: "Str. Păcurari 14, ap. 8, Iași",
+    paymentMethod: "Card online",
+    notes: "Vă rog copertă albastră închisă. Sun când ajunge curierul.",
     shopId: "pim-copy",
     shopName: "PIM Copy",
     category: "print",
@@ -59,6 +70,11 @@ export const sampleOrders: SampleOrder[] = [
   {
     id: "SR-1041",
     customerName: "Maria Ionescu",
+    fulfilment: "delivery",
+    contactPhone: "+40 722 998 100",
+    deliveryAddress: "Bd. Carol I 22, Iași",
+    paymentMethod: "Numerar la livrare",
+    notes: "Urgent dacă se poate azi.",
     shopId: "copy-center-tudor",
     shopName: "Copy Center Tudor",
     category: "copy",
@@ -81,6 +97,9 @@ export const sampleOrders: SampleOrder[] = [
   {
     id: "SR-1039",
     customerName: "Vlad Georgescu",
+    fulfilment: "pickup",
+    contactPhone: "+40 733 555 212",
+    paymentMethod: "Numerar la magazin",
     shopId: "printhaus",
     shopName: "PrintHaus",
     category: "binding",
@@ -100,6 +119,10 @@ export const sampleOrders: SampleOrder[] = [
   {
     id: "SR-1037",
     customerName: "Elena Rusu",
+    fulfilment: "delivery",
+    contactPhone: "+40 740 010 020",
+    deliveryAddress: "Str. Sărărie 5, Iași",
+    paymentMethod: "Card online",
     shopId: "pim-copy",
     shopName: "PIM Copy",
     category: "print",
@@ -115,6 +138,10 @@ export const sampleOrders: SampleOrder[] = [
   {
     id: "SR-1031",
     customerName: "Cristian Dima",
+    fulfilment: "delivery",
+    contactPhone: "+40 751 303 404",
+    deliveryAddress: "Str. Independenței 7, Iași",
+    paymentMethod: "Numerar la livrare",
     shopId: "birotica-independentei",
     shopName: "Birotica Independenței",
     category: "stationery",

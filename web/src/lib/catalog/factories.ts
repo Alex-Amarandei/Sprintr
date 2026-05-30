@@ -1,4 +1,4 @@
-import type { Field, FieldType, FieldOption, Item, ItemKind } from "./schema";
+import type { Category, Field, FieldType, FieldOption, Item, ItemKind } from "./schema";
 
 /** Blank-but-valid builders for new catalog entities (with stable ids/keys). */
 
@@ -59,6 +59,11 @@ export function newItem(kind: ItemKind = "service", sortOrder = 0): Item {
     requires_upload: kind === "service",
     stock_display: "none",
     inventory_item_id: null,
+    category_id: null,
     fields: [],
   };
+}
+
+export function newCategory(name = "", sortOrder = 0): Category {
+  return { id: crypto.randomUUID(), name, parent_id: null, sort_order: sortOrder };
 }

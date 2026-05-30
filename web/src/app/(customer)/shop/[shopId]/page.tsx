@@ -25,6 +25,7 @@ import { OpenBadge } from "@/components/ui/OpenBadge";
 import { ShopCatalogTabs } from "@/components/shop/ShopCatalogTabs";
 import { ShopSchedule } from "@/components/shop/ShopSchedule";
 import { SAMPLE_SCHEDULE, getScheduleStatus } from "@/lib/shop/schedule";
+import { roCount } from "@/lib/utils/format";
 
 export const metadata: Metadata = { title: "Magazin" };
 
@@ -85,7 +86,7 @@ export default async function ShopDetailPage({ params }: Props) {
                       {shop.rating.toFixed(1)}
                     </Text>
                     {shop.reviews != null && (
-                      <Text fz="sm">({shop.reviews} recenzii)</Text>
+                      <Text fz="sm">({roCount(shop.reviews, "recenzie", "recenzii")})</Text>
                     )}
                   </Group>
                 )}

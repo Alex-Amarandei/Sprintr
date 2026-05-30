@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Avatar,
   Badge,
@@ -115,25 +116,30 @@ export function ShopOrderQueue({
         gap="md"
         style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}
       >
-        <Group gap="sm" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
-          <Avatar radius="xl" color="brand" size={38}>
-            {initials(o.customerName)}
-          </Avatar>
-          <div style={{ minWidth: 0 }}>
-            <Group gap={6}>
-              <Text fw={600} fz="sm">
-                #{o.id}
+        <Link
+          href={`/dashboard/orders/${o.id}`}
+          style={{ textDecoration: "none", color: "inherit", minWidth: 0, flex: 1 }}
+        >
+          <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+            <Avatar radius="xl" color="brand" size={38}>
+              {initials(o.customerName)}
+            </Avatar>
+            <div style={{ minWidth: 0 }}>
+              <Group gap={6}>
+                <Text fw={600} fz="sm">
+                  #{o.id}
+                </Text>
+                <Text fz="xs" c="dimmed">
+                  · {o.placedAt}
+                </Text>
+              </Group>
+              <Text fz="sm" truncate>
+                {o.customerName} · {o.lines[0]?.title}
+                {o.itemsCount > 1 ? ` +${o.itemsCount - 1}` : ""}
               </Text>
-              <Text fz="xs" c="dimmed">
-                · {o.placedAt}
-              </Text>
-            </Group>
-            <Text fz="sm" truncate>
-              {o.customerName} · {o.lines[0]?.title}
-              {o.itemsCount > 1 ? ` +${o.itemsCount - 1}` : ""}
-            </Text>
-          </div>
-        </Group>
+            </div>
+          </Group>
+        </Link>
 
         <Group gap="md" wrap="nowrap">
           {hasPdf && (

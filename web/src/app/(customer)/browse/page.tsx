@@ -14,6 +14,7 @@ import { getShops } from "@/lib/catalog/shops";
 import { createClient } from "@/lib/supabase/server";
 import { ShopCard } from "@/components/shop/ShopCard";
 import { LinkButton } from "@/components/ui/links";
+import { roCount } from "@/lib/utils/format";
 
 export const metadata: Metadata = { title: "Magazine" };
 
@@ -63,7 +64,7 @@ export default async function BrowsePage() {
               Bună{firstName ? `, ${firstName}` : ""} 👋
             </Title>
             <Text c="gray.4" mt={4}>
-              {openCount} magazine sunt deschise acum în Iași. De unde comanzi azi?
+              {roCount(openCount, "magazin", "magazine")} {openCount === 1 ? "este deschis" : "sunt deschise"} acum în Iași. De unde comanzi azi?
             </Text>
           </div>
           {shops[0] && (
@@ -99,7 +100,7 @@ export default async function BrowsePage() {
         <Group justify="space-between" align="baseline" mb="md">
           <Title order={3}>Magazine în Iași</Title>
           <Text fz="sm" c="dimmed">
-            {shops.length} magazine
+            {roCount(shops.length, "magazin", "magazine")}
           </Text>
         </Group>
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">

@@ -111,18 +111,34 @@ export const itemSchema = z.object({
   requires_upload: z.boolean().default(false),
   stock_display: z.enum(stockDisplayValues).default("none"),
   inventory_item_id: z.string().nullable().default(null), // Phase 2
+  // Optional link to a category from document.categories (§2). Backward-compatible.
+  category_id: z.string().nullable().default(null),
   fields: z.array(fieldSchema).default([]),
 });
 export type Item = z.infer<typeof itemSchema>;
 
+// ---- Categories (§2) — per-shop, flat list (parent_id reserved for nesting) ----
+export const categorySchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  parent_id: z.string().nullable().default(null),
+  sort_order: z.number().int().default(0),
+});
+export type Category = z.infer<typeof categorySchema>;
+
 // ---- Document (§2) --------------------------------------------------------
 export const catalogDocumentSchema = z.object({
   schema_version: z.literal(1),
+  categories: z.array(categorySchema).default([]),
   items: z.array(itemSchema).default([]),
 });
 export type CatalogDocument = z.infer<typeof catalogDocumentSchema>;
 
-export const emptyDocument: CatalogDocument = { schema_version: 1, items: [] };
+export const emptyDocument: CatalogDocument = {
+  schema_version: 1,
+  categories: [],
+  items: [],
+};
 
 /** Parse an unknown jsonb document defensively; falls back to empty on failure. */
 export function parseDocument(input: unknown): CatalogDocument {

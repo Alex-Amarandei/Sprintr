@@ -119,13 +119,13 @@ export default async function OrderDetailPage({ params }: Props) {
 
         {/* Right: chat */}
         <Box w={380} visibleFrom="md" style={{ flexShrink: 0 }}>
-          <ChatPanel shopName={order.shopName} initialMessages={order.messages} />
+          <ChatPanel peerName={order.shopName} initialMessages={order.messages} />
         </Box>
       </Group>
 
       {/* Chat on mobile (below) */}
       <Box hiddenFrom="md">
-        <ChatPanel shopName={order.shopName} initialMessages={order.messages} height={440} />
+        <ChatPanel peerName={order.shopName} initialMessages={order.messages} height={440} />
       </Box>
     </Stack>
   );

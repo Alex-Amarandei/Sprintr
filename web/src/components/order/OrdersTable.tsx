@@ -15,6 +15,7 @@ import { ChevronRight } from "lucide-react";
 import type { SampleOrder } from "@/lib/orders/sample";
 import { SHOP_CATEGORY } from "@/components/shop/category";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { roCount } from "@/lib/utils/format";
 
 type Filter = "all" | "active" | "done" | "rejected";
 
@@ -56,7 +57,7 @@ function OrderRow({ order }: { order: SampleOrder }) {
 
         <Group gap="xl" wrap="nowrap">
           <Text fz="sm" c="dimmed" visibleFrom="sm">
-            {order.itemsCount} {order.itemsCount === 1 ? "produs" : "produse"}
+            {roCount(order.itemsCount, "produs", "produse")}
           </Text>
           <Text fw={700} fz="sm" w={90} ta="right">
             {order.total.toFixed(2)} lei
