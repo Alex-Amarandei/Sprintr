@@ -62,7 +62,7 @@ export default async function ShopDashboardPage() {
           </Text>
         </div>
         <Group>
-          <ExportReportButton />
+          <ExportReportButton orders={orders} />
           <Button leftSection={<Plus size={16} />}>Adaugă produs</Button>
         </Group>
       </Group>

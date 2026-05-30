@@ -3,17 +3,17 @@
 import { Button } from "@mantine/core";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
-import { sampleOrders } from "@/lib/orders/sample";
+import type { SampleOrder } from "@/lib/orders/sample";
 import { ORDER_STATUS } from "@/lib/design/status";
 import { roCount } from "@/lib/utils/format";
 
 const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
 
-/** Exports the orders as a CSV the shop can open in Excel. TODO(BE): real date-ranged report. */
-export function ExportReportButton() {
+/** Exports the shop's real orders as a CSV (opens in Excel). */
+export function ExportReportButton({ orders }: { orders: SampleOrder[] }) {
   function exportCsv() {
     const headers = ["Comandă", "Client", "Magazin", "Produse", "Total (lei)", "Status", "Plasată"];
-    const rows = sampleOrders.map((o) => [
+    const rows = orders.map((o) => [
       `#${o.id}`,
       o.customerName,
       o.shopName,
@@ -33,7 +33,7 @@ export function ExportReportButton() {
     a.download = "raport-comenzi.csv";
     a.click();
     URL.revokeObjectURL(url);
-    toast.success(`Raport exportat — ${roCount(sampleOrders.length, "comandă", "comenzi")}`);
+    toast.success(`Raport exportat — ${roCount(orders.length, "comandă", "comenzi")}`);
   }
 
   return (
