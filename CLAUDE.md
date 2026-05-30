@@ -238,9 +238,10 @@ the default back to v7 later needs no type change / data migration.
   `anon`/`authenticated`/`public` — call it only via the trigger, never RPC) +
   `on_auth_user_created` trigger auto-creates a profile. Shop accounts pass
   `role`/`full_name` via `raw_user_meta_data`.
-- **`rls_auto_enable` event trigger exists** (installed earlier, kept): it auto-runs
-  `enable row level security` on every new `public` table. So new tables get RLS turned
-  on for free — **but you still must write policies** (RLS on + no policy = deny-all).
+- **`rls_auto_enable` event trigger** (`ensure_rls`): auto-runs `enable row level security`
+  on every new `public` table. So new tables get RLS turned on for free — **but you still
+  must write policies** (RLS on + no policy = deny-all). Adopted into source control in
+  migration 2 (and its `execute` revoked); it's canonical now, not out-of-band.
 - **Migration filename = ledger version.** The MCP stamps its own wall-clock version on
   `apply_migration`; after applying, rename the local file to match the version shown by
   `list_migrations` so the repo and DB agree (needed for CLI `db push`/`db reset`).
