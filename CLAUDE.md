@@ -215,3 +215,15 @@ for fast seed data). Store storage PATHS not URLs. No `city` column (Iași hardc
   **`feat/shop-*`**, **`feat/customer-*`**. Chat component has one owner, merged early.
 - Repo is the fork **`Alex-Amarandei/Sprintr`** (`origin`); the original upstream remote
   was removed to avoid mistakes.
+
+## Decision reversal: plain UUIDv4 over UUIDv7
+
+Supersedes the "IDs — UUIDv7" section above and the `default uuid_generate_v7()` in the
+`shops` block. **For this sprint we use plain `gen_random_uuid()` (UUIDv4) for all our
+own primary keys** — no custom function, nothing to break. The v7 benefits
+(time-sortability, B-tree locality) only matter at a scale we won't hit this weekend, and
+we already sort by `created_at` + index everywhere. Column type stays `uuid`, so flipping
+the default back to v7 later needs no type change / data migration.
+
+→ When defining tables, use `id uuid primary key default gen_random_uuid()` (not
+`uuid_generate_v7()`). `profiles.id` stays the exception: it equals `auth.users.id`.
