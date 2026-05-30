@@ -244,3 +244,46 @@ the default back to v7 later needs no type change / data migration.
 - **Migration filename = ledger version.** The MCP stamps its own wall-clock version on
   `apply_migration`; after applying, rename the local file to match the version shown by
   `list_migrations` so the repo and DB agree (needed for CLI `db push`/`db reset`).
+
+## Shops, access control & legal data (migration 1, applied)
+
+Supersedes the original single-`owner_id` `shops` block. Ownership/permissions now live in
+their own table, and fiscal data is split out.
+
+- **`shops`** = public, browsable storefront identity (no `owner_id`):
+  `id, name, description, logo_path, banner_path, phone, address, schedule,
+  schedule_overrides, created_at`. **Anyone (incl. `anon`) can read shops** — browsing is
+  public; login is only required at checkout/chat.
+- **`shop_permissions`** `(shop_id, profile_id, role)`, one role per person per shop
+  (`unique (shop_id, profile_id)`). `role` is the **`shop_role` enum, ordered
+  `staff < catalog < owner`**:
+  - `staff` → orders + chat
+  - `catalog` → + catalog & offers (everything staff can do, plus catalog/offers)
+  - `owner` → + members, legal/fiscal, finance/stats (everything)
+  RLS uses `role >= 'x'` thanks to the enum order.
+- **`shop_legal`** = sensitive fiscal/tax data, 1:1 with shop (PK = FK), **owner-only**
+  read+write: `legal_name, legal_form, fiscal_code (CUI), vat_payer, vat_number, reg_com,
+  legal_address`.
+- **`is_shop_member(shop_id, min_role)`** SECURITY DEFINER helper drives all shop-scoped
+  RLS (bypasses RLS internally to avoid recursion; only checks the caller's own row).
+- **Provisioning is admin-only** (service role): admin creates the `shops` row + the first
+  `owner` `shop_permissions` row (+ optional `shop_legal`). No self-serve shop signup.
+  An `owner` can then add teammates.
+
+### Scope change: `offers` is now IN scope
+
+Reverses the "offers/promos" entry under "Scope — OUT". Offers matter to the product.
+The `catalog` role owns them. **Open question for when we build the `offers` table:**
+display-only promo (no order-math change) vs price-affecting discount (touches the frozen
+order total + the additive-only pricing rule). Decide then.
+
+### Postgres gotcha: function EXECUTE grants
+
+Supabase sets `ALTER DEFAULT PRIVILEGES` granting `EXECUTE` to `PUBLIC`/`anon`/
+`authenticated` on every new `public` function, and `CREATE FUNCTION` itself adds a
+`PUBLIC` grant. So to lock a function down you must **`revoke execute … from public, anon`
+(and `authenticated` if it's trigger-only)** — revoking from one role isn't enough if the
+grant arrives via `PUBLIC`. Verify with `pg_proc.proacl`, not just the advisor (which
+caches). Run `get_advisors` after every migration. Helper/trigger functions
+(`handle_new_user`, `is_shop_member`) are locked down this way; `is_shop_member` keeps
+`authenticated` because RLS needs it (an accepted advisor WARN).
