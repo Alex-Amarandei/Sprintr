@@ -29,12 +29,13 @@ function GoogleIcon() {
 }
 
 interface Props {
+  /** Optional forced destination. If omitted, the callback routes by role. */
   next?: string;
   label?: string;
 }
 
 export function GoogleSignInButton({
-  next = "/browse",
+  next,
   label = "Continuă cu Google",
 }: Props) {
   const [loading, setLoading] = useState(false);
@@ -42,12 +43,13 @@ export function GoogleSignInButton({
   async function signIn() {
     setLoading(true);
     const supabase = createClient();
+    const callback = `${window.location.origin}/auth/callback${
+      next ? `?next=${encodeURIComponent(next)}` : ""
+    }`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
-          next
-        )}`,
+        redirectTo: callback,
         queryParams: { access_type: "offline", prompt: "consent" },
       },
     });

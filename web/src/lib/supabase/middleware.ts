@@ -40,10 +40,13 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  const protectedRoutes = ["/browse", "/order", "/orders", "/dashboard", "/courier"];
+  // Browsing shops is public (login only at checkout/chat). Guard the rest.
+  const protectedRoutes = ["/order", "/orders", "/dashboard", "/courier"];
   const authRoutes = ["/login", "/register"];
-  const isProtected = protectedRoutes.some((r) => pathname.startsWith(r));
-  const isAuthRoute = authRoutes.some((r) => pathname.startsWith(r));
+  // Segment-precise match: "/order" guards "/order" and "/order/123" but NOT "/order-demo".
+  const matches = (r: string) => pathname === r || pathname.startsWith(r + "/");
+  const isProtected = protectedRoutes.some(matches);
+  const isAuthRoute = authRoutes.some(matches);
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone();

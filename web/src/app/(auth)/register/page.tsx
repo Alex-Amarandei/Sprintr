@@ -17,7 +17,7 @@ export default function RegisterPage() {
       </Text>
 
       <Stack gap="md">
-        <GoogleSignInButton next="/browse" label="Înregistrează-te cu Google" />
+        <GoogleSignInButton label="Înregistrează-te cu Google" />
       </Stack>
 
       <Text ta="center" size="sm" c="dimmed" mt="lg">

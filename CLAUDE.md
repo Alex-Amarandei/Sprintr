@@ -394,8 +394,48 @@ First cut of the shop catalog configurator lives in `web/src`:
 - Scope of this cut: editor core (items + fields + price rules + save to draft).
   **Deferred:** publish/version-history UI (`set_active_catalog_version`), image upload,
   drag-reorder (uses up/down buttons for now), customer-facing renderer.
-- **To test live you need:** (1) working login (auth forms not wired yet) and (2) a seeded
+- **To test live you need:** (1) working login (Google OAuth — done) and (2) a seeded
   `shops` row + a `shop_permissions` row (role `catalog`/`owner`) for the logged-in user.
+- **Login-free demo:** `/catalog-demo` (builder, localMode) — throwaway, remove before prod.
+
+## Customer renderer + pricing — IMPLEMENTED (FE, 2026-05-30)
+The other half of the configurator (Scope-IN "dynamic form renderer (customer side)"):
+- `lib/catalog/pricing.ts` — `computeItemPrice(item, answers)` = client mirror of the §7
+  algorithm (additive + per_unit, round half-up). Server (Edge Function) stays authoritative.
+- `lib/catalog/answers.ts` — `defaultAnswers(item)` (applies defaults/locked) +
+  `validateAnswers(item, answers)` (§8 mirror).
+- `lib/catalog/samples.ts` — `samplePrintService` worked example (§9: pages × bw, color/page).
+- `components/catalog/ItemOrderForm.tsx` — renders a catalog Item as a dynamic form
+  (Radio/Checkbox/Switch/NumberInput/Textarea + PDF FileInput), live price breakdown,
+  validation, "Plasează comanda" (preview only — real placement needs the Edge Function).
+- **Login-free demo:** `/order-demo`. Throwaway, remove before prod.
+- middleware now uses **segment-precise** route matching (`/order` no longer captures
+  `/order-demo`); real `/order/[id]` stays protected.
+
+## Customer journey wired into REAL routes (FE, 2026-05-30) — NO demo pages
+Demo pages (`/catalog-demo`, `/order-demo`, `/cart-demo`) were REMOVED — features now live
+in the actual app, using sample data until backend reads land:
+- `/browse` is now **public** (removed from middleware protected list, per "browsing is
+  public" rule). Lists `sampleShops` (PIM Copy, PrintHaus) → links to `/shop/[shopId]`.
+- `/shop/[shopId]` renders the shop + its catalog as `AddItemCard`s (uses
+  `getSampleCatalog()` placeholder; swap for the shop's active `catalog_versions.document`).
+- `(customer)/layout.tsx` wraps everything in `<CartProvider>` and shows `<CartBar>` in the
+  header — cart persists across customer pages (client state; resets on full reload).
+- TODO(BE) markers flag where `sampleShops`/`getSampleCatalog` get replaced by Supabase reads,
+  and where cart checkout calls the pricing/placement Edge Function.
+
+## Mixed cart — IMPLEMENTED (FE, 2026-05-30)
+Cart UX: zero-config items add instantly; configurable items open a modal with the
+dynamic form first (matches the "order = mixed cart of N lines" model).
+- `lib/catalog/cart.ts` — `CartLine` type, `needsConfiguration(item)` (true if it has
+  fields or requires_upload), `buildCartLine(item, answers, fileName)` (freezes total).
+- `components/cart/CartContext.tsx` — `<CartProvider>` + `useCart()` (lines/total/add/remove/clear).
+- `components/cart/AddItemCard.tsx` — card with instant-add OR a `<Modal>` wrapping
+  `ItemOrderForm` (submitLabel "Adaugă în coș") for configurable items.
+- `components/cart/CartBar.tsx` — cart indicator + `<Drawer>` with lines, remove, total,
+  checkout (preview only — real placement = Edge Function).
+- Sample catalog in `lib/catalog/samples.ts`: `samplePencil` (instant), `sampleNotebook`
+  (modal/product), `samplePrintService` (modal/service). **Login-free demo:** `/cart-demo`.
 
 ---
 
