@@ -55,8 +55,9 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (isAuthRoute && user) {
+    // Send to "/" — the home page redirects by role (shop → /dashboard, else /browse).
     const url = request.nextUrl.clone();
-    url.pathname = "/browse";
+    url.pathname = "/";
     return NextResponse.redirect(url);
   }
 

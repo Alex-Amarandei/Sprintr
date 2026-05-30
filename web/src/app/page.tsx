@@ -1,7 +1,25 @@
+import { redirect } from "next/navigation";
 import { Container, Group, Stack, Text, Title } from "@mantine/core";
 import { LinkButton } from "@/components/ui/links";
+import { createClient } from "@/lib/supabase/server";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Logged-in users skip the marketing landing and go straight into the app,
+  // routed by their role.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    redirect(profile?.role === "shop" ? "/dashboard" : "/browse");
+  }
+
   return (
     <Container
       size="sm"
@@ -19,8 +37,8 @@ export default function HomePage() {
           <LinkButton href="/browse" size="md">
             Comandă acum
           </LinkButton>
-          <LinkButton href="/register" size="md" variant="outline">
-            Înregistrează-te
+          <LinkButton href="/login" size="md" variant="outline">
+            Autentifică-te
           </LinkButton>
         </Group>
       </Stack>

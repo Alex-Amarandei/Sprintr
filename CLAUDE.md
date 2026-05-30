@@ -424,6 +424,16 @@ in the actual app, using sample data until backend reads land:
 - TODO(BE) markers flag where `sampleShops`/`getSampleCatalog` get replaced by Supabase reads,
   and where cart checkout calls the pricing/placement Edge Function.
 
+## Role-based routing (FE, 2026-05-30) — single source of truth = `/`
+- **`/` (home)** is an async server component: logged-in → redirect by `profiles.role`
+  (`shop` → `/dashboard`, else `/browse`); logged-out → marketing landing (CTA → /browse, /login).
+- **Middleware** redirects logged-in users off `/login`/`/register` to **`/`** (NOT /browse),
+  so role routing lives in exactly one place. Protected prefixes: `/order /orders /dashboard
+  /courier` (segment-precise). `/browse` + `/shop/[id]` are public.
+- **`/dashboard` layout** is a shop-only guard: re-checks auth + `role === 'shop'`, else
+  redirects to `/browse`. (Catalog page additionally needs a `shop_permissions` row to load.)
+- OAuth callback also routes by role (explicit `?next` wins, else role).
+
 ## Mixed cart — IMPLEMENTED (FE, 2026-05-30)
 Cart UX: zero-config items add instantly; configurable items open a modal with the
 dynamic form first (matches the "order = mixed cart of N lines" model).
