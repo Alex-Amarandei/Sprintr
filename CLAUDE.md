@@ -49,6 +49,9 @@ shop self-signup, password reset/email verification, standalone products, offers
 search, categories, ratings/reviews, multi-city, order editing/cancellation, i18n,
 number/quantity fields, conditional option logic, multi-file uploads, image sharing in chat.
 
+> NOTE: `offers` was later moved INTO scope — see "Scope change: offers is now IN scope"
+> below. The line above is kept for history.
+
 ## Taxonomy
 
 Template side (what a shop defines; mutable; uses foreign keys):
@@ -88,6 +91,9 @@ B-tree locality). Column type stays `uuid` so everything joins cleanly with
 - If not: add a PL/pgSQL `uuid_generate_v7()` function once in the first migration and use
   it as the column default. (Fabio Lima's well-known function, or the `pg_uuidv7` ext.)
 - `auth.users` ids are not sortable (Supabase-managed) — irrelevant; sort users by created_at.
+
+> SUPERSEDED — see "Decision reversal: plain UUIDv4 over UUIDv7" below. We use
+> `gen_random_uuid()` (UUIDv4). This section is kept for history.
 
 ## Schedule modeling
 
@@ -132,6 +138,9 @@ create index on shops (owner_id);
 Everything past `name` is nullable so a bare shop can be inserted and filled in (matters
 for fast seed data). Store storage PATHS not URLs. No `city` column (Iași hardcoded).
 
+> SUPERSEDED — `owner_id` was dropped and ownership moved to `shop_permissions`; the UUID
+> default is now `gen_random_uuid()`. See "Shops, access control & legal data" below.
+
 ### Not yet designed (DO THESE NEXT)
 - `profiles` (role mapping: customer | shop, 1:1 with auth.users) — design FIRST, security
   depends on it.
@@ -160,6 +169,7 @@ for fast seed data). Store storage PATHS not URLs. No `city` column (Iași hardc
 2. WhatsApp: real Twilio/WhatsApp API access, or stub/`wa.me` fallback for the demo?
    This decides whether ANY custom server code is needed.
 3. Build-day check: Supabase Postgres version (PG18 native uuidv7 vs add the function).
+   → Resolved: PG17.6, and we chose UUIDv4 (see reversal below).
 
 ## Build order suggestion
 
@@ -190,9 +200,8 @@ for fast seed data). Store storage PATHS not URLs. No `city` column (Iași hardc
 
 - **One shared cloud project. No Supabase DB branching** this weekend (Pro-only,
   overkill for 3 people). Project ref: `qborcngytmztfucjuwgw`, region Central EU
-  (Frankfurt).
-- **Postgres 17.6** → no native `uuidv7()`. We ship `public.uuid_generate_v7()` and use
-  it as the default for our PKs. (Resolves open decision #3.)
+  (Frankfurt). URL: `https://qborcngytmztfucjuwgw.supabase.co`.
+- **Postgres 17.6** → no native `uuidv7()`. (We chose UUIDv4 anyway — see below.)
 - Access is via the **Supabase MCP** (`.mcp.json`, committed). Each teammate must
   (1) be **invited to the Supabase project/org**, then (2) run `/mcp` → **authenticate**
   (OAuth). The committed config alone grants no access.
@@ -202,7 +211,8 @@ for fast seed data). Store storage PATHS not URLs. No `city` column (Iași hardc
 ## Migration workflow
 
 - **Backend owns all schema changes.** `supabase/migrations/*.sql` is the single source
-  of truth.
+  of truth. **The committed migrations are authoritative — do not apply ad-hoc DB changes
+  outside them.**
 - Apply migrations via the **MCP `apply_migration`**, then commit the `.sql`, regenerate
   TypeScript types, and commit those too.
 - Teammates **`git pull` migration files + types — they never apply migrations
@@ -245,6 +255,8 @@ the default back to v7 later needs no type change / data migration.
 - **Migration filename = ledger version.** The MCP stamps its own wall-clock version on
   `apply_migration`; after applying, rename the local file to match the version shown by
   `list_migrations` so the repo and DB agree (needed for CLI `db push`/`db reset`).
+- **Applied ledger:** `…113653 initial_profiles_and_auth`, `…121242 shops_permissions_legal`,
+  `…122212 adopt_rls_auto_enable_guard`. (Supersedes any older `00_uuidv7_profiles` note.)
 
 ## Shops, access control & legal data (migration 1, applied)
 
@@ -288,3 +300,41 @@ grant arrives via `PUBLIC`. Verify with `pg_proc.proacl`, not just the advisor (
 caches). Run `get_advisors` after every migration. Helper/trigger functions
 (`handle_new_user`, `is_shop_member`) are locked down this way; `is_shop_member` keeps
 `authenticated` because RLS needs it (an accepted advisor WARN).
+
+# Frontend & integration notes (FE-owned)
+
+> Maintained by the frontend work; kept here so everyone's Claude stays in sync.
+> DB/schema decisions are governed by the sections above (UUIDv4, offers IN scope,
+> `profiles` = enum + email, `shops` + `shop_permissions` + `shop_legal`) — those
+> **supersede** the earlier "UUIDv7 / 8-table / offers-out / single-owner" notes.
+
+## Repo layout (monorepo)
+- `web/` — Next.js frontend (built). `server/` — backend, placeholder so far.
+- Run the frontend from `web/`. Bun, not npm (`bun install`, `bun run dev`).
+
+## Stack versions (bumped to latest on purpose, 2026-05-30)
+- Next.js 16 (App Router, Turbopack) · React 19 · TypeScript 6.
+- Tailwind v4: `@import "tailwindcss"` + `@config` in `web/src/styles/globals.css`, and
+  `@tailwindcss/postcss` in `postcss.config.mjs`. Do NOT reintroduce v3
+  `@tailwind base/...` directives.
+- Supabase JS + `@supabase/ssr`; two clients in `web/src/lib/supabase/{client,server}.ts`.
+
+## Routing (route-group collision was fixed — don't undo it)
+- Customer: `/browse`, `/orders`, `/shop/[shopId]`, `/order/[orderId]` (root level).
+- Shop: `/dashboard`, `/dashboard/orders|products|services|offers|profile`.
+- Courier: `/courier/deliveries|earnings`.
+- Auth: `/login`, `/register`.
+- `middleware.ts` skips Supabase auth when env keys are missing/placeholder (app browsable
+  before keys are set). Protected prefixes: `/browse /order /orders /dashboard /courier`.
+
+## Env
+- Each teammate needs their own `web/.env.local` (copy from `.env.local.example`; gitignored).
+
+## Seed data (FE-provided catalog inputs)
+- `web/seed/pimcopy.json` — real PIM Copy (pimcopy.ro) catalog; `price_estimated:true` =
+  fictive placeholder, 3 are real (`:false`).
+- `web/seed/printhaus.json` — PrintHaus catalog (16 services, 38 option groups); all prices
+  fictive estimates (site publishes none). Phone/address in the `shop` block.
+- These JSONs use richer option types (`number`, `radio`) + per-unit pricing that **don't**
+  match our MVP model (`single_select|boolean|text`, additive-only). **Down-map** when we
+  write the seed migration. Seeding ownership (FE script vs seed migration) is TBD.
