@@ -377,6 +377,10 @@ We switched login to **Google OAuth only** (was: email/password in Scope-IN line
   fictive placeholder, 3 are real (`:false`).
 - `web/seed/printhaus.json` — PrintHaus catalog (16 services, 38 option groups); all prices
   fictive estimates (site publishes none). Phone/address in the `shop` block.
+- `web/seed/stef.json` — STEF Copy Center (stef.ro, WooCommerce), Iași. 8 services + 5
+  products. **5 REAL prices** (`:false`, from product JSON-LD: șapcă 35, ecuson 1.1,
+  ștampile 137/185, set creion 45.3); print/copy/binding/lamination services + variable
+  personalizări are estimates (`:true`). Real contact + weekday schedule in `shop`.
 - These JSONs use richer option types (`number`, `radio`) + per-unit pricing that **don't**
   match our MVP model (`single_select|boolean|text`, additive-only). **Down-map** when we
   write the seed migration. Seeding ownership (FE script vs seed migration) is TBD.

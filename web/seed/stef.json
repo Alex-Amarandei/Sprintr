@@ -1,0 +1,208 @@
+{
+  "source": "https://stef.ro/",
+  "crawled_at": "2026-05-30",
+  "currency": "RON",
+  "notes": "STEF Copy Center & Editură, Iași (WooCommerce). Prices marked price_estimated:false are REAL, pulled from product pages (JSON-LD): șapcă 35, ecuson 1.1, ștampilă rotundă 137, ștampilă datieră 185, set creion grafit 45.3. The copy/print/binding/lamination SERVICE pages don't publish numeric prices, and variable products (tricouri, tablouri canvas, căni — variations load via AJAX) couldn't be read; those are fictive estimates (price_estimated:true) based on the Iași market.",
+  "shop": {
+    "name": "STEF Copy Center",
+    "description": "Copy center & editură în Iași: listare/multiplicare A6–A3 alb-negru și color, formate mari, legătorie și broșare, laminare, personalizări (tricouri, căni, tablouri canvas, ștampile, ecusoane) și papetărie.",
+    "city": "Iași",
+    "country": "Romania",
+    "phone": "0232 254 739",
+    "phones_extra": ["0745 236 413", "0753 059 216", "0744 705 367"],
+    "email": "secretariat@stef.ro",
+    "address": "Iași (Copou – Academie + alte locații)",
+    "schedule": { "mon": {"open":"09:00","close":"17:00"}, "tue": {"open":"09:00","close":"17:00"}, "wed": {"open":"09:00","close":"17:00"}, "thu": {"open":"09:00","close":"17:00"}, "fri": {"open":"09:00","close":"17:00"}, "sat": null, "sun": null }
+  },
+  "services": [
+    {
+      "slug": "multiplicare-printare-a6-a3",
+      "name": "Multiplicare și printare A6/A5/B5/A4/A3",
+      "description": "Copiere și printare digitală A6–A3, alb-negru sau color, față-verso. Hârtie 60–80g, reciclabilă 80g, carton color 160g, autocolant mat/lucios 160g.",
+      "base_price": 0.25,
+      "base_price_unit": "per pagină A4 alb-negru, hârtie 80g",
+      "price_estimated": true,
+      "options": [
+        { "label": "Format", "type": "radio", "is_required": true, "choices": [
+          { "value": "A5", "price_modifier": -0.1, "price_estimated": true },
+          { "value": "A4", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "A3", "price_modifier": 0.5, "price_estimated": true }
+        ]},
+        { "label": "Culoare", "type": "radio", "is_required": true, "choices": [
+          { "value": "Alb-negru", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "Color", "price_modifier": 1.25, "price_estimated": true }
+        ]},
+        { "label": "Hârtie", "type": "select", "is_required": true, "choices": [
+          { "value": "Hârtie 80g", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "Hârtie reciclabilă 80g", "price_modifier": 0.05, "price_estimated": true },
+          { "value": "Carton color 160g", "price_modifier": 0.5, "price_estimated": true },
+          { "value": "Autocolant mat/lucios 160g", "price_modifier": 1.5, "price_estimated": true }
+        ]},
+        { "label": "Tip tipărire", "type": "radio", "is_required": true, "choices": [
+          { "value": "O singură față", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "Față-verso", "price_modifier": 0.1, "price_estimated": true }
+        ]},
+        { "label": "Număr de pagini", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "multiplicare-formate-mari",
+      "name": "Multiplicare și printare formate mari (A2/A1/A0)",
+      "description": "Listare formate mari alb-negru și color (planșe, postere).",
+      "base_price": 12.0,
+      "base_price_unit": "per planșă A2 alb-negru",
+      "price_estimated": true,
+      "options": [
+        { "label": "Format", "type": "radio", "is_required": true, "choices": [
+          { "value": "A2", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "A1", "price_modifier": 10.0, "price_estimated": true },
+          { "value": "A0", "price_modifier": 25.0, "price_estimated": true }
+        ]},
+        { "label": "Culoare", "type": "radio", "is_required": true, "choices": [
+          { "value": "Alb-negru", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "Color", "price_modifier": 15.0, "price_estimated": true }
+        ]}
+      ]
+    },
+    {
+      "slug": "legatorie-clasica-licenta",
+      "name": "Legătorie clasică (copertă cartonată) — licență",
+      "description": "Legătorie clasică cu copertă cartonată pentru lucrări de licență/disertație.",
+      "base_price": 25.0,
+      "base_price_unit": "per exemplar",
+      "price_estimated": true,
+      "options": [
+        { "label": "Culoare copertă", "type": "single_select", "is_required": true, "choices": [
+          { "value": "Negru", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "Albastru", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "Bordo", "price_modifier": 0.0, "price_estimated": true }
+        ]},
+        { "label": "Inscripționare aurie", "type": "boolean", "is_required": false, "price_modifier": 10.0, "price_estimated": true }
+      ]
+    },
+    {
+      "slug": "legatorie-brosare",
+      "name": "Legătorie / broșare cu spiră",
+      "description": "Legare cu spiră de plastic sau metalică, făcută pe loc.",
+      "base_price": 8.0,
+      "base_price_unit": "pornind de la (spiră plastic)",
+      "price_estimated": true,
+      "options": [
+        { "label": "Tip spiră", "type": "single_select", "is_required": true, "choices": [
+          { "value": "Spiră plastic", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "Spiră metalică", "price_modifier": 4.0, "price_estimated": true }
+        ]}
+      ]
+    },
+    {
+      "slug": "laminare-plastifiere",
+      "name": "Laminare / plastifiere",
+      "description": "Laminare documente pentru protecție și durabilitate.",
+      "base_price": 3.0,
+      "base_price_unit": "per coală A4",
+      "price_estimated": true,
+      "options": [
+        { "label": "Format", "type": "radio", "is_required": true, "choices": [
+          { "value": "A6", "price_modifier": -2.0, "price_estimated": true },
+          { "value": "A5", "price_modifier": -1.0, "price_estimated": true },
+          { "value": "A4", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "A3", "price_modifier": 2.0, "price_estimated": true }
+        ]},
+        { "label": "Număr de coli", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "tricou-personalizat",
+      "name": "Tricou personalizat",
+      "description": "Tricou 100% bumbac, personalizat cu imaginea sau textul dorit (finisaj silicon). Alb/negru/roșu, damă/bărbați.",
+      "base_price": 45.0,
+      "base_price_unit": "per tricou (orientativ)",
+      "price_estimated": true,
+      "options": [
+        { "label": "Mărime", "type": "single_select", "is_required": true, "choices": [
+          { "value": "S", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "M", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "L", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "XL", "price_modifier": 5.0, "price_estimated": true },
+          { "value": "XXL", "price_modifier": 5.0, "price_estimated": true }
+        ]},
+        { "label": "Culoare", "type": "single_select", "is_required": true, "choices": [
+          { "value": "Alb", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "Negru", "price_modifier": 5.0, "price_estimated": true },
+          { "value": "Roșu", "price_modifier": 5.0, "price_estimated": true }
+        ]}
+      ]
+    },
+    {
+      "slug": "tablou-canvas-personalizat",
+      "name": "Tablou canvas personalizat",
+      "description": "Tablou printat pe pânză de bumbac, format portret/peisaj/pătrat, dimensiuni variate.",
+      "base_price": 60.0,
+      "base_price_unit": "per tablou format mic (orientativ)",
+      "price_estimated": true,
+      "options": [
+        { "label": "Format", "type": "single_select", "is_required": true, "choices": [
+          { "value": "Portret", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "Peisaj", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "Pătrat", "price_modifier": 0.0, "price_estimated": true }
+        ]},
+        { "label": "Dimensiune", "type": "single_select", "is_required": true, "choices": [
+          { "value": "Mic (30×40)", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "Mediu (50×70)", "price_modifier": 40.0, "price_estimated": true },
+          { "value": "Mare (70×100)", "price_modifier": 90.0, "price_estimated": true }
+        ]}
+      ]
+    },
+    {
+      "slug": "cana-personalizata",
+      "name": "Cană personalizată",
+      "description": "Cană personalizată cu imagine/text (inclusiv variante termosensibile).",
+      "base_price": 30.0,
+      "base_price_unit": "per cană (orientativ)",
+      "price_estimated": true,
+      "options": [
+        { "label": "Tip", "type": "single_select", "is_required": true, "choices": [
+          { "value": "Clasică", "price_modifier": 0.0, "price_estimated": true },
+          { "value": "Termosensibilă (magică)", "price_modifier": 15.0, "price_estimated": true }
+        ]}
+      ]
+    }
+  ],
+  "products": [
+    {
+      "slug": "sapca-personalizata",
+      "name": "Șapcă personalizată",
+      "description": "Șapcă personalizată, model clasic/negru.",
+      "price": 35.0,
+      "price_estimated": false
+    },
+    {
+      "slug": "ecuson-cu-clips-donau",
+      "name": "Ecuson cu clips Donau",
+      "description": "Ecuson cu clips, marca Donau.",
+      "price": 1.1,
+      "price_estimated": false
+    },
+    {
+      "slug": "stampila-rotunda-trodat-4638",
+      "name": "Ștampilă rotundă Trodat 4638 (Ø38 mm)",
+      "description": "Ștampilă rotundă cu amprentă inclusă și tușieră încorporată, diametru 38 mm.",
+      "price": 137.0,
+      "price_estimated": false
+    },
+    {
+      "slug": "stampila-datiera-trodat-4729",
+      "name": "Ștampilă datieră Trodat 4729 (50×30 mm)",
+      "description": "Ștampilă datieră dreptunghiulară 50×30 mm, amprentă inclusă, tușieră încorporată.",
+      "price": 185.0,
+      "price_estimated": false
+    },
+    {
+      "slug": "set-creion-grafit-koh-i-noor-1500",
+      "name": "Set creion grafit Koh-I-Noor Graphic 1500 (5B–5H)",
+      "description": "Set creioane grafit profesionale Koh-I-Noor 1500, durități 5B–5H.",
+      "price": 45.3,
+      "price_estimated": false
+    }
+  ]
+}

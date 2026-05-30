@@ -4,6 +4,7 @@ import {
   ActionIcon,
   Box,
   Button,
+  ColorInput,
   Group,
   NumberInput,
   Paper,
@@ -273,6 +274,14 @@ function OptionsEditor({
                     .replace(/[^a-z0-9_]/g, "_"),
                 })
               }
+            />
+            <ColorInput
+              label="Culoare (opțional)"
+              w={150}
+              format="hex"
+              placeholder="ex. #f5f5dc"
+              value={opt.swatch ?? ""}
+              onChange={(v) => update(i, { swatch: v || undefined })}
             />
             <PriceRuleInput
               value={opt.price}

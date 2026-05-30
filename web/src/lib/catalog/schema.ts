@@ -23,6 +23,12 @@ export const fieldOptionSchema = z.object({
   value: z.string().min(1),
   label: z.string().min(1),
   price: priceRuleSchema.optional(),
+  // Optional hex color (e.g. "#f5f5dc") → render this option as a visible swatch
+  // instead of plain text. Display-only; never affects pricing/validation.
+  swatch: z
+    .string()
+    .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, "cod hex invalid")
+    .optional(),
   default: z.boolean().optional(),
   locked: z.boolean().optional(),
 });

@@ -5,10 +5,13 @@ import {
   Alert,
   Box,
   Button,
+  CheckIcon,
   Checkbox,
+  ColorSwatch,
   Divider,
   FileInput,
   Group,
+  Input,
   NumberInput,
   Paper,
   Radio,
@@ -17,10 +20,11 @@ import {
   Text,
   Textarea,
   Title,
+  Tooltip,
 } from "@mantine/core";
 import { FileUp } from "lucide-react";
 import { toast } from "sonner";
-import type { Item, PriceRule } from "@/lib/catalog/schema";
+import type { Field, Item, PriceRule } from "@/lib/catalog/schema";
 import { computeItemPrice, type Answers } from "@/lib/catalog/pricing";
 import { defaultAnswers, validateAnswers } from "@/lib/catalog/answers";
 import { formatPrice } from "@/lib/utils/format";
@@ -30,6 +34,93 @@ function ruleHint(rule?: PriceRule): string | null {
   if (rule.mode === "additive")
     return rule.amount ? `+${formatPrice(rule.amount)}` : null;
   return `+${formatPrice(rule.amount)}/${rule.per}`;
+}
+
+/** True if a select field's options carry color swatches → render them visually. */
+function hasSwatches(field: Field): boolean {
+  return (
+    (field.type === "single_select" || field.type === "multi_select") &&
+    field.options.some((o) => o.swatch)
+  );
+}
+
+/** Visual color-swatch picker for single/multi select fields with swatches. */
+function SwatchPicker({
+  field,
+  value,
+  error,
+  multi,
+  onChange,
+}: {
+  field: Field & { type: "single_select" | "multi_select" };
+  value: unknown;
+  error?: string;
+  multi: boolean;
+  onChange: (value: unknown) => void;
+}) {
+  const selected = multi
+    ? (Array.isArray(value) ? (value as string[]) : [])
+    : value
+      ? [value as string]
+      : [];
+
+  function pick(v: string, locked?: boolean) {
+    if (multi) {
+      if (locked) return; // locked options can't be toggled off
+      onChange(
+        selected.includes(v)
+          ? selected.filter((x) => x !== v)
+          : [...selected, v]
+      );
+    } else {
+      onChange(v);
+    }
+  }
+
+  return (
+    <Input.Wrapper
+      label={field.label}
+      description={field.help ?? undefined}
+      withAsterisk={field.required}
+      error={error}
+    >
+      <Group gap="md" mt="xs">
+        {field.options.map((o) => {
+          const isSel = selected.includes(o.value);
+          const hint = ruleHint(o.price);
+          return (
+            <Stack
+              key={o.value}
+              gap={4}
+              align="center"
+              style={{ cursor: "pointer", width: 64 }}
+              onClick={() => pick(o.value, o.locked)}
+            >
+              <Tooltip label={o.label} withArrow>
+                <ColorSwatch
+                  color={o.swatch ?? "#ffffff"}
+                  size={40}
+                  withShadow
+                  style={{
+                    outline: isSel
+                      ? "3px solid var(--mantine-color-brand-6)"
+                      : "1px solid var(--mantine-color-gray-3)",
+                    outlineOffset: 2,
+                  }}
+                >
+                  {isSel && <CheckIcon style={{ width: 14, height: 14 }} />}
+                </ColorSwatch>
+              </Tooltip>
+              <Text size="xs" ta="center" lh={1.1}>
+                {o.label}
+                {hint ? ` (${hint})` : ""}
+              </Text>
+            </Stack>
+          );
+        })}
+      </Group>
+    </Input.Wrapper>
+  );
 }
 
 interface Props {
@@ -102,6 +193,19 @@ export function ItemOrderForm({
 
         {item.fields.map((f) => {
           const err = errors[f.key];
+          if (hasSwatches(f)) {
+            return (
+              <SwatchPicker
+                key={f.key}
+                field={f as Field & { type: "single_select" | "multi_select" }}
+                value={answers[f.key]}
+                error={err}
+                multi={f.type === "multi_select"}
+                onChange={(v) => set(f.key, v)}
+              />
+            );
+          }
+
           switch (f.type) {
             case "single_select":
               return (
