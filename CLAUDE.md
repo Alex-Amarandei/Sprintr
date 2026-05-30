@@ -438,6 +438,17 @@ in the actual app, using sample data until backend reads land:
   redirects to `/browse`. (Catalog page additionally needs a `shop_permissions` row to load.)
 - OAuth callback also routes by role (explicit `?next` wins, else role).
 
+## Color swatches on select options (FE, 2026-05-30) — schema EXTENSION
+Added an optional **`swatch`** (hex string) to a select option (`fieldOptionSchema`).
+Additive + backward-compatible (old documents without it stay valid). Display-only —
+NEVER affects pricing/validation (answers still send the option `value` string).
+- Builder: `ColorInput` per option in `FieldEditor` (shop sets the colors it stocks).
+- Renderer: if ANY option in a single/multi-select has a `swatch`, `ItemOrderForm` renders
+  a visual **`SwatchPicker`** (clickable `ColorSwatch`es) instead of radio/checkbox text.
+- Example: `samplePrintService` now has a "Culoare hârtie" field (alb/crem/albastru/roz).
+- **TODO(BE):** mirror `swatch?` in the Edge Function's document validator so saving/placing
+  documents that include it isn't rejected (it's an unknown key to a strict validator).
+
 ## Mixed cart — IMPLEMENTED (FE, 2026-05-30)
 Cart UX: zero-config items add instantly; configurable items open a modal with the
 dynamic form first (matches the "order = mixed cart of N lines" model).
