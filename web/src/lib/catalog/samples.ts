@@ -14,6 +14,7 @@ export const samplePrintService: Item = {
   requires_upload: true,
   stock_display: "none",
   inventory_item_id: null,
+  category_id: null,
   fields: [
     {
       key: "pagini",
@@ -123,6 +124,7 @@ export const samplePencil: Item = {
   requires_upload: false,
   stock_display: "none",
   inventory_item_id: null,
+  category_id: null,
   fields: [],
 };
 
@@ -139,6 +141,7 @@ export const sampleNotebook: Item = {
   requires_upload: false,
   stock_display: "none",
   inventory_item_id: null,
+  category_id: null,
   fields: [
     {
       key: "cantitate",
