@@ -4,6 +4,7 @@ import { LinkAnchor, LinkActionIcon } from "@/components/ui/links";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { CartProvider } from "@/components/cart/CartContext";
 import { CartBar } from "@/components/cart/CartBar";
+import { SiteFooter } from "@/components/ui/SiteFooter";
 
 export default function CustomerLayout({
   children,
@@ -60,6 +61,7 @@ export default function CustomerLayout({
         <Container size="lg" py="xl">
           {children}
         </Container>
+        <SiteFooter />
       </Box>
     </CartProvider>
   );
