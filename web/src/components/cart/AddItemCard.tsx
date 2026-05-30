@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import {
   Badge,
@@ -29,6 +30,8 @@ export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
   // "from" price for the card (base + defaults)
   const fromPrice = computeItemPrice(item, defaultAnswers(item)).total;
 
+  const kindColor = item.kind === "service" ? "brand" : "blue";
+
   function quickAdd() {
     addLine(buildCartLine(item), shopId);
     toast.success(`${item.title} adăugat în coș`);
@@ -40,7 +43,17 @@ export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
         <div>
           <Group justify="space-between" wrap="nowrap" align="flex-start">
             <Title order={4}>{item.title}</Title>
-            <Badge variant="light" color={item.kind === "service" ? "brand" : "blue"}>
+            <Badge
+              variant="light"
+              color={kindColor}
+              // Pin to fixed shades so the badge matches between dark and light mode.
+              styles={{
+                root: {
+                  "--badge-bg": `var(--mantine-color-${kindColor}-1)`,
+                  "--badge-color": `var(--mantine-color-${kindColor}-7)`,
+                } as CSSProperties,
+              }}
+            >
               {item.kind === "service" ? "Serviciu" : "Produs"}
             </Badge>
           </Group>
@@ -57,7 +70,20 @@ export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
             {formatPrice(fromPrice)}
           </Text>
           {configurable ? (
-            <Button leftSection={<Settings2 size={16} />} onClick={open} variant="light">
+            <Button
+              leftSection={<Settings2 size={16} />}
+              onClick={open}
+              variant="light"
+              // Pin to fixed brand shades so the button looks identical in dark
+              // and light mode (the `light` variant otherwise resolves per-scheme).
+              styles={{
+                root: {
+                  "--button-bg": "var(--mantine-color-brand-1)",
+                  "--button-hover": "var(--mantine-color-brand-2)",
+                  "--button-color": "var(--mantine-color-brand-7)",
+                } as CSSProperties,
+              }}
+            >
               Configurează
             </Button>
           ) : (
