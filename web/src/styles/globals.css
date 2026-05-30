@@ -3,6 +3,11 @@ html,
 body {
   padding: 0;
   margin: 0;
+  /* Guard against accidental horizontal overflow breaking the mobile viewport.
+     `clip` (not `hidden`) avoids turning body into a scroll container, which would
+     break the sticky headers. */
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 :root {

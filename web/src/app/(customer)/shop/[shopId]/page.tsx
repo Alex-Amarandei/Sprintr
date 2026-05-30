@@ -58,7 +58,7 @@ export default async function ShopDetailPage({ params }: Props) {
       />
 
       {/* Header card (overlaps banner) */}
-      <Card mt={-72} mx="md" style={{ position: "relative" }}>
+      <Card mt={-72} mx="md" style={{ position: "relative", padding: "8px" }}>
         <Group justify="space-between" align="flex-start" wrap="nowrap">
           <Group align="flex-start" wrap="nowrap" gap="md">
             <ThemeIcon
@@ -69,7 +69,7 @@ export default async function ShopDetailPage({ params }: Props) {
             >
               <Icon size={34} color="white" strokeWidth={1.75} />
             </ThemeIcon>
-            <div>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <Group gap="sm" align="center">
                 <Title order={2}>{shop.name}</Title>
                 <OpenBadge open={open} label={open ? "Deschis acum" : undefined} />
@@ -108,7 +108,7 @@ export default async function ShopDetailPage({ params }: Props) {
               </Group>
             </div>
           </Group>
-          <Group gap="xs" wrap="nowrap">
+          <Group gap="xs" wrap="nowrap" visibleFrom="sm">
             <ActionIcon variant="default" size="lg" aria-label="Favorite">
               <Heart size={18} />
             </ActionIcon>

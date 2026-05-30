@@ -37,6 +37,7 @@ export default function CustomerLayout({
               <TextInput
                 flex={1}
                 maw={420}
+              visibleFrom="sm"
                 mx="md"
                 placeholder="Caută magazine sau servicii..."
                 leftSection={<Search size={16} />}
