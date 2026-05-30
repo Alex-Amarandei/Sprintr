@@ -1022,3 +1022,88 @@ Sample data: `lib/orders/sample.ts` (orders incl. customer/contact/notes/fulfilm
   network-idle, so the Chrome screenshot tool times out — verify those via DOM inspection, not screenshots.
 - **Aligning an image tile beside a labelled input:** the input label adds ~22px above the field; offset
   the tile column (`mt`) so the tile top meets the input box, not the column top.
+
+## Orders + status + profile wired to REAL Supabase (FE, 2026-05-31) ✅
+The customer order pages, the shop order queue/detail, and the shop profile editor now read/write
+real data (no more `sampleOrders` on these). `lib/orders/sample.ts` is kept only for `/design`-style
+references; the live pages no longer import it.
+- **`lib/orders/queries.ts`** (server-only) = read layer, maps DB rows → the existing `SampleOrder`
+  UI shape so components were untouched:
+  - `getMyOrders()` — the customer's own orders (RLS own) → `/orders` list.
+  - `getOrderDetail(id)` — one order + `order_items` + `messages` + shop name + customer name +
+    config summary (loads `catalog_versions.document` by `orders.catalog_version_id` to turn frozen
+    `answers` into human labels). Used by BOTH `/order/[id]` (customer) and
+    `/dashboard/orders/[id]` (shop); RLS authorizes who can read it.
+  - `getShopOrders()` / `getMyShop()` — resolve the caller's shop via `shop_permissions`, then read
+    that shop's orders / storefront fields. Drive the dashboard queue + greeting + profile editor.
+- **Server Actions** (the only writes):
+  - `lib/orders/actions.ts → advanceOrderStatus(orderId, status)` — accept/reject/in_progress/done;
+    stamps `handled_by = auth.uid()` on accept; `revalidatePath`. RLS = shop staff+.
+    `ShopOrderQueue` + `ShopOrderActions` call it with optimistic update + rollback-on-error.
+  - `lib/shop/actions.ts → updateShopProfile(shopId, {name,description,phone,address})` — owner-only
+    by RLS. `ProfileEditor` is now controlled + has a "Salvează modificările" button.
+  - `ShopProfileInput` lives in `lib/shop/types.ts` (NOT the `"use server"` file — those may only
+    export async functions).
+- Order **id is a uuid** → displayed short (`id.slice(0,8)`) everywhere (lists, headers, toasts).
+- `delivery` shown on order detail = `total − subtotal` (the 6% platform fee; there is no delivery-fee
+  column).
+
+### BE gaps surfaced by this integration (FE features with NO backend support yet)
+These stay as **visual placeholders** until BE lands them (per product decision 2026-05-31):
+1. **Uploaded files aren't persisted.** `/api/place-order` receives `fileName` per line but does NOT
+   store it in `order_items` (answers/price_breakdown/line_total only). So order detail shows no
+   "Fișiere atașate" and no per-line PDF chip. → BE: persist the storage path in the `file` answer +
+   mint signed URLs for the shop to download.
+2. **No ETA** on orders → the "ETA …" text + StatusTimeline eta are omitted for real orders.
+3. **No revenue/stats aggregation** → dashboard "Venit azi / ultimele 7 zile", "Top servicii",
+   RevenueBars, and customer "Economisit cu promoții / Livrare medie" are hardcoded sample numbers.
+4. **Customer name visibility for shops** depends on `profiles` RLS. If a shop member can't read the
+   buyer's `profiles.full_name`, the queue/detail fall back to "Client". → BE: confirm/allow shops to
+   read the names of customers who ordered from them.
+5. **Shop profile**: only `name/description/phone/address` save. `schedule` (jsonb weekly hours),
+   logo/banner upload, "Tip activitate", and email are visual-only (no columns / not wired).
+6. **Chat is read-only** in this pass (existing `messages` are displayed; no realtime send) — chat was
+   intentionally excluded from this integration round.
+7. **Admins with no `shop_permissions` row** see an empty dashboard queue (reads are membership-scoped,
+   not `is_admin()`-scoped). A demo shop login must be an actual shop member.
+
+## Products wired to the REAL catalog document (FE, 2026-05-31) ✅
+`/dashboard/products` + new/edit no longer use `sampleCatalog`. Products are catalog `items`
+with `kind === "product"` inside the same versioned `catalog_versions.document` as services.
+- **`lib/catalog/products.ts`** (server-only): `getShopProducts()` / `getShopProduct(id)` —
+  resolve the caller's shop via `shop_permissions`, then read the **latest DRAFT if one exists**
+  (so unpublished edits are visible in the dashboard), else the **active** version's document;
+  filter `kind === "product"`.
+- **`lib/catalog/api.ts → saveProductToDraft(shopId, {id?,name,description,basePrice,inStock})`**
+  (client): `getOrCreateDraft` → upsert the product item into `document.items` (preserving all
+  other items + the product's own config fields) → `saveDraftDocument`. **Does NOT publish** —
+  same draft→publish model as the builder; the shop publishes from `/dashboard/services` (Catalog).
+  The save toast says so ("…publică din Catalog pentru a-l face vizibil").
+- `ProductEditor` now takes `shopId` + optional `productId`, persists via the helper (loading +
+  error toast), then `router.push + refresh`. Pages show `EmptyState` when the user has no shop.
+- **Still not persisted by the simple editor:** SKU + unit (cosmetic — no schema column / the
+  simple editor doesn't manage `number`/`is_quantity` fields), and image upload. Configurable
+  products (with `fields`) also list here; editing them via this simple form preserves their fields.
+
+## Responsive / mobile pass — dashboard (FE, 2026-05-31) ✅
+Made the shop dashboard area usable on phones (was: 6 stacked nav links atop every page;
+order-detail client+chat invisible on mobile; cramped fixed-width input/queue rows).
+- **`components/dashboard/MobileNav.tsx`** (new, client) — mobile sticky top bar with a
+  **Burger → Drawer** nav (replaces the always-expanded vertical `DashboardNav` in the mobile
+  bar). Drawer auto-closes on route change + on link click (`DashboardNav` gained an optional
+  `onNavigate` cb). Desktop fixed sidebar (`visibleFrom md`) is unchanged.
+- **`/dashboard/orders/[orderId]`** — the "Client & livrare" card + `ChatPanel` were
+  `visibleFrom md` with NO mobile fallback (invisible on phones). Extracted to a `sidebar`
+  const, rendered in the desktop side column AND stacked below the main content on mobile
+  (`hiddenFrom md`). (Customer `/order/[id]` already had a mobile chat fallback.)
+- **`ShopOrderQueue`** rows — were one `nowrap` row packing total+status+2 buttons (overflowed
+  on phones). Now: desktop unchanged (status+actions inline, `visibleFrom sm`); on mobile a
+  second row carries `StatusBadge` + the action buttons (`hiddenFrom sm`).
+- **`ProductEditor`** — the 3-up Preț/Unitate/SKU `Group grow` → `SimpleGrid cols={{base:1,sm:3}}`.
+- **`ProfileEditor`** — info `Group grow` rows → `SimpleGrid cols={{base:1,sm:2}}`; schedule rows
+  now `wrap` (time inputs + badge drop below the day/switch on narrow screens).
+- **`ShopOrderActions`** (detail header) — `wrap="wrap"` so buttons reflow.
+- Verified via production build (all routes compile, dynamic). NOTE: true mobile-viewport
+  rendering couldn't be exercised in-tool — the remote Chrome renders at a fixed 1440 viewport
+  and `/dashboard/*` never reaches network-idle (screenshots/JS eval hang). Desktop confirmed
+  clean (sidebar visible, no horizontal overflow).

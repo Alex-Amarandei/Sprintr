@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import {
   Avatar,
@@ -17,16 +17,18 @@ import { Check, FileText, X } from "lucide-react";
 import { toast } from "sonner";
 import type { SampleOrder } from "@/lib/orders/sample";
 import type { OrderStatus } from "@/lib/design/status";
+import { advanceOrderStatus } from "@/lib/orders/actions";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
 type Filter = "all" | "new" | "prep";
 
 const initials = (n: string) =>
   n.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+const short = (id: string) => id.slice(0, 8);
 
 /**
  * Shop-side incoming order queue with inline accept/reject/advance.
- * Status changes are local (presentational) — TODO(BE): wire to order updates.
+ * Optimistic update + server persistence via the `advanceOrderStatus` action.
  */
 export function ShopOrderQueue({
   initialOrders,
@@ -39,10 +41,20 @@ export function ShopOrderQueue({
 }) {
   const [orders, setOrders] = useState<SampleOrder[]>(initialOrders);
   const [filter, setFilter] = useState<Filter>("all");
+  const [pending, startTransition] = useTransition();
 
   function setStatus(id: string, status: OrderStatus, msg: string) {
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
-    toast.success(msg);
+    const prev = orders;
+    setOrders((cur) => cur.map((o) => (o.id === id ? { ...o, status } : o))); // optimistic
+    startTransition(async () => {
+      const res = await advanceOrderStatus(id, status);
+      if (res.ok) {
+        toast.success(msg);
+      } else {
+        setOrders(prev); // rollback
+        toast.error(res.error ?? "Nu am putut actualiza comanda");
+      }
+    });
   }
 
   const isPrep = (s: OrderStatus) => s === "accepted" || s === "in_progress";
@@ -60,10 +72,11 @@ export function ShopOrderQueue({
       return (
         <Group gap="xs" wrap="nowrap">
           <Button
-            variant="subtle"
-            color="gray"
+            variant="default"
+            bg="stone.0"
             size="xs"
-            onClick={() => setStatus(o.id, "rejected", `Comanda #${o.id} respinsă`)}
+            disabled={pending}
+            onClick={() => setStatus(o.id, "rejected", `Comanda #${short(o.id)} respinsă`)}
           >
             Respinge
           </Button>
@@ -71,7 +84,8 @@ export function ShopOrderQueue({
             color="teal"
             size="xs"
             leftSection={<Check size={14} />}
-            onClick={() => setStatus(o.id, "accepted", `Comanda #${o.id} acceptată`)}
+            disabled={pending}
+            onClick={() => setStatus(o.id, "accepted", `Comanda #${short(o.id)} acceptată`)}
           >
             Acceptă
           </Button>
@@ -84,7 +98,8 @@ export function ShopOrderQueue({
           variant="light"
           color="cyan"
           size="xs"
-          onClick={() => setStatus(o.id, "in_progress", `#${o.id} în pregătire`)}
+          disabled={pending}
+          onClick={() => setStatus(o.id, "in_progress", `#${short(o.id)} în pregătire`)}
         >
           Începe pregătirea
         </Button>
@@ -96,7 +111,8 @@ export function ShopOrderQueue({
           variant="light"
           color="teal"
           size="xs"
-          onClick={() => setStatus(o.id, "done", `#${o.id} finalizată`)}
+          disabled={pending}
+          onClick={() => setStatus(o.id, "done", `#${short(o.id)} finalizată`)}
         >
           Marchează gata
         </Button>
@@ -107,66 +123,73 @@ export function ShopOrderQueue({
 
   const row = (o: SampleOrder) => {
     const hasPdf = o.lines.some((l) => l.pdfName);
+    const act = actions(o);
     return (
-      <Group
+      <Box
         key={o.id}
-        justify="space-between"
-        wrap="nowrap"
         p="md"
-        gap="md"
         style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
       >
-        <Link
-          href={`/dashboard/orders/${o.id}`}
-          style={{ textDecoration: "none", color: "inherit", minWidth: 0, flex: 1 }}
-        >
-          <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-            <Avatar
-              radius="xl"
-              size={38}
-              style={
-                {
-                  "--avatar-bg": "var(--mantine-color-brand-1)",
-                  "--avatar-color": "var(--mantine-color-brand-7)",
-                } as React.CSSProperties
-              }
-            >
-              {initials(o.customerName)}
-            </Avatar>
-            <div style={{ minWidth: 0 }}>
-              <Group gap={6}>
-                <Text fw={600} fz="sm">
-                  #{o.id}
+        <Group justify="space-between" wrap="nowrap" gap="md">
+          <Link
+            href={`/dashboard/orders/${o.id}`}
+            style={{ textDecoration: "none", color: "inherit", minWidth: 0, flex: 1 }}
+          >
+            <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+              <Avatar
+                radius="xl"
+                size={38}
+                style={
+                  {
+                    "--avatar-bg": "var(--mantine-color-brand-1)",
+                    "--avatar-color": "var(--mantine-color-brand-7)",
+                  } as React.CSSProperties
+                }
+              >
+                {initials(o.customerName)}
+              </Avatar>
+              <div style={{ minWidth: 0 }}>
+                <Group gap={6}>
+                  <Text fw={600} fz="sm">
+                    #{short(o.id)}
+                  </Text>
+                  <Text fz="xs" c="dimmed">
+                    · {o.placedAt}
+                  </Text>
+                </Group>
+                <Text fz="sm" truncate>
+                  {o.customerName} · {o.lines[0]?.title}
+                  {o.itemsCount > 1 ? ` +${o.itemsCount - 1}` : ""}
                 </Text>
-                <Text fz="xs" c="dimmed">
-                  · {o.placedAt}
-                </Text>
-              </Group>
-              <Text fz="sm" truncate>
-                {o.customerName} · {o.lines[0]?.title}
-                {o.itemsCount > 1 ? ` +${o.itemsCount - 1}` : ""}
-              </Text>
-            </div>
-          </Group>
-        </Link>
+              </div>
+            </Group>
+          </Link>
 
-        <Group gap="md" wrap="nowrap">
-          {hasPdf && (
-            <Badge variant="light" color="red" leftSection={<FileText size={12} />} visibleFrom="md">
-              PDF
-            </Badge>
-          )}
-          <Text fw={700} fz="sm" w={84} ta="right" style={{ whiteSpace: "nowrap" }}>
-            {o.total.toFixed(2)} lei
-          </Text>
-          <Box w={118} visibleFrom="sm">
-            <StatusBadge status={o.status} />
-          </Box>
-          <Box w={170} style={{ display: "flex", justifyContent: "flex-end" }}>
-            {actions(o)}
-          </Box>
+          <Group gap="md" wrap="nowrap">
+            {hasPdf && (
+              <Badge variant="light" color="red" leftSection={<FileText size={12} />} visibleFrom="md">
+                PDF
+              </Badge>
+            )}
+            <Text fw={700} fz="sm" ta="right" style={{ whiteSpace: "nowrap" }}>
+              {o.total.toFixed(2)} lei
+            </Text>
+            {/* Desktop: status + actions inline */}
+            <Box w={118} visibleFrom="sm">
+              <StatusBadge status={o.status} />
+            </Box>
+            <Box w={170} ml="xl" visibleFrom="sm" style={{ display: "flex", justifyContent: "flex-end" }}>
+              {act}
+            </Box>
+          </Group>
         </Group>
-      </Group>
+
+        {/* Mobile: status + actions on their own row */}
+        <Group justify="space-between" hiddenFrom="sm" mt="sm" wrap="nowrap">
+          <StatusBadge status={o.status} />
+          {act}
+        </Group>
+      </Box>
     );
   };
 

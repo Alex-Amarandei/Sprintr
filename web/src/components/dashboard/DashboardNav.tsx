@@ -22,7 +22,7 @@ const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/dashboard/profile", label: "Profil", icon: User },
 ];
 
-export function DashboardNav() {
+export function DashboardNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
@@ -37,6 +37,7 @@ export function DashboardNav() {
             href={href}
             label={label}
             active={active}
+            onClick={onNavigate}
             leftSection={<Icon size={18} />}
             styles={{
               root: {

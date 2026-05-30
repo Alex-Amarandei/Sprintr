@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -8,6 +8,7 @@ import {
   Card,
   Group,
   NumberInput,
+  SimpleGrid,
   Stack,
   Switch,
   Text,
@@ -19,6 +20,7 @@ import {
 import { Check, Image as ImageIcon, Package } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils/format";
+import { saveProductToDraft } from "@/lib/catalog/api";
 import { LinkButton } from "@/components/ui/links";
 
 export interface ProductDraft {
@@ -42,21 +44,49 @@ const BLANK: ProductDraft = {
 export function ProductEditor({
   mode,
   initial,
+  shopId,
+  productId,
 }: {
   mode: "new" | "edit";
   initial?: ProductDraft;
+  shopId: string | null;
+  productId?: string;
 }) {
   const router = useRouter();
   const [p, setP] = useState<ProductDraft>(initial ?? BLANK);
+  const [pending, startTransition] = useTransition();
   const set = <K extends keyof ProductDraft>(k: K, v: ProductDraft[K]) =>
     setP((prev) => ({ ...prev, [k]: v }));
 
   function save() {
-    // TODO(BE): persist into the shop's catalog draft (kind: "product").
-    toast.success(
-      mode === "new" ? "Produs adăugat" : "Modificările au fost salvate",
-    );
-    router.push("/dashboard/products");
+    if (!shopId) {
+      toast.error("Niciun magazin asociat contului tău");
+      return;
+    }
+    if (!p.name.trim()) {
+      toast.error("Adaugă o denumire pentru produs");
+      return;
+    }
+    startTransition(async () => {
+      try {
+        await saveProductToDraft(shopId, {
+          id: productId,
+          name: p.name.trim(),
+          description: p.description,
+          basePrice: p.basePrice,
+          inStock: p.inStock,
+        });
+        toast.success(
+          mode === "new"
+            ? "Produs salvat în schiță — publică din Catalog pentru a-l face vizibil"
+            : "Modificările au fost salvate în schiță",
+        );
+        router.push("/dashboard/products");
+        router.refresh();
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Nu am putut salva produsul");
+      }
+    });
   }
 
   return (
@@ -78,7 +108,12 @@ export function ProductEditor({
           >
             Anulează
           </LinkButton>
-          <Button leftSection={<Check size={16} />} onClick={save}>
+          <Button
+            leftSection={<Check size={16} />}
+            onClick={save}
+            loading={pending}
+            disabled={!shopId}
+          >
             Salvează
           </Button>
         </Group>
@@ -122,7 +157,7 @@ export function ProductEditor({
               </Stack>
             </Group>
 
-            <Group grow mt="sm">
+            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm" mt="sm">
               <NumberInput
                 label="Preț de bază"
                 suffix=" lei"
@@ -145,7 +180,7 @@ export function ProductEditor({
                 value={p.sku}
                 onChange={(e) => set("sku", e.currentTarget.value)}
               />
-            </Group>
+            </SimpleGrid>
           </Card>
 
           <Card>

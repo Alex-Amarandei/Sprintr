@@ -1,11 +1,12 @@
 import { Metadata } from "next";
 import { Stack, Text, Title } from "@mantine/core";
-import { sampleOrders } from "@/lib/orders/sample";
+import { getShopOrders } from "@/lib/orders/queries";
 import { ShopOrderQueue } from "@/components/dashboard/ShopOrderQueue";
 
 export const metadata: Metadata = { title: "Comenzi primite" };
 
-export default function ShopOrdersPage() {
+export default async function ShopOrdersPage() {
+  const orders = await getShopOrders();
   return (
     <Stack gap="lg">
       <div>
@@ -14,8 +15,7 @@ export default function ShopOrdersPage() {
           Acceptă, respinge și avansează statusul comenzilor primite.
         </Text>
       </div>
-      {/* TODO(BE): replace sampleOrders with this shop's orders from Supabase. */}
-      <ShopOrderQueue initialOrders={sampleOrders} />
+      <ShopOrderQueue initialOrders={orders} />
     </Stack>
   );
 }

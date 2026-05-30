@@ -5,6 +5,7 @@ import { Wordmark } from "@/components/ui/Wordmark";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
+import { MobileNav } from "@/components/dashboard/MobileNav";
 import { createClient } from "@/lib/supabase/server";
 
 const SIDEBAR_WIDTH = 260;
@@ -66,34 +67,8 @@ export default async function ShopLayout({
         <DashboardNav />
       </Box>
 
-      {/* Mobile top bar + nav */}
-      <Box
-        hiddenFrom="md"
-        bg="var(--mantine-color-body)"
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 50,
-          borderBottom: "1px solid var(--mantine-color-default-border)",
-        }}
-      >
-        <Group justify="space-between" align="center" wrap="nowrap" p="md">
-          <LinkAnchor
-            href="/dashboard"
-            fw={700}
-            fz="xl"
-            c="brand.6"
-            underline="never"
-          >
-            <Wordmark />
-          </LinkAnchor>
-          <Group gap="xs" wrap="nowrap">
-            <ThemeToggle />
-            <SignOutButton />
-          </Group>
-        </Group>
-        <DashboardNav />
-      </Box>
+      {/* Mobile top bar + nav (hamburger → Drawer) */}
+      <MobileNav />
 
       <Box
         component="main"

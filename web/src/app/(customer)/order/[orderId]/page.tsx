@@ -11,8 +11,7 @@ import {
   Title,
 } from "@mantine/core";
 import { ArrowLeft, Download, FileText } from "lucide-react";
-import { getSampleOrder } from "@/lib/orders/sample";
-import { ORDER_STATUS } from "@/lib/design/status";
+import { getOrderDetail } from "@/lib/orders/queries";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { ChatPanel } from "@/components/order/ChatPanel";
@@ -26,9 +25,10 @@ interface Props {
 
 export default async function OrderDetailPage({ params }: Props) {
   const { orderId } = await params;
-  // TODO(BE): read the order (frozen line items + messages) from Supabase.
-  const order = getSampleOrder(orderId);
+  const order = await getOrderDetail(orderId);
   if (!order) notFound();
+
+  const shortId = order.id.slice(0, 8);
 
   return (
     <Stack gap="lg">
@@ -41,7 +41,7 @@ export default async function OrderDetailPage({ params }: Props) {
       <Group justify="space-between" align="flex-start" wrap="wrap" gap="md">
         <div>
           <Group gap="sm" align="center">
-            <Title order={2}>Comanda #{order.id}</Title>
+            <Title order={2}>Comanda #{shortId}</Title>
             <StatusBadge status={order.status} />
           </Group>
           <Text c="dimmed" mt={4}>

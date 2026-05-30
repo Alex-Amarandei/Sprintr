@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import {
   Badge,
   Box,
   Button,
   Card,
   Group,
+  SimpleGrid,
   Stack,
   Switch,
   Text,
@@ -16,6 +17,9 @@ import {
   Title,
 } from "@mantine/core";
 import { Check, Circle, Image as ImageIcon, Printer } from "lucide-react";
+import { toast } from "sonner";
+import { updateShopProfile } from "@/lib/shop/actions";
+import type { ShopProfileInput } from "@/lib/shop/types";
 
 interface Day {
   label: string;
@@ -42,18 +46,54 @@ const CHECKLIST = [
   { label: "Conexiune Stripe pentru încasări", done: false },
 ];
 
-export function ProfileEditor() {
+export function ProfileEditor({
+  shopId,
+  initial,
+}: {
+  shopId: string | null;
+  initial: ShopProfileInput;
+}) {
   const [days, setDays] = useState<Day[]>(INITIAL_DAYS);
+  const [form, setForm] = useState<ShopProfileInput>(initial);
+  const [pending, startTransition] = useTransition();
+
+  const field = (k: keyof ShopProfileInput) => ({
+    value: form[k],
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setForm((f) => ({ ...f, [k]: e.currentTarget.value })),
+  });
 
   const toggleDay = (i: number) =>
     setDays((prev) => prev.map((d, idx) => (idx === i ? { ...d, open: !d.open } : d)));
 
+  function save() {
+    if (!shopId) {
+      toast.error("Niciun magazin asociat contului tău");
+      return;
+    }
+    startTransition(async () => {
+      const res = await updateShopProfile(shopId, form);
+      if (res.ok) toast.success("Profil salvat");
+      else toast.error(res.error ?? "Nu am putut salva profilul");
+    });
+  }
+
   return (
     <Stack gap="lg">
-      <div>
-        <Title order={2}>Profil magazin</Title>
-        <Text c="dimmed">Așa te văd clienții pe SprintR.</Text>
-      </div>
+      <Group justify="space-between" align="flex-end" wrap="wrap" gap="md">
+        <div>
+          <Title order={2}>Profil magazin</Title>
+          <Text c="dimmed">Așa te văd clienții pe SprintR.</Text>
+        </div>
+        <Button
+          leftSection={<Check size={16} />}
+          loading={pending}
+          disabled={!shopId}
+          onClick={save}
+        >
+          Salvează modificările
+        </Button>
+      </Group>
 
       <Group align="flex-start" gap="lg" wrap="nowrap">
         {/* Main column */}
@@ -103,27 +143,24 @@ export function ProfileEditor() {
               Informații magazin
             </Text>
             <Stack gap="sm">
-              <Group grow>
-                <TextInput label="Nume" defaultValue="PIM Copy" />
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+                <TextInput label="Nume" {...field("name")} />
+                {/* Not a column on `shops` — visual only for now. */}
                 <TextInput
                   label="Tip activitate"
                   defaultValue="Centru de printare & papetărie"
                 />
-              </Group>
-              <Textarea
-                label="Descriere"
-                autosize
-                minRows={2}
-                defaultValue="Editură & tipografie digitală, copiere, scanare și legătorie lângă universitate."
-              />
-              <Group grow>
-                <TextInput label="Telefon" defaultValue="+40 232 123 456" />
+              </SimpleGrid>
+              <Textarea label="Descriere" autosize minRows={2} {...field("description")} />
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+                <TextInput label="Telefon" {...field("phone")} />
+                {/* No email column on `shops` — visual only. */}
                 <TextInput label="Email" defaultValue="contact@pimcopy.ro" />
-              </Group>
-              <Group grow>
-                <TextInput label="Adresă" defaultValue="Str. Lăpușneanu 12" />
+              </SimpleGrid>
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+                <TextInput label="Adresă" {...field("address")} />
                 <TextInput label="Oraș" defaultValue="Iași" disabled />
-              </Group>
+              </SimpleGrid>
             </Stack>
           </Card>
 
@@ -132,9 +169,9 @@ export function ProfileEditor() {
             <Text fw={700} mb="md">
               Program de funcționare
             </Text>
-            <Stack gap="xs">
+            <Stack gap="sm">
               {days.map((d, i) => (
-                <Group key={d.label} justify="space-between" wrap="nowrap">
+                <Group key={d.label} justify="space-between" wrap="wrap" gap="xs">
                   <Group gap="md" wrap="nowrap">
                     <Text fw={500} w={88}>
                       {d.label}
