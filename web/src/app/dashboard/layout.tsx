@@ -3,11 +3,11 @@ import { LayoutDashboard, ShoppingBag, Package, Wrench, Tag, User } from "lucide
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/orders", label: "Comenzi", icon: ShoppingBag },
-  { href: "/products", label: "Produse", icon: Package },
-  { href: "/services", label: "Servicii", icon: Wrench },
-  { href: "/offers", label: "Oferte", icon: Tag },
-  { href: "/profile", label: "Profil", icon: User },
+  { href: "/dashboard/orders", label: "Comenzi", icon: ShoppingBag },
+  { href: "/dashboard/products", label: "Produse", icon: Package },
+  { href: "/dashboard/services", label: "Servicii", icon: Wrench },
+  { href: "/dashboard/offers", label: "Oferte", icon: Tag },
+  { href: "/dashboard/profile", label: "Profil", icon: User },
 ];
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
