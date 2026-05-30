@@ -905,3 +905,24 @@ field renderers) added as pages are built.
 next/font's `--font-geist-sans` must be exposed on **`<html>`** (not only `<body>`), else Mantine's
 `--mantine-font-family` (defined at `:root`) can't resolve the `var()` and the whole app falls back
 to serif. Fixed in `layout.tsx` (`className={inter.variable}` on `<html>`).
+
+## Gotcha: Mantine compound components + `.extend` in Server Components
+Under the App Router, importing a Mantine **client** component into a Server Component gives a
+client-reference proxy — its statics/sub-components are `undefined`. So:
+- `Component.extend()` in `theme.ts` → use plain config objects instead (already done).
+- Compound APIs (`Tabs.List/Tab/Panel`, `Accordion.Item`, `Menu.Target`, etc.) → wrap that JSX in a
+  small `"use client"` component (e.g. `components/shop/ShopCatalogTabs.tsx`). Symptom if you forget:
+  500 "Element type is invalid… got undefined".
+
+## Customer pages — design pass (done so far, logic preserved)
+Restyled to the prototype, keeping existing logic/data (`sampleShops`, `getSampleCatalog`,
+`AddItemCard` → `ItemOrderForm` modal, cart, role-redirect):
+- **`/` landing** — hero (ember accent headline, dual CTA, stats, order-preview card) + "cum funcționează". Redirects logged-in users by role (unchanged).
+- **`/browse`** — welcome band (greets by profile name), visual filter chips, `ShopCard` grid.
+- **`/shop/[shopId]`** — banner + overlapping header card, weekly program, catalog tabs, promo sidebar.
+- New shared: `components/shop/ShopCard.tsx`, `category.ts`, `ShopCatalogTabs.tsx`; `SampleShop` extended with optional display fields (rating/eta/tags/isOpen/category — placeholder until BE).
+
+## Heads-up: Stripe key missing locally
+`CheckoutModal` calls `loadStripe(NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)` eagerly → throws
+"Expected publishable key… got undefined" (the dev "1 Issue" badge) when the cart mounts and the
+key isn't in `.env.local`. Harmless to rendering; set the key locally to silence it.

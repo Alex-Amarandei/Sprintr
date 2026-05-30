@@ -176,11 +176,25 @@ export const sampleCatalog: Item[] = [
 ];
 
 // ---- Sample shops (placeholder until backend reads land) ------------------
+/** Visual category — drives the card's icon + gradient. */
+export type ShopCategory = "print" | "copy" | "binding" | "stationery";
+
 export interface SampleShop {
   id: string;
   name: string;
   description: string;
   address: string;
+  // Optional display fields (placeholder; BE may omit → card degrades gracefully).
+  category?: ShopCategory;
+  rating?: number;
+  reviews?: number;
+  /** Delivery estimate, e.g. "25–35 min". */
+  eta?: string;
+  tags?: string[];
+  isOpen?: boolean;
+  /** When closed, the next opening time, e.g. "09:00". */
+  opensAt?: string;
+  phone?: string;
 }
 
 export const sampleShops: SampleShop[] = [
@@ -189,12 +203,53 @@ export const sampleShops: SampleShop[] = [
     name: "PIM Copy",
     description: "Editură & tipografie digitală, copiere, scanare și legătorie.",
     address: "Str. Lăpușneanu, Iași",
+    category: "print",
+    rating: 4.9,
+    reviews: 320,
+    eta: "25–35 min",
+    tags: ["Licențe", "Color", "Spiră"],
+    isOpen: true,
+    phone: "+40 232 123 456",
   },
   {
     id: "printhaus",
     name: "PrintHaus",
     description: "Cărți de vizită, flyere, bannere, roll-up și print UV.",
     address: "Șos. Ștefan cel Mare 4, Iași",
+    category: "binding",
+    rating: 4.7,
+    reviews: 180,
+    eta: "30–40 min",
+    tags: ["Bannere", "UV", "Flyere"],
+    isOpen: true,
+    phone: "+40 232 222 111",
+  },
+  {
+    id: "copy-center-tudor",
+    name: "Copy Center Tudor",
+    description: "Color, A3, legare spirală și termică lângă Tudor Vladimirescu.",
+    address: "Bd. Tudor Vladimirescu 18, Iași",
+    category: "copy",
+    rating: 4.8,
+    reviews: 210,
+    eta: "20–30 min",
+    tags: ["Color", "A3"],
+    isOpen: false,
+    opensAt: "09:00",
+    phone: "+40 232 333 222",
+  },
+  {
+    id: "birotica-independentei",
+    name: "Birotica Independenței",
+    description: "Pixuri, caiete, markere, post-it și consumabile de birou.",
+    address: "Str. Independenței 7, Iași",
+    category: "stationery",
+    rating: 4.6,
+    reviews: 92,
+    eta: "40–50 min",
+    tags: ["Pixuri", "Caiete", "Post-it"],
+    isOpen: true,
+    phone: "+40 232 444 333",
   },
 ];
 

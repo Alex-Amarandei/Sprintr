@@ -72,9 +72,22 @@ export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
         <Modal
           opened={opened}
           onClose={close}
-          title={`Configurează: ${item.title}`}
+          title={
+            <div>
+              <Text fw={800} fz="lg" lh={1.2} c="ink.9">
+                Configurează: {item.title}
+              </Text>
+              {item.description && (
+                <Text fz="sm" c="dimmed" mt={4}>
+                  {item.description}
+                </Text>
+              )}
+            </div>
+          }
           size="lg"
+          padding="xl"
           centered
+          styles={{ header: { alignItems: "flex-start" } }}
         >
           <ItemOrderForm
             item={item}

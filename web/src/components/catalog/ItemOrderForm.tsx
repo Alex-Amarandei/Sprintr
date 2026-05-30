@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import {
-  Alert,
   Box,
   Button,
   CheckIcon,
@@ -13,13 +12,12 @@ import {
   Group,
   Input,
   NumberInput,
-  Paper,
   Radio,
+  SimpleGrid,
   Stack,
   Switch,
   Text,
   Textarea,
-  Title,
   Tooltip,
 } from "@mantine/core";
 import { FileUp } from "lucide-react";
@@ -84,7 +82,7 @@ function SwatchPicker({
       withAsterisk={field.required}
       error={error}
     >
-      <Group gap="md" mt="xs">
+      <Group gap="md" mt="xs" align="flex-start">
         {field.options.map((o) => {
           const isSel = selected.includes(o.value);
           const hint = ruleHint(o.price);
@@ -113,8 +111,12 @@ function SwatchPicker({
               </Tooltip>
               <Text size="xs" ta="center" lh={1.1}>
                 {o.label}
-                {hint ? ` (${hint})` : ""}
               </Text>
+              {hint && (
+                <Text fz={10} fw={600} c="brand.7" ta="center" lh={1}>
+                  {hint}
+                </Text>
+              )}
             </Stack>
           );
         })}
@@ -141,6 +143,8 @@ export function ItemOrderForm({
 }: Props) {
   const [answers, setAnswers] = useState<Answers>(() => defaultAnswers(item));
   const [file, setFile] = useState<File | null>(null);
+  // Only surface validation errors after the first submit attempt.
+  const [attempted, setAttempted] = useState(false);
 
   const set = (key: string, value: unknown) =>
     setAnswers((a) => ({ ...a, [key]: value }));
@@ -152,6 +156,10 @@ export function ItemOrderForm({
   const canOrder = Object.keys(errors).length === 0 && !uploadMissing;
 
   function placeOrder() {
+    if (!canOrder) {
+      setAttempted(true);
+      return;
+    }
     const payload = {
       itemId: item.id,
       answers,
@@ -166,33 +174,37 @@ export function ItemOrderForm({
   }
 
   return (
-    <Paper withBorder radius="lg" p="lg" shadow="xs">
-      <Stack gap="md">
-        <div>
-          <Title order={3}>{item.title}</Title>
-          {item.description && (
-            <Text c="dimmed" size="sm" mt={4}>
-              {item.description}
-            </Text>
-          )}
-        </div>
-
+    <Box style={{ display: "flex", flexDirection: "column", maxHeight: "58vh" }}>
+      <Box
+        style={{
+          overflowY: "auto",
+          flex: 1,
+          marginRight: "-8px",
+          paddingRight: "8px",
+        }}
+      >
+        <Stack gap="lg" pb="md">
         {item.requires_upload && (
           <FileInput
-            label="Document PDF"
-            description="Încarcă fișierul de tipărit"
+            label="Atașează PDF-ul"
+            description="Obligatoriu pentru servicii de printare"
             placeholder="Alege un fișier PDF"
             accept="application/pdf"
             leftSection={<FileUp size={16} />}
             value={file}
-            onChange={setFile}
-            error={uploadMissing ? "Fișierul este obligatoriu" : undefined}
+            onChange={(f) => {
+              // Don't clear an already-picked file when the OS dialog is cancelled.
+              if (f) setFile(f);
+            }}
+            error={
+              attempted && uploadMissing ? "Fișierul este obligatoriu" : undefined
+            }
             required
           />
         )}
 
         {item.fields.map((f) => {
-          const err = errors[f.key];
+          const err = attempted ? errors[f.key] : undefined;
           if (hasSwatches(f)) {
             return (
               <SwatchPicker
@@ -218,18 +230,28 @@ export function ItemOrderForm({
                   onChange={(v) => set(f.key, v)}
                   error={err}
                 >
-                  <Stack gap="xs" mt="xs">
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs" mt="xs">
                     {f.options.map((o) => {
                       const hint = ruleHint(o.price);
                       return (
-                        <Radio
-                          key={o.value}
-                          value={o.value}
-                          label={hint ? `${o.label}  (${hint})` : o.label}
-                        />
+                        <Radio.Card key={o.value} value={o.value} radius="md" p="sm">
+                          <Group wrap="nowrap" gap="sm" align="flex-start">
+                            <Radio.Indicator />
+                            <div>
+                              <Text fw={600} fz="sm" lh={1.2}>
+                                {o.label}
+                              </Text>
+                              {hint && (
+                                <Text fz={11} fw={600} c="brand.7" mt={2}>
+                                  {hint}
+                                </Text>
+                              )}
+                            </div>
+                          </Group>
+                        </Radio.Card>
                       );
                     })}
-                  </Stack>
+                  </SimpleGrid>
                 </Radio.Group>
               );
 
@@ -243,19 +265,34 @@ export function ItemOrderForm({
                   onChange={(v) => set(f.key, v)}
                   error={err}
                 >
-                  <Stack gap="xs" mt="xs">
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs" mt="xs">
                     {f.options.map((o) => {
                       const hint = ruleHint(o.price);
                       return (
-                        <Checkbox
+                        <Checkbox.Card
                           key={o.value}
                           value={o.value}
+                          radius="md"
+                          p="sm"
                           disabled={o.locked}
-                          label={hint ? `${o.label}  (${hint})` : o.label}
-                        />
+                        >
+                          <Group wrap="nowrap" gap="sm" align="flex-start">
+                            <Checkbox.Indicator />
+                            <div>
+                              <Text fw={600} fz="sm" lh={1.2}>
+                                {o.label}
+                              </Text>
+                              {hint && (
+                                <Text fz={11} fw={600} c="brand.7" mt={2}>
+                                  {hint}
+                                </Text>
+                              )}
+                            </div>
+                          </Group>
+                        </Checkbox.Card>
                       );
                     })}
-                  </Stack>
+                  </SimpleGrid>
                 </Checkbox.Group>
               );
 
@@ -264,7 +301,16 @@ export function ItemOrderForm({
               return (
                 <Switch
                   key={f.key}
-                  label={hint ? `${f.label}  (${hint})` : f.label}
+                  label={
+                    <>
+                      {f.label}
+                      {hint && (
+                        <Text span fz={11} fw={600} c="brand.7" ml={6}>
+                          {hint}
+                        </Text>
+                      )}
+                    </>
+                  }
                   description={f.help ?? undefined}
                   checked={Boolean(answers[f.key])}
                   onChange={(e) => set(f.key, e.currentTarget.checked)}
@@ -306,44 +352,54 @@ export function ItemOrderForm({
           }
         })}
 
-        <Divider />
-
         {/* Live price breakdown */}
-        <Stack gap={4}>
-          {price.basePrice > 0 && (
-            <Group justify="space-between">
-              <Text size="sm" c="dimmed">
-                Preț de bază
-              </Text>
-              <Text size="sm">{formatPrice(price.basePrice)}</Text>
-            </Group>
-          )}
-          {price.lines.map((l, i) => (
-            <Group key={i} justify="space-between">
-              <Text size="sm" c="dimmed">
-                {l.label}
-              </Text>
-              <Text size="sm">{formatPrice(l.amount)}</Text>
-            </Group>
-          ))}
-          <Group justify="space-between" mt={4}>
-            <Text fw={700}>Total</Text>
-            <Text fw={700} fz="xl" c="brand.7">
+        {(price.basePrice > 0 || price.lines.length > 0) && (
+          <Box>
+            <Divider mb="sm" />
+            <Stack gap={4}>
+              {price.basePrice > 0 && (
+                <Group justify="space-between">
+                  <Text size="sm" c="dimmed">
+                    Preț de bază
+                  </Text>
+                  <Text size="sm">{formatPrice(price.basePrice)}</Text>
+                </Group>
+              )}
+              {price.lines.map((l, i) => (
+                <Group key={i} justify="space-between">
+                  <Text size="sm" c="dimmed">
+                    {l.label}
+                  </Text>
+                  <Text size="sm">{formatPrice(l.amount)}</Text>
+                </Group>
+              ))}
+            </Stack>
+          </Box>
+        )}
+        </Stack>
+      </Box>
+
+      {/* Footer — total + CTA, always visible below the scroll area */}
+      <Box pt="md" style={{ borderTop: "1px solid var(--mantine-color-gray-2)" }}>
+        {attempted && !canOrder && (
+          <Text fz="xs" c="red.7" mb="xs">
+            Completează câmpurile obligatorii pentru a continua.
+          </Text>
+        )}
+        <Group justify="space-between" align="center" wrap="nowrap">
+          <div>
+            <Text tt="uppercase" fz={10} fw={700} c="dimmed">
+              Total
+            </Text>
+            <Text fz={26} fw={800} c="ink.9" lh={1}>
               {formatPrice(price.total)}
             </Text>
-          </Group>
-        </Stack>
-
-        {!canOrder && (
-          <Alert color="yellow" variant="light" py="xs">
-            Completează câmpurile obligatorii pentru a plasa comanda.
-          </Alert>
-        )}
-
-        <Button onClick={placeOrder} disabled={!canOrder} size="md">
-          {submitLabel} · {formatPrice(price.total)}
-        </Button>
-      </Stack>
-    </Paper>
+          </div>
+          <Button onClick={placeOrder} size="md">
+            {submitLabel}
+          </Button>
+        </Group>
+      </Box>
+    </Box>
   );
 }
