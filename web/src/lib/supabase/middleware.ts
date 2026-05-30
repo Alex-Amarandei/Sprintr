@@ -34,9 +34,12 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims() verifies the access token LOCALLY when the project uses asymmetric JWT
+  // signing keys (JWKS cached in-process) → no network round-trip per navigation. On legacy
+  // HS256 it falls back to a network check (same cost as getUser), and it still refreshes an
+  // expired session via the refresh token. We only need "is there a valid user" for the guard.
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const user = claimsData?.claims ?? null;
 
   const { pathname } = request.nextUrl;
 
