@@ -1,6 +1,5 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import {
   Badge,
@@ -46,12 +45,13 @@ export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
             <Badge
               variant="light"
               color={kindColor}
-              // Pin to fixed shades so the badge matches between dark and light mode.
+              // Real bg/color props (not the --badge-* vars, which Mantine sets
+              // inline itself) so the badge looks identical in dark and light mode.
               styles={{
                 root: {
-                  "--badge-bg": `var(--mantine-color-${kindColor}-1)`,
-                  "--badge-color": `var(--mantine-color-${kindColor}-7)`,
-                } as CSSProperties,
+                  backgroundColor: `var(--mantine-color-${kindColor}-1)`,
+                  color: `var(--mantine-color-${kindColor}-7)`,
+                },
               }}
             >
               {item.kind === "service" ? "Serviciu" : "Produs"}
@@ -74,14 +74,13 @@ export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
               leftSection={<Settings2 size={16} />}
               onClick={open}
               variant="light"
-              // Pin to fixed brand shades so the button looks identical in dark
-              // and light mode (the `light` variant otherwise resolves per-scheme).
+              // Real bg/color props (not the --button-* vars, which Mantine sets
+              // inline itself) so the button looks identical in dark and light mode.
               styles={{
                 root: {
-                  "--button-bg": "var(--mantine-color-brand-1)",
-                  "--button-hover": "var(--mantine-color-brand-2)",
-                  "--button-color": "var(--mantine-color-brand-7)",
-                } as CSSProperties,
+                  backgroundColor: "var(--mantine-color-brand-1)",
+                  color: "var(--mantine-color-brand-7)",
+                },
               }}
             >
               Configurează
