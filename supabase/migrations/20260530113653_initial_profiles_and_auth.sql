@@ -54,6 +54,10 @@ begin
 end;
 $$;
 
+-- Harden: the trigger fires regardless of EXECUTE grants (it runs as the function
+-- owner), so revoke direct RPC access — clients must never call this themselves.
+revoke execute on function public.handle_new_user() from anon, authenticated, public;
+
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
