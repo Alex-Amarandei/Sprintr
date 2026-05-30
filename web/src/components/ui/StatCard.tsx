@@ -19,11 +19,27 @@ export function StatCard({
   return (
     <Card>
       <Group justify="space-between" align="flex-start" wrap="nowrap">
-        <ThemeIcon variant="light" color={color} size={42} radius="md">
+        {/* Pin to the light-mode tinted look in both schemes (vivid, not dulled in dark). */}
+        <ThemeIcon
+          color={color}
+          size={42}
+          radius="md"
+          style={{
+            backgroundColor: `var(--mantine-color-${color}-1)`,
+            color: `var(--mantine-color-${color}-7)`,
+          }}
+        >
           {icon}
         </ThemeIcon>
         {delta && (
-          <Text fz="xs" fw={600} c="teal.7">
+          <Text
+            fz="xs"
+            fw={600}
+            style={{
+              color:
+                "light-dark(var(--mantine-color-teal-7), var(--mantine-color-teal-4))",
+            }}
+          >
             {delta}
           </Text>
         )}
