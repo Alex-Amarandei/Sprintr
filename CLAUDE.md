@@ -596,14 +596,26 @@ forward-compatible.
 - The client still computes a price for live preview (same algorithm, §7), but it is never
   trusted.
 
-## Orders = mixed cart, inserted only by the Edge Function
+## Orders = mixed cart, inserted only by the Edge Function (migration 4, applied)
 
-- One **order** has N **line items**, each a `service` or `product`, each **freezing**
-  `item_title`, `answers` (jsonb), `price_breakdown` (jsonb), `line_total`, and `pdf_path`
-  (services). Instance copies values — a placed order never changes when the catalog does.
-- **RLS:** customers `select` only their own orders; **no client `insert`** — only the Edge
-  Function (service role) writes orders. This is what makes the price tamper-proof.
-- Order status: `pending → accepted → in_preparation → done` (+ `rejected`), per CLAUDE.md.
+- One **`orders`** row + N **`order_items`** lines, each a `service` or `product`, each
+  **freezing** `kind, item_id (stable), item_title, quantity, answers (jsonb),
+  price_breakdown (jsonb), line_total`. Uploaded files live as storage paths *inside*
+  `answers` (the `file` fields). Instance copies values — a placed order never changes when
+  the catalog does. `orders.catalog_version_id` records which version it was placed off.
+- **RLS:** customer `select`s own; shop members `select`/`update` their shop's; **no client
+  `insert`** — only the Edge Function (service role) writes orders/items (tamper-proof).
+  `staff`+ (any member) advances status.
+- **Status:** `pending → accepted | rejected → in_progress → done`. `completed_at` is set
+  (trigger) when it hits `done` or `rejected`; a **`pg_cron`** hourly job sets `archived_at`
+  ~1 day after `completed_at` (archived is a timestamp, NOT a status — the done/rejected
+  outcome is preserved). Active board = `archived_at is null`.
+- **Payment:** `payment_method` (`cash_in_store | cash_on_delivery | online`),
+  `payment_status` (`pending | paid | failed | refunded`), `payment_ref` (Stripe id, online),
+  `paid_at`. Online = Edge Fn creates the Stripe intent + webhook marks paid; cash = shop
+  marks paid at handover. Stripe wiring is server-side, later (like the WhatsApp ping).
+- **Uploads:** private `order-files` bucket, customer own-folder (`order-files/{uid}/…`);
+  shops read via server-generated signed URLs.
 
 ## Offers — banner + cart-level promotions (separate from the catalog version)
 

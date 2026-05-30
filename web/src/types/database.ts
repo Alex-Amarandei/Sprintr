@@ -70,6 +70,144 @@ export type Database = {
           },
         ]
       }
+      order_items: {
+        Row: {
+          answers: Json
+          created_at: string
+          id: string
+          item_id: string
+          item_title: string
+          kind: Database["public"]["Enums"]["item_kind"]
+          line_total: number
+          order_id: string
+          price_breakdown: Json
+          quantity: number
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          item_id: string
+          item_title: string
+          kind: Database["public"]["Enums"]["item_kind"]
+          line_total?: number
+          order_id: string
+          price_breakdown?: Json
+          quantity?: number
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          item_id?: string
+          item_title?: string
+          kind?: Database["public"]["Enums"]["item_kind"]
+          line_total?: number
+          order_id?: string
+          price_breakdown?: Json
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          archived_at: string | null
+          catalog_version_id: string | null
+          completed_at: string | null
+          contact_phone: string | null
+          created_at: string
+          customer_id: string
+          delivery_address: string | null
+          fulfilment: Database["public"]["Enums"]["fulfilment_type"]
+          id: string
+          notes: string | null
+          paid_at: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_ref: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          shop_id: string
+          status: Database["public"]["Enums"]["order_status"]
+          subtotal: number
+          total: number
+          updated_at: string
+          whatsapp_sent: boolean
+        }
+        Insert: {
+          archived_at?: string | null
+          catalog_version_id?: string | null
+          completed_at?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          customer_id: string
+          delivery_address?: string | null
+          fulfilment?: Database["public"]["Enums"]["fulfilment_type"]
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          payment_ref?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          shop_id: string
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          whatsapp_sent?: boolean
+        }
+        Update: {
+          archived_at?: string | null
+          catalog_version_id?: string | null
+          completed_at?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          customer_id?: string
+          delivery_address?: string | null
+          fulfilment?: Database["public"]["Enums"]["fulfilment_type"]
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          payment_ref?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          shop_id?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          whatsapp_sent?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_catalog_version_id_fkey"
+            columns: ["catalog_version_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -272,6 +410,11 @@ export type Database = {
     }
     Enums: {
       catalog_version_status: "draft" | "published" | "archived"
+      fulfilment_type: "delivery" | "pickup"
+      item_kind: "service" | "product"
+      order_status: "pending" | "accepted" | "rejected" | "in_progress" | "done"
+      payment_method: "cash_in_store" | "cash_on_delivery" | "online"
+      payment_status: "pending" | "paid" | "failed" | "refunded"
       shop_role: "staff" | "catalog" | "owner"
       user_role: "customer" | "shop"
     }
@@ -402,6 +545,11 @@ export const Constants = {
   public: {
     Enums: {
       catalog_version_status: ["draft", "published", "archived"],
+      fulfilment_type: ["delivery", "pickup"],
+      item_kind: ["service", "product"],
+      order_status: ["pending", "accepted", "rejected", "in_progress", "done"],
+      payment_method: ["cash_in_store", "cash_on_delivery", "online"],
+      payment_status: ["pending", "paid", "failed", "refunded"],
       shop_role: ["staff", "catalog", "owner"],
       user_role: ["customer", "shop"],
     },
