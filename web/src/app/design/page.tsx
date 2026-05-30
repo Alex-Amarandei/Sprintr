@@ -24,6 +24,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { Metadata } from "next";
+import { ColorSwatch } from "@/components/design/ColorSwatch";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { OpenBadge } from "@/components/ui/OpenBadge";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -83,20 +84,7 @@ export default function DesignSystemPage() {
                   </Text>
                   <Group gap={6}>
                     {Array.from({ length: 10 }).map((_, i) => (
-                      <Stack key={i} gap={4} align="center">
-                        <Box
-                          w={52}
-                          h={44}
-                          bg={`${name}.${i}`}
-                          style={{
-                            borderRadius: 8,
-                            border: "1px solid var(--mantine-color-gray-2)",
-                          }}
-                        />
-                        <Text fz={10} c="dimmed">
-                          {i}
-                        </Text>
-                      </Stack>
+                      <ColorSwatch key={i} token={name} index={i} />
                     ))}
                   </Group>
                 </div>
