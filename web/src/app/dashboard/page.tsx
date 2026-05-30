@@ -8,18 +8,12 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import {
-  Check,
-  Clock,
-  Download,
-  Package,
-  Plus,
-  TrendingUp,
-} from "lucide-react";
+import { Check, Clock, Package, Plus, TrendingUp } from "lucide-react";
 import { sampleOrders } from "@/lib/orders/sample";
 import { roCount } from "@/lib/utils/format";
 import { StatCard } from "@/components/ui/StatCard";
 import { RevenueBars } from "@/components/dashboard/RevenueBars";
+import { ExportReportButton } from "@/components/dashboard/ExportReportButton";
 import { ShopOrderQueue } from "@/components/dashboard/ShopOrderQueue";
 
 export const metadata: Metadata = { title: "Dashboard magazin" };
@@ -65,9 +59,7 @@ export default function ShopDashboardPage() {
           </Text>
         </div>
         <Group>
-          <Button variant="default" leftSection={<Download size={16} />}>
-            Export raport
-          </Button>
+          <ExportReportButton />
           <Button leftSection={<Plus size={16} />}>Adaugă produs</Button>
         </Group>
       </Group>

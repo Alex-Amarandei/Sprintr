@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import type { Field, Item, PriceRule } from "@/lib/catalog/schema";
 import { computeItemPrice, type Answers } from "@/lib/catalog/pricing";
 import { defaultAnswers, validateAnswers } from "@/lib/catalog/answers";
+import { acceptAttr, acceptedLabel, fileAllowed } from "@/lib/catalog/fileTypes";
 import { formatPrice } from "@/lib/utils/format";
 
 function ruleHint(rule?: PriceRule): string | null {
@@ -186,15 +187,22 @@ export function ItemOrderForm({
         <Stack gap="lg" pb="md">
         {item.requires_upload && (
           <FileInput
-            label="Atașează PDF-ul"
-            description="Obligatoriu pentru servicii de printare"
-            placeholder="Alege un fișier PDF"
-            accept="application/pdf"
+            label="Atașează fișierul"
+            description={`Tipuri acceptate: ${acceptedLabel(item.accepted_file_types)}`}
+            placeholder="Alege un fișier"
+            accept={acceptAttr(item.accepted_file_types)}
             leftSection={<FileUp size={16} />}
             value={file}
             onChange={(f) => {
               // Don't clear an already-picked file when the OS dialog is cancelled.
-              if (f) setFile(f);
+              if (!f) return;
+              if (!fileAllowed(f, item.accepted_file_types)) {
+                toast.error(
+                  `Tip de fișier neacceptat. Permise: ${acceptedLabel(item.accepted_file_types)}.`
+                );
+                return;
+              }
+              setFile(f);
             }}
             error={
               attempted && uploadMissing ? "Fișierul este obligatoriu" : undefined

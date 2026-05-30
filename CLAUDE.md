@@ -959,6 +959,14 @@ key isn't in `.env.local`. Harmless to rendering; set the key locally to silence
   height and opens to 0px → looked like "expand doesn't work". Use plain conditional render (`{open && …}`)
   for nested expandables, not `Collapse`.
 
+## Catalog — per-item accepted file types (FE, 2026-05-31)
+- `itemSchema` gained **`accepted_file_types: FileTypeKey[]`** (`pdf | word | excel | image | csv`),
+  default `["pdf"]` (backward-compatible). The shop picks them in the builder when "Necesită fișier
+  atașat" is on; the customer upload's `accept` + validation come from this list
+  (`lib/catalog/fileTypes.ts` → `acceptAttr` / `acceptedLabel` / `fileAllowed`). Replaces the old
+  hardcoded PDF-only upload. **TODO(BE):** allow these MIME/extensions in the `order-files` bucket and
+  mirror the check in server-side answer validation (§8).
+
 ---
 
 # Pages — full FE inventory (design pass complete, append-only)

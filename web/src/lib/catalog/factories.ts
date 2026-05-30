@@ -57,6 +57,7 @@ export function newItem(kind: ItemKind = "service", sortOrder = 0): Item {
     sort_order: sortOrder,
     base_price: 0,
     requires_upload: kind === "service",
+    accepted_file_types: ["pdf"],
     stock_display: "none",
     inventory_item_id: null,
     category_id: null,

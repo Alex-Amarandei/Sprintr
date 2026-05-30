@@ -99,6 +99,10 @@ export type ItemKind = (typeof itemKinds)[number];
 
 export const stockDisplayValues = ["none", "in_out", "exact"] as const;
 
+// Supported uploadable file types (shop picks a subset per item that needs a file).
+export const fileTypeValues = ["pdf", "word", "excel", "image", "csv"] as const;
+export type FileTypeKey = (typeof fileTypeValues)[number];
+
 export const itemSchema = z.object({
   id: z.string().min(1),
   kind: z.enum(itemKinds),
@@ -109,6 +113,9 @@ export const itemSchema = z.object({
   sort_order: z.number().int().default(0),
   base_price: z.number().min(0).default(0),
   requires_upload: z.boolean().default(false),
+  // Which file types the customer may upload when `requires_upload`. Defaults to PDF
+  // (backward-compatible with documents created before this field existed).
+  accepted_file_types: z.array(z.enum(fileTypeValues)).default(["pdf"]),
   stock_display: z.enum(stockDisplayValues).default("none"),
   inventory_item_id: z.string().nullable().default(null), // Phase 2
   // Optional link to a category from document.categories (§2). Backward-compatible.

@@ -8,6 +8,7 @@ import {
   Divider,
   Group,
   Menu,
+  MultiSelect,
   NumberInput,
   Paper,
   Select,
@@ -39,10 +40,12 @@ import {
   type Category,
   type Field,
   type FieldType,
+  type FileTypeKey,
   type Item,
   type ItemKind,
 } from "@/lib/catalog/schema";
 import { newField } from "@/lib/catalog/factories";
+import { FILE_TYPE_OPTIONS } from "@/lib/catalog/fileTypes";
 import { formatPrice, roCount } from "@/lib/utils/format";
 import { FieldEditor } from "./FieldEditor";
 
@@ -218,9 +221,20 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
           />
 
           <Group>
-            <Switch label="Necesită upload PDF" checked={item.requires_upload} onChange={(e) => patch({ requires_upload: e.currentTarget.checked })} />
+            <Switch label="Necesită fișier atașat" checked={item.requires_upload} onChange={(e) => patch({ requires_upload: e.currentTarget.checked })} />
             <Switch label="Activ" checked={item.is_active} onChange={(e) => patch({ is_active: e.currentTarget.checked })} />
           </Group>
+
+          {item.requires_upload && (
+            <MultiSelect
+              label="Tipuri de fișiere acceptate"
+              description="Clientul va putea încărca doar aceste tipuri."
+              placeholder="Alege tipurile permise"
+              data={FILE_TYPE_OPTIONS}
+              value={item.accepted_file_types}
+              onChange={(v) => patch({ accepted_file_types: v as FileTypeKey[] })}
+            />
+          )}
 
           <Divider label="Câmpuri configurabile" labelPosition="left" />
 

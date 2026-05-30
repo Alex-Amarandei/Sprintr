@@ -17,7 +17,8 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
-import { MoreHorizontal, Palette, Plus } from "lucide-react";
+import { Palette, Plus, Trash2 } from "lucide-react";
+import { LinkButton } from "@/components/ui/links";
 
 type PromoType = "percent" | "fixed" | "bxgy";
 
@@ -66,7 +67,9 @@ export function OffersManager() {
             Atrage clienți noi cu promoții și un banner activ pe pagina ta.
           </Text>
         </div>
-        <Button leftSection={<Plus size={16} />}>Promoție nouă</Button>
+        <LinkButton href="/dashboard/offers/new" leftSection={<Plus size={16} />}>
+          Promoție nouă
+        </LinkButton>
       </Group>
 
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
@@ -175,8 +178,13 @@ export function OffersManager() {
                         )
                       }
                     />
-                    <ActionIcon variant="subtle" color="gray" aria-label="Opțiuni">
-                      <MoreHorizontal size={18} />
+                    <ActionIcon
+                      variant="subtle"
+                      color="red"
+                      aria-label="Șterge promoția"
+                      onClick={() => setPromos((prev) => prev.filter((x) => x.id !== p.id))}
+                    >
+                      <Trash2 size={18} />
                     </ActionIcon>
                   </Group>
                 </Group>
