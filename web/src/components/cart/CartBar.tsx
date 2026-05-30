@@ -14,7 +14,7 @@ import {
   ThemeIcon,
 } from "@mantine/core";
 import { ArrowRight, FileText, Package, ShoppingCart, Trash2 } from "lucide-react";
-import { formatPrice } from "@/lib/utils/format";
+import { formatPrice, roCount } from "@/lib/utils/format";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useCart } from "./CartContext";
 import { CheckoutModal } from "./CheckoutModal";
@@ -51,7 +51,7 @@ export function CartBar() {
             </Text>
             {count > 0 && (
               <Text fz="sm" c="dimmed">
-                {count} {count === 1 ? "produs" : "produse"}
+                {roCount(count, "produs", "produse")}
               </Text>
             )}
           </div>

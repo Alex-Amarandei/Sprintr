@@ -3,6 +3,7 @@ import { Badge, Box, Card, Group, Stack, Text } from "@mantine/core";
 import { Clock, Star } from "lucide-react";
 import type { SampleShop } from "@/lib/catalog/samples";
 import { OpenBadge } from "@/components/ui/OpenBadge";
+import { roCount } from "@/lib/utils/format";
 import { SHOP_CATEGORY } from "./category";
 
 export function ShopCard({ shop }: { shop: SampleShop }) {
@@ -81,7 +82,7 @@ export function ShopCard({ shop }: { shop: SampleShop }) {
           </Group>
           {shop.reviews != null && (
             <Text fz="xs" c="dimmed">
-              {shop.reviews} recenzii
+              {roCount(shop.reviews, "recenzie", "recenzii")}
             </Text>
           )}
         </Group>

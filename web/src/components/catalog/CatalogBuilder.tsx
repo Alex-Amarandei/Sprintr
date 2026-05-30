@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  ActionIcon,
   Alert,
   Badge,
   Button,
@@ -12,27 +13,180 @@ import {
   Paper,
   Stack,
   Text,
+  TextInput,
   Title,
 } from "@mantine/core";
-import { Pencil, Plus, Save } from "lucide-react";
+import { GripVertical, Pencil, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DndContext,
+  closestCorners,
+  PointerSensor,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
   catalogDocumentSchema,
   parseDocument,
   type CatalogDocument,
+  type Category,
   type Item,
   type ItemKind,
 } from "@/lib/catalog/schema";
-import { newItem } from "@/lib/catalog/factories";
+import { newCategory, newItem } from "@/lib/catalog/factories";
 import { createDraft, saveDraftDocument } from "@/lib/catalog/api";
+import { roCount } from "@/lib/utils/format";
 import { ItemCard } from "./ItemCard";
 
-function moveInArray<T>(arr: T[], from: number, to: number): T[] {
-  if (to < 0 || to >= arr.length) return arr;
-  const next = [...arr];
-  const [moved] = next.splice(from, 1);
-  next.splice(to, 0, moved);
-  return next;
+/** An ItemCard wrapped as a dnd-kit sortable, with its own drag handle. */
+function SortableItemCard({
+  item,
+  categories,
+  onChange,
+  onRemove,
+}: {
+  item: Item;
+  categories: Category[];
+  onChange: (it: Item) => void;
+  onRemove: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: item.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    zIndex: isDragging ? 2 : undefined,
+  };
+  const handle = (
+    <ActionIcon
+      variant="subtle"
+      color="gray"
+      size="lg"
+      style={{ cursor: "grab" }}
+      aria-label="Trage pentru reordonare"
+      {...attributes}
+      {...listeners}
+    >
+      <GripVertical size={18} />
+    </ActionIcon>
+  );
+  return (
+    <div ref={setNodeRef} style={style}>
+      <ItemCard item={item} categories={categories} onChange={onChange} onRemove={onRemove} dragHandle={handle} />
+    </div>
+  );
+}
+
+/**
+ * A category section — an editable header + a droppable area holding its items.
+ * Items can be dragged in/out across sections. `categoryId === null` = uncategorized.
+ */
+function CategorySection({
+  categoryId,
+  name,
+  items,
+  categories,
+  onRename,
+  onDelete,
+  onAddItem,
+  onItemChange,
+  onItemRemove,
+}: {
+  categoryId: string | null;
+  name: string;
+  items: Item[];
+  categories: Category[];
+  onRename?: (name: string) => void;
+  onDelete?: () => void;
+  onAddItem?: (kind: ItemKind) => void;
+  onItemChange: (id: string, it: Item) => void;
+  onItemRemove: (id: string) => void;
+}) {
+  const droppableId = `cat:${categoryId ?? "none"}`;
+  const { setNodeRef, isOver } = useDroppable({ id: droppableId });
+  const isUncat = categoryId === null;
+
+  return (
+    <Paper
+      withBorder
+      radius="lg"
+      p="md"
+      style={{
+        background: isOver ? "var(--mantine-color-stone-1)" : "var(--mantine-color-gray-0)",
+        transition: "background 120ms",
+      }}
+    >
+      <Group justify="space-between" wrap="nowrap" mb="sm">
+        {isUncat ? (
+          <Text fw={700} c="dimmed">
+            Fără categorie
+          </Text>
+        ) : (
+          <TextInput
+            variant="unstyled"
+            placeholder="Nume categorie"
+            value={name}
+            onChange={(e) => onRename?.(e.currentTarget.value)}
+            styles={{ input: { fontWeight: 700, fontSize: "var(--mantine-font-size-md)" } }}
+            style={{ flex: 1 }}
+          />
+        )}
+        <Group gap="xs" wrap="nowrap">
+          <Text fz="xs" c="dimmed" style={{ whiteSpace: "nowrap" }}>
+            {roCount(items.length, "produs", "produse")}
+          </Text>
+          {!isUncat && (
+            <Menu shadow="md" position="bottom-end">
+              <Menu.Target>
+                <Button variant="light" size="xs" leftSection={<Plus size={14} />}>
+                  Adaugă
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item onClick={() => onAddItem?.("service")}>Serviciu</Menu.Item>
+                <Menu.Item onClick={() => onAddItem?.("product")}>Produs</Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          )}
+          {!isUncat && (
+            <ActionIcon variant="subtle" color="red" onClick={onDelete} aria-label="Șterge categoria">
+              <Trash2 size={16} />
+            </ActionIcon>
+          )}
+        </Group>
+      </Group>
+
+      <div ref={setNodeRef}>
+        <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+          <Stack gap="sm">
+            {items.map((item) => (
+              <SortableItemCard
+                key={item.id}
+                item={item}
+                categories={categories}
+                onChange={(it) => onItemChange(item.id, it)}
+                onRemove={() => onItemRemove(item.id)}
+              />
+            ))}
+            {items.length === 0 && (
+              <Text fz="sm" c="dimmed" ta="center" py="md">
+                Trage produse aici
+              </Text>
+            )}
+          </Stack>
+        </SortableContext>
+      </div>
+    </Paper>
+  );
 }
 
 /** Field keys must be unique within an item. Returns an error string or null. */
@@ -94,14 +248,76 @@ export function CatalogBuilder({
     }
   }
 
-  function addItem(kind: ItemKind) {
-    updateDoc([...doc.items, newItem(kind, doc.items.length)]);
+  function addItem(kind: ItemKind, categoryId: string | null = null) {
+    updateDoc([
+      ...doc.items,
+      { ...newItem(kind, doc.items.length), category_id: categoryId },
+    ]);
   }
-  function updateItem(i: number, item: Item) {
-    updateDoc(doc.items.map((it, idx) => (idx === i ? item : it)));
+  const updateItemById = (id: string, item: Item) =>
+    updateDoc(doc.items.map((it) => (it.id === id ? item : it)));
+  const removeItemById = (id: string) =>
+    updateDoc(doc.items.filter((it) => it.id !== id));
+
+  function setCategories(categories: Category[]) {
+    // Clear references to deleted categories from items.
+    const ids = new Set(categories.map((c) => c.id));
+    const items = doc.items.map((it) =>
+      it.category_id && !ids.has(it.category_id) ? { ...it, category_id: null } : it
+    );
+    setDoc({ ...doc, categories, items });
+    setDirty(true);
   }
-  function removeItem(i: number) {
-    updateDoc(doc.items.filter((_, idx) => idx !== i));
+  const addCategory = () =>
+    setCategories([...doc.categories, newCategory("", doc.categories.length)]);
+  const renameCategory = (id: string, name: string) =>
+    setCategories(doc.categories.map((c) => (c.id === id ? { ...c, name } : c)));
+  const deleteCategory = (id: string) =>
+    setCategories(doc.categories.filter((c) => c.id !== id));
+
+  const itemsOf = (categoryId: string | null) =>
+    doc.items.filter((it) => (it.category_id ?? null) === categoryId);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } })
+  );
+  /** Cross-container drag: move an item into a category section and reorder. */
+  function onDragEnd(e: DragEndEvent) {
+    const { active, over } = e;
+    if (!over) return;
+    const activeId = String(active.id);
+    const overId = String(over.id);
+    if (activeId === overId) return;
+
+    const activeItem = doc.items.find((it) => it.id === activeId);
+    if (!activeItem) return;
+
+    let targetCat: string | null;
+    let overItemId: string | null;
+    if (overId.startsWith("cat:")) {
+      const raw = overId.slice(4);
+      targetCat = raw === "none" ? null : raw;
+      overItemId = null;
+    } else {
+      const overItem = doc.items.find((it) => it.id === overId);
+      if (!overItem) return;
+      targetCat = overItem.category_id ?? null;
+      overItemId = overId;
+    }
+
+    const rest = doc.items.filter((it) => it.id !== activeId);
+    const moved: Item = { ...activeItem, category_id: targetCat };
+    if (overItemId) {
+      const idx = rest.findIndex((it) => it.id === overItemId);
+      rest.splice(idx < 0 ? rest.length : idx, 0, moved);
+    } else {
+      const sameCat = rest
+        .map((it, k) => ((it.category_id ?? null) === targetCat ? k : -1))
+        .filter((k) => k >= 0);
+      const insertAt = sameCat.length ? sameCat[sameCat.length - 1] + 1 : rest.length;
+      rest.splice(insertAt, 0, moved);
+    }
+    updateDoc(rest);
   }
 
   async function save() {
@@ -159,7 +375,7 @@ export function CatalogBuilder({
               </Badge>
             )}
             <Text size="sm" c="dimmed">
-              {doc.items.length} item(i)
+              {roCount(doc.items.length, "element", "elemente")}
             </Text>
           </Group>
         </div>
@@ -191,46 +407,61 @@ export function CatalogBuilder({
         </Alert>
       )}
 
-      {doc.items.length === 0 ? (
+      {editing ? (
+        <>
+          <Group>
+            <Button variant="default" leftSection={<Plus size={16} />} onClick={addCategory}>
+              Adaugă categorie
+            </Button>
+          </Group>
+
+          <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={onDragEnd}>
+            <Stack gap="md">
+              {doc.categories.map((cat) => (
+                <CategorySection
+                  key={cat.id}
+                  categoryId={cat.id}
+                  name={cat.name}
+                  items={itemsOf(cat.id)}
+                  categories={doc.categories}
+                  onRename={(name) => renameCategory(cat.id, name)}
+                  onDelete={() => deleteCategory(cat.id)}
+                  onAddItem={(kind) => addItem(kind, cat.id)}
+                  onItemChange={updateItemById}
+                  onItemRemove={removeItemById}
+                />
+              ))}
+              <CategorySection
+                categoryId={null}
+                name=""
+                items={itemsOf(null)}
+                categories={doc.categories}
+                onItemChange={updateItemById}
+                onItemRemove={removeItemById}
+              />
+            </Stack>
+          </DndContext>
+        </>
+      ) : doc.items.length === 0 ? (
         <Paper withBorder radius="lg" p={48} ta="center" c="dimmed">
-          {editing
-            ? "Niciun item încă. Adaugă primul serviciu sau produs."
-            : "Catalogul este gol."}
+          Catalogul este gol.
         </Paper>
       ) : (
         <Stack gap="md">
-          {doc.items.map((item, i) =>
-            editing ? (
-              <ItemCard
-                key={item.id}
-                item={item}
-                onChange={(it) => updateItem(i, it)}
-                onRemove={() => removeItem(i)}
-                onMoveUp={
-                  i > 0
-                    ? () => updateDoc(moveInArray(doc.items, i, i - 1))
-                    : undefined
-                }
-                onMoveDown={
-                  i < doc.items.length - 1
-                    ? () => updateDoc(moveInArray(doc.items, i, i + 1))
-                    : undefined
-                }
-              />
-            ) : (
-              <Paper key={item.id} withBorder radius="lg" p="md">
-                <Group justify="space-between">
-                  <Title order={4}>{item.title}</Title>
-                  <Badge variant="light">
-                    {item.kind === "service" ? "Serviciu" : "Produs"}
-                  </Badge>
-                </Group>
-                <Text size="sm" c="dimmed">
-                  {item.fields.length} câmpuri · de la {item.base_price} RON
-                </Text>
-              </Paper>
-            )
-          )}
+          {doc.items.map((item) => (
+            <Paper key={item.id} withBorder radius="lg" p="md">
+              <Group justify="space-between">
+                <Title order={4}>{item.title}</Title>
+                <Badge variant="light">
+                  {item.kind === "service" ? "Serviciu" : "Produs"}
+                </Badge>
+              </Group>
+              <Text size="sm" c="dimmed">
+                {roCount(item.fields.length, "câmp", "câmpuri")} · de la{" "}
+                {item.base_price} RON
+              </Text>
+            </Paper>
+          ))}
         </Stack>
       )}
 

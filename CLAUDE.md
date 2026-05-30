@@ -945,3 +945,72 @@ Restyled to the prototype, keeping existing logic/data (`sampleShops`, `getSampl
 `CheckoutModal` calls `loadStripe(NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)` eagerly → throws
 "Expected publishable key… got undefined" (the dev "1 Issue" badge) when the cart mounts and the
 key isn't in `.env.local`. Harmless to rendering; set the key locally to silence it.
+
+## Catalog builder — categories + drag-drop (FE, 2026-05-30)
+- **Document schema gained categories (§2):** `catalogDocumentSchema` now has `categories: Category[]`
+  (`{id,name,parent_id,sort_order}`, flat for now) and each item has `category_id` (nullable). Both
+  **additive with defaults** — old documents parse unchanged. **TODO(BE):** mirror `categories` +
+  `category_id` (and the earlier `swatch`) in any server-side document validator so saving isn't rejected.
+- **Builder UX reconfigured** (`CatalogBuilder`/`ItemCard`/`FieldEditor`): items & fields are now
+  **collapsible** (compact summary row → click to expand) and **drag-reorderable** via **dnd-kit**
+  (`@dnd-kit/core|sortable|utilities`) with grip handles — the old up/down arrows are gone. A
+  `Categorii` manager (add/rename/delete) sits at the top; each item has a "Categorie (opțional)" select.
+- **Gotcha fixed:** nested Mantine `Collapse` (item-Collapse containing field-Collapses) mis-measures
+  height and opens to 0px → looked like "expand doesn't work". Use plain conditional render (`{open && …}`)
+  for nested expandables, not `Collapse`.
+
+---
+
+# Pages — full FE inventory (design pass complete, append-only)
+
+> Every page below is built to the design system v2 with **existing logic preserved** (data fetches,
+> cart, pricing, checkout, catalog RPCs). Placeholder data is clearly sample/`TODO(BE)`. Romanian UI.
+> All counts use `roCount(n, singular, plural)` from `lib/utils/format.ts` (1→sg, 2–19→pl, ≥20→"de"+pl).
+
+## Customer
+- **`/` landing** (`app/page.tsx`) — hero (ember-accent headline, badge, dual CTA, stats, floating
+  order-preview card) + "Trei pași" steps. Logged-in users redirect by role (`shop`→/dashboard, else /browse).
+- **`/browse`** — dark welcome band (greets by profile name, "N magazine sunt deschise"), visual filter
+  chips, `ShopCard` grid. **Reads real shops via `getShops()`** (BE-wired).
+- **`/shop/[shopId]`** — banner + overlapping header card, weekly `ShopSchedule`, catalog tabs
+  (`ShopCatalogTabs`), promo sidebar. Reads `getShopView`/`getShopCatalog`.
+- **Configurator** = `AddItemCard` (catalog item card) → modal with `ItemOrderForm`: 5 field types as
+  radio-cards/swatch-picker/stepper/switch/textarea, live price, **sticky Total+CTA footer**, errors only
+  after first submit, file-cancel doesn't clear. Bold modal title + `padding="xl"`.
+- **Cart** = header `CartBar` → right `Drawer` (icon-tile lines, Subtotal/Livrare/Total card, CTA + empty
+  state) → `CheckoutModal` (3 steps: card-style fulfilment + payment selects, Stripe `PaymentElement`,
+  success). **No platform-fee line**; "Numerar la magazin" only on pickup.
+- **`/orders`** — KPI strip + `OrdersTable` (filter tabs, status pills, ETA, clickable rows).
+- **`/order/[orderId]`** — `StatusTimeline` + frozen line items + PDF link + totals + `ChatPanel`
+  (customer perspective).
+
+## Shop dashboard (`/dashboard/*`, layout guards `role shop|admin`; sidebar `DashboardNav`)
+- **`/dashboard`** — greeting + date, 4 `StatCard`s, `RevenueBars` (CSS bar chart), Top servicii,
+  `ShopOrderQueue` (inline Acceptă/Respinge/advance, tabs).
+- **`/dashboard/orders`** — full `ShopOrderQueue`; rows link to detail.
+- **`/dashboard/orders/[orderId]`** — shop order detail: status actions (`ShopOrderActions`), status
+  timeline, frozen config per line, **Fișiere atașate + Descarcă** (`DownloadButton`, TODO(BE) signed
+  URLs), client notes, Client&livrare sidebar, `ChatPanel` (shop perspective), **prev/next arrows** top-right.
+- **`/dashboard/products`** — product grid; **`/dashboard/products/new`** + **`/[productId]/edit`** =
+  `ProductEditor` (general details + live preview).
+- **`/dashboard/offers`** — `OffersManager`: banner editor w/ live preview + promotions list (type/status/
+  code badges + toggles).
+- **`/dashboard/profile`** — `ProfileEditor`: banner/logo, info form, per-day hours, completeness sidebar.
+- **`/dashboard/services`** — `CatalogBuilder` (real Supabase draft/publish). Items & fields **collapsible**
+  + **drag-reorder (dnd-kit)**; **categories as droppable sections** — drag items between sections to set
+  `category_id`; no-shop state uses `EmptyState`.
+
+## Component locations
+`components/ui/` (StatusBadge, OpenBadge, Dot, SectionHeader, EmptyState, StatCard) ·
+`components/shop/` (ShopCard, category.ts, ShopCatalogTabs, ShopSchedule) ·
+`components/order/` (StatusTimeline, ChatPanel[`perspective` prop], OrdersTable, ShopOrderActions, DownloadButton) ·
+`components/dashboard/` (DashboardNav, RevenueBars, ShopOrderQueue, OffersManager, ProfileEditor, ProductEditor) ·
+`components/catalog/` (CatalogBuilder, ItemCard, FieldEditor, PriceRuleInput) · `components/cart/` (CartBar, CheckoutModal, AddItemCard).
+Sample data: `lib/orders/sample.ts` (orders incl. customer/contact/notes/fulfilment), `lib/catalog/samples.ts`.
+
+## Dev notes
+- **Toasts** moved to `bottom-right` + `closeButton` (were covering the header).
+- **Screenshot quirk:** `/dashboard/*` (and `/browse` since it does a live Supabase read) never reach
+  network-idle, so the Chrome screenshot tool times out — verify those via DOM inspection, not screenshots.
+- **Aligning an image tile beside a labelled input:** the input label adds ~22px above the field; offset
+  the tile column (`mt`) so the tile top meets the input box, not the column top.

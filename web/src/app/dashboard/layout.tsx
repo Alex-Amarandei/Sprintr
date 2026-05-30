@@ -29,8 +29,10 @@ export default async function ShopLayout({
 
   return (
     <Box mih="100vh" bg="gray.0">
+      {/* Desktop fixed sidebar */}
       <Box
         component="aside"
+        visibleFrom="md"
         w={SIDEBAR_WIDTH}
         bg="white"
         style={{
@@ -59,7 +61,38 @@ export default async function ShopLayout({
         </Box>
         <DashboardNav />
       </Box>
-      <Box component="main" ml={SIDEBAR_WIDTH} p="xl">
+
+      {/* Mobile top bar + nav */}
+      <Box
+        hiddenFrom="md"
+        bg="white"
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
+          borderBottom: "1px solid var(--mantine-color-gray-2)",
+        }}
+      >
+        <Group justify="space-between" align="center" wrap="nowrap" p="md">
+          <LinkAnchor
+            href="/dashboard"
+            fw={700}
+            fz="xl"
+            c="brand.6"
+            underline="never"
+          >
+            SprintR
+          </LinkAnchor>
+          <SignOutButton />
+        </Group>
+        <DashboardNav />
+      </Box>
+
+      <Box
+        component="main"
+        ml={{ base: 0, md: SIDEBAR_WIDTH }}
+        p={{ base: "md", md: "xl" }}
+      >
         {children}
       </Box>
     </Box>

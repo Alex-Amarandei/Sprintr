@@ -8,8 +8,16 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { Check, Clock, Download, Package, Plus, TrendingUp } from "lucide-react";
+import {
+  Check,
+  Clock,
+  Download,
+  Package,
+  Plus,
+  TrendingUp,
+} from "lucide-react";
 import { sampleOrders } from "@/lib/orders/sample";
+import { roCount } from "@/lib/utils/format";
 import { StatCard } from "@/components/ui/StatCard";
 import { RevenueBars } from "@/components/dashboard/RevenueBars";
 import { ShopOrderQueue } from "@/components/dashboard/ShopOrderQueue";
@@ -41,7 +49,7 @@ export default function ShopDashboardPage() {
   }).format(new Date());
   const newCount = sampleOrders.filter((o) => o.status === "pending").length;
   const prepCount = sampleOrders.filter(
-    (o) => o.status === "accepted" || o.status === "in_progress"
+    (o) => o.status === "accepted" || o.status === "in_progress",
   ).length;
 
   return (
@@ -53,7 +61,7 @@ export default function ShopDashboardPage() {
           </Text>
           <Title order={2}>Bună dimineața, PIM Copy 👋</Title>
           <Text c="dimmed">
-            Ai {newCount} comenzi noi care așteaptă aprobare.
+            Ai {roCount(newCount, "comandă nouă", "comenzi noi")} care așteaptă aprobare.
           </Text>
         </div>
         <Group>
@@ -65,10 +73,33 @@ export default function ShopDashboardPage() {
       </Group>
 
       <SimpleGrid cols={{ base: 2, md: 4 }} spacing="lg">
-        <StatCard icon={<Clock size={20} />} value={String(newCount)} label="Comenzi noi" delta="+2 vs ieri" color="brand" />
-        <StatCard icon={<Package size={20} />} value={String(prepCount)} label="În pregătire" color="cyan" />
-        <StatCard icon={<Check size={20} />} value="18" label="Finalizate azi" delta="+12%" color="teal" />
-        <StatCard icon={<TrendingUp size={20} />} value="1.240 lei" label="Venit azi" delta="+24%" color="brand" />
+        <StatCard
+          icon={<Clock size={20} />}
+          value={String(newCount)}
+          label="Comenzi noi"
+          delta="+2 vs ieri"
+          color="brand"
+        />
+        <StatCard
+          icon={<Package size={20} />}
+          value={String(prepCount)}
+          label="În pregătire"
+          color="cyan"
+        />
+        <StatCard
+          icon={<Check size={20} />}
+          value="18"
+          label="Finalizate azi"
+          delta="+12%"
+          color="teal"
+        />
+        <StatCard
+          icon={<TrendingUp size={20} />}
+          value="1.240 lei"
+          label="Venit azi"
+          delta="+24%"
+          color="brand"
+        />
       </SimpleGrid>
 
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
@@ -93,7 +124,7 @@ export default function ShopDashboardPage() {
                     {t.name}
                   </Text>
                   <Text fz="xs" c="dimmed">
-                    {t.orders} comenzi
+                    {roCount(t.orders, "comandă", "comenzi")}
                   </Text>
                 </div>
                 <Text fw={700} fz="sm">
@@ -107,7 +138,7 @@ export default function ShopDashboardPage() {
 
       <div>
         <Title order={3} mb="md">
-          Comenzi de procesat
+          Comenzi
         </Title>
         <ShopOrderQueue initialOrders={sampleOrders} limit={5} />
       </div>
