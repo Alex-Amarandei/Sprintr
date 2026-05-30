@@ -350,7 +350,9 @@ caches). Run `get_advisors` after every migration. Helper/trigger functions
 
 ## Supabase project
 - Project ref: `qborcngytmztfucjuwgw` · URL: `https://qborcngytmztfucjuwgw.supabase.co`
-- **Postgres 17.6** → NO native `uuidv7()`. We add `public.uuid_generate_v7()` (Fabio Lima).
+- **Postgres 17.6** → no native `uuidv7()`. We use **`gen_random_uuid()` (UUIDv4)** for our
+  PKs — see "Decision reversal: plain UUIDv4 over UUIDv7" above. There is **no**
+  `uuid_generate_v7()` function (this line previously claimed otherwise — corrected).
 - MCP server configured in `.mcp.json` (each teammate authenticates via OAuth on their machine).
 - Each teammate needs their own `web/.env.local` (copy from `.env.local.example`, gitignored).
 
@@ -362,3 +364,193 @@ caches). Run `get_advisors` after every migration. Helper/trigger functions
 - These JSONs use richer option types (`number`, `radio`) + per-unit pricing that **don't**
   match our MVP model (`single_select|boolean|text`, additive-only). **Down-map** when we
   write the seed migration. Seeding ownership (FE script vs seed migration) is TBD.
+
+---
+
+# Catalog & product builder — spec for the UI team
+
+This is the **contract** for the product/service builder (catalog-member side) and the
+customer-facing renderer. Build to this convention; the backend renders, validates, and
+prices from exactly these shapes. The configurator is intentionally **data-driven and
+shop-agnostic** (Storyblok-style): a shop defines arbitrary fields; we never hard-code a
+shop's schema. Two job types, **service** and **product**, share one model.
+
+## 1. Versioned catalog (saving / publishing)
+
+- A shop's catalog is a series of **immutable version snapshots** (`catalog_versions`),
+  each holding the whole catalog as one JSON `document`.
+- `shops.active_version_id` points at the **live** version (what customers see).
+- Editing happens on a **draft**; publishing/switching just moves the pointer; reverting =
+  point back at an older version. We keep the **last 10** versions per shop.
+- **Permissions:** create/edit drafts and publish/switch/revert = role **`catalog` or
+  `owner`** (`staff` cannot). Enforced by RLS + the RPC functions below.
+- **Builder UI flow (RPCs):**
+  - *Edit catalog* → `create_catalog_draft(shop_id, label?)` → clones the live version into
+    a new `draft`; returns the row. Edit that draft's `document` (normal `update`).
+  - *Publish / Make live / Revert to vN* → `set_active_catalog_version(version_id)`.
+  - *Version history* → select `catalog_versions` for the shop (members read all); show
+    `version, label, status, created_by, created_at`; offer switch/revert.
+- Customers (incl. logged-out `anon`) can read **only** the active version's `document`.
+
+## 2. Document structure
+
+```jsonc
+{ "schema_version": 1, "items": [ /* ordered Items */ ] }
+```
+
+## 3. Item
+
+```jsonc
+{
+  "id": "uuid",               // stable across versions — KEEP the same id when editing an item
+  "kind": "service" | "product",
+  "title": "Listare lucrare de licență",
+  "description": "…",         // nullable
+  "image_path": "shops/<id>/items/<file>",   // storage path (not URL), nullable
+  "is_active": true,
+  "sort_order": 0,
+  "base_price": 0,            // RON, additive once (see §7)
+  "requires_upload": true,    // service: customer must attach a PDF; product: usually false
+  "stock_display": "none",    // "none" | "in_out" | "exact"   (Phase 2 / inventory)
+  "inventory_item_id": null,  // PRODUCT only, 1:1 link            (Phase 2 / inventory)
+  "fields": [ /* ordered Fields — the configurator */ ]
+}
+```
+
+- **product** = simple good: `requires_upload:false`, typically a single `quantity` number
+  field, 1:1 `inventory_item_id`.
+- **service** = configurable job: `requires_upload:true` (usually); `fields` define the
+  config; may consume **several** inventory items based on choices (Phase 2 `consumes`).
+
+## 4. Field — render by `type`
+
+```jsonc
+{
+  "key": "binding",      // unique within the item; [a-z0-9_]; machine-stable
+  "label": "Legătorie",  // customer-facing
+  "type": "single_select" | "multi_select" | "boolean" | "number" | "text",
+  "required": false,     // see per-type meaning below
+  "help": null,          // optional hint
+  "default": null        // optional prefill
+}
+```
+
+| `type` | UI control | answer value | priced via |
+|---|---|---|---|
+| `single_select` | radio / dropdown | chosen `value` (string) | chosen option's `price` |
+| `multi_select` | checkbox group | `value`s (string[]) | Σ chosen options' `price` |
+| `boolean` | switch / checkbox | `true`/`false` | field `price` when `true` |
+| `number` | number input | number | field `price` (usually `per_unit`) |
+| `text` | text input | string | never priced |
+
+- **single_/multi_select** add:
+  ```jsonc
+  "options": [
+    { "value": "spiral", "label": "Spiră", "price": { "mode":"additive", "amount":10 },
+      "default": false, "locked": false }
+  ],
+  "min_select": 0,   // multi_select only — 0 = optional, ≥1 = mandatory count
+  "max_select": null // multi_select only — null = unlimited
+  ```
+- **number** adds: `"min":1, "max":null, "step":1, "unit":"pagini"` + optional `"price"`.
+- **boolean** adds optional `"price"` (applied when `true`).
+
+### Mandatory vs optional
+- `required:true` on `single_select`/`number` → must be answered.
+- `multi_select` → governed by `min_select` / `max_select`.
+- option `default:true` → pre-selected but changeable; `locked:true` → pre-selected and
+  **cannot** be deselected (render checked + disabled; always counts toward price/consume).
+
+## 5. PriceRule
+
+```jsonc
+{ "mode": "additive", "amount": 10 }                  // +10 RON once
+{ "mode": "per_unit", "amount": 1.0, "per": "pages" }  // +1.0 RON × answers.pages
+```
+- `per` = `key` of a `number` field in the same item. A `number` field's *own* price
+  defaults `per` to that field's value. Prices are RON, 2 decimals.
+
+## 6. Answer shape (customer submission; frozen onto the order)
+
+Keyed by field `key`:
+```jsonc
+{ "pages": 100, "print": "color", "finishing": ["lamination"], "rush": true, "note": "…" }
+```
+single_select→string · multi_select→string[] · boolean→bool · number→number · text→string.
+
+## 7. Pricing algorithm (authoritative; client mirrors it for live preview)
+
+```
+total = base_price
+for each field, by type:
+  single_select : answered ? resolve(chosenOption.price) : 0
+  multi_select  : Σ resolve(option.price) over selected
+  boolean       : value === true ? resolve(field.price) : 0
+  number        : resolve(field.price)        // per defaults to this field's own value
+  text          : 0
+resolve(additive)       = amount
+resolve(per_unit, per)  = amount × answers[per]
+round half-up to 2 decimals at the end.
+```
+- **Flat sum, NO conditional/branching pricing** — every priced element contributes
+  independently.
+- **Server is the source of truth.** The client computes the same formula for live preview,
+  but the order total is recomputed server-side at placement; mismatch → reject.
+
+## 8. Validation (server + mirror on client)
+
+- `required` single_select/number answered; multi_select count ∈ [min_select, max_select].
+- every selected value ∈ that field's option `value`s; all `locked` options present.
+- number ∈ [min, max] honoring `step`.
+- every `per` (and Phase-2 `qty_per`) references an existing `number` field key.
+- unknown answer keys rejected; malformed `document` rejected on save.
+
+## 9. Worked example (service)
+
+```jsonc
+{ "kind":"service", "title":"Listare licență", "base_price":0, "requires_upload":true,
+  "fields":[
+    {"key":"pages","label":"Pagini","type":"number","required":true,"min":1,"unit":"pag",
+     "price":{"mode":"per_unit","amount":0.25}},
+    {"key":"print","label":"Tipar","type":"single_select","required":true,"options":[
+      {"value":"bw","label":"Alb-negru","price":{"mode":"additive","amount":0}},
+      {"value":"color","label":"Color","price":{"mode":"per_unit","amount":1.0,"per":"pages"}}]},
+    {"key":"binding","label":"Legătorie","type":"single_select","required":true,"options":[
+      {"value":"none","label":"Fără","price":{"mode":"additive","amount":0}},
+      {"value":"spiral","label":"Spiră","price":{"mode":"additive","amount":10}}]}
+  ]}
+// answers {pages:100, print:"color", binding:"spiral"} → 0 + 25 + 100 + 10 = 135 RON
+```
+
+## 10. Product pattern
+
+```jsonc
+{ "kind":"product", "title":"Pix Pilot", "base_price":0, "requires_upload":false,
+  "inventory_item_id":"…", "stock_display":"in_out",
+  "fields":[ {"key":"quantity","label":"Cantitate","type":"number","required":true,
+              "min":1,"default":1,"price":{"mode":"per_unit","amount":5.0}} ] }
+// answers {quantity:3} → 15 RON; decrements its inventory item by 3 at placement (Phase 2).
+```
+
+## 11. Phase 2 — inventory (designed, NOT built yet)
+
+When `inventory_items` lands, the `document` gains these **additively** (no migration —
+it's JSONB; old documents without them stay valid):
+- **product** items: `inventory_item_id` — **1:1** with an inventory item. Ordering qty N
+  decrements that item by N.
+- **service** items: options/fields may declare a **`consumes`** list (bill-of-materials),
+  exactly parallel to `price`:
+  ```jsonc
+  "consumes": [
+    { "inventory_item_id":"…", "qty": 1 },            // fixed: 1 spiral if this option chosen
+    { "inventory_item_id":"…", "qty_per": "pages" }   // per-unit: 1 sheet per page
+  ]
+  ```
+  So a service can consume **multiple** inventory items depending on the customer's choices.
+- **At placement:** accumulate required qty per inventory item across the frozen answers,
+  then decrement atomically. **Hard-block** if any *tracked* item is short
+  (`stock` NULL = untracked → skipped). `stock_display` controls customer visibility
+  (`none` / `in_out` / `exact`).
+
+The builder UI can ignore Phase 2 until the table exists — the document shape is
+forward-compatible.
