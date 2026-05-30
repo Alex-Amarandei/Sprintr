@@ -81,7 +81,7 @@ export default async function ShopLayout({
             c="brand.6"
             underline="never"
           >
-            SprintR
+            <Wordmark />
           </LinkAnchor>
           <SignOutButton />
         </Group>
