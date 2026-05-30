@@ -170,3 +170,58 @@ for fast seed data). Store storage PATHS not URLs. No `city` column (Iași hardc
 3. `messages` + realtime + RLS policies across all tables.
 4. Wire frontend: chat is a SHARED component one person owns (both customer + shop embed it).
    Frontend split otherwise: Person A = shop side, Person B = customer side.
+
+---
+
+# TEAM SYNC — read this before working
+
+**Convention: we ALL use Claude. Any change another teammate's Claude must know about goes
+HERE, in this section. Keep it short and current. Update it in the same commit as the change.**
+
+## Repo layout (monorepo)
+- `web/` — Next.js frontend (built). `server/` — backend, placeholder only so far.
+- Run the frontend from `web/`. We use **Bun**, not npm (`bun install`, `bun run dev`).
+
+## Confirmed stack versions (bumped to latest on purpose, 2026-05-30)
+- Next.js **16** (App Router, Turbopack) · React **19** · TypeScript 6
+- Tailwind **v4** — note the v4 setup: `@import "tailwindcss"` + `@config` in
+  `web/src/styles/globals.css`, and the `@tailwindcss/postcss` plugin in `postcss.config.mjs`.
+  Do NOT reintroduce v3 `@tailwind base/...` directives.
+- Supabase JS + `@supabase/ssr`. Two clients: `web/src/lib/supabase/{client,server}.ts`.
+- Package manager: **Bun** (`web/bun.lock` is the lockfile; no package-lock.json).
+
+## Routing (route-group collision was fixed — don't undo it)
+Route groups alone collided (`/orders` existed twice). Final URL scheme:
+- Customer: `/browse`, `/orders`, `/shop/[shopId]`, `/order/[orderId]` (root level)
+- Shop owner: `/dashboard`, `/dashboard/orders|products|services|offers|profile`
+- Courier: `/courier/deliveries|earnings`
+- Auth: `/login`, `/register`
+`middleware.ts` skips Supabase auth when env keys are missing/placeholder (so the app is
+browsable before keys are set). Protected prefixes: /browse /order /orders /dashboard /courier.
+
+## Supabase project
+- Project ref: `qborcngytmztfucjuwgw` · URL: `https://qborcngytmztfucjuwgw.supabase.co`
+- **Postgres 17.6** → NO native `uuidv7()`. We add `public.uuid_generate_v7()` (Fabio Lima).
+- MCP server configured in `.mcp.json` (each teammate authenticates via OAuth on their machine).
+- Each teammate needs their own `web/.env.local` (copy from `.env.local.example`, gitignored).
+
+## DB scope decision (2026-05-30)
+Building the **CLAUDE.md 8-table weekend scope** (profiles, shops, services, option_groups,
+option_choices, orders, order_selections, messages). NO cities/products/offers tables yet,
+even though scaffold has `/dashboard/products` + `/dashboard/offers` pages (left as empty
+shells for post-MVP). `web/src/types/database.ts` currently describes the BROADER model and
+must be reconciled to the 8-table scope.
+
+## Seed data
+- `web/seed/pimcopy.json` — real PIM Copy (pimcopy.ro) catalog, shaped to our schema.
+  Prices marked `price_estimated:true` are fictive placeholders; 3 are real (`:false`).
+
+## Migration log (keep appending; newest last)
+- `00_uuidv7_profiles` (applied 2026-05-30): added `public.uuid_generate_v7()`,
+  `public.profiles` (+RLS: select/update own), and `handle_new_user()` trigger on
+  `auth.users` that inserts a profile row on signup (role from user_metadata, default
+  'customer'). OPEN advisor warnings to fix: pin search_path on uuid_generate_v7; revoke
+  public EXECUTE on the SECURITY DEFINER funcs.
+- NOTE: DB is being worked on by a teammate concurrently (spotted a `public.rls_auto_enable()`
+  function not created here). Coordinate before applying more migrations to avoid collisions.
+  Schema/seed ownership: teammate is handling seeding — do NOT seed from here.
