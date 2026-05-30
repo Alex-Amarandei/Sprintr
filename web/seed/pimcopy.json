@@ -1,0 +1,260 @@
+{
+  "source": "https://pimcopy.ro/",
+  "crawled_at": "2026-05-30",
+  "currency": "RON",
+  "notes": "Catalog structurat pentru PIM Copy. Prețurile marcate cu \"price_estimated\": true sunt valori fictive orientative bazate pe media pieței de copy-shop din Iași/România (mai 2026) — de validat cu magazinul înainte de lansare. Cele 3 prețuri publicate efectiv pe site (arc metalic, cutter plotter, poster 160x200) sunt marcate \"price_estimated\": false.",
+  "shop": {
+    "name": "PIM Copy",
+    "description": "Editură & tipografie digitală, copiere și listare A4/A3 alb-negru și color, formate mari, scanare, legătorie și servicii personalizate. Mai multe puncte de lucru în Iași.",
+    "city": "Iași",
+    "country": "Romania",
+    "locations": ["Independenței", "Smârdan", "Tudor T18", "Copou"],
+    "phone": null,
+    "address": null
+  },
+  "services": [
+    {
+      "slug": "editura-tipografie-digitala",
+      "name": "Editură & Tipografie digitală",
+      "description": "Servicii de editură și tipografie digitală pentru autori care au nevoie de tiraje mici, rapide, de calitate și la prețuri accesibile.",
+      "base_price": 250.0,
+      "base_price_unit": "per tiraj minim (până la 50 exemplare, orientativ)",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Tiraj (număr exemplare)",
+          "type": "number",
+          "is_required": true,
+          "price_modifier": 6.0,
+          "price_modifier_unit": "per exemplar suplimentar",
+          "price_estimated": true
+        }
+      ]
+    },
+    {
+      "slug": "multiplicari-listari-alb-negru",
+      "name": "Multiplicări și listări A4/A3 alb-negru",
+      "description": "Copiere și listare documente A4 și A3 alb-negru pe hârtie de calitate 80gr. Viteză până la 105 copii A4/minut. Prețul de copiere este egal cu cel de listare.",
+      "base_price": 0.25,
+      "base_price_unit": "per pagină A4, o singură față",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Format",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "A4", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "A3", "price_modifier": 0.25, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Tip tipărire",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "O singură față", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Față-verso", "price_modifier": 0.1, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Număr de pagini",
+          "type": "number",
+          "is_required": true,
+          "price_modifier": null
+        }
+      ]
+    },
+    {
+      "slug": "multiplicari-listari-color",
+      "name": "Multiplicări și listări A4/A3 color",
+      "description": "Copiere și listare documente A4 și A3 color. Standard pe hârtie satinată 90gr; opțional carton lucios/mat, hârtie mai groasă/subțire, autocolant, folie retroproiector, etichete CD, calc, cartoane speciale sau materiale proprii compatibile. Până la 65 copii color A4/minut.",
+      "base_price": 1.5,
+      "base_price_unit": "per pagină A4, o singură față, hârtie standard",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Format",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "A4", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "A3", "price_modifier": 1.5, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Tip hârtie / suport",
+          "type": "select",
+          "is_required": true,
+          "choices": [
+            { "value": "Hârtie satinată 90gr (standard)", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Carton lucios/mat", "price_modifier": 1.0, "price_estimated": true },
+            { "value": "Autocolant vinil", "price_modifier": 2.0, "price_estimated": true },
+            { "value": "Folie retroproiector", "price_modifier": 2.5, "price_estimated": true },
+            { "value": "Etichetă CD", "price_modifier": 1.5, "price_estimated": true },
+            { "value": "Calc", "price_modifier": 1.0, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Tip tipărire",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "O singură față", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Față-verso", "price_modifier": 1.0, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Număr de pagini",
+          "type": "number",
+          "is_required": true,
+          "price_modifier": null
+        }
+      ]
+    },
+    {
+      "slug": "multiplicari-listari-formate-mari",
+      "name": "Multiplicări și listări formate mari",
+      "description": "Listare proiecte și postere pe formate mari, alb-negru și color. Tarifare per centimetru liniar. Lățimi suportate: de la 420mm până la 1600mm (max. 914mm în majoritatea punctelor, 1370mm la Independenței, 160cm la Copou). Materiale de la hârtie 80gr la banner rezistent la exterior.",
+      "base_price": 0.4,
+      "base_price_unit": "per centimetru liniar, alb-negru, hârtie",
+      "price_estimated": true,
+      "pricing_model": "per_linear_cm",
+      "options": [
+        {
+          "label": "Tip culoare",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "Alb-negru", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Color", "price_modifier": 0.4, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Material",
+          "type": "select",
+          "is_required": true,
+          "choices": [
+            { "value": "Hârtie 80gr", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Banner exterior", "price_modifier": 0.6, "price_estimated": true }
+          ]
+        }
+      ],
+      "examples": [
+        { "description": "Poster 160cm x 200cm", "price": 80.0, "price_estimated": false }
+      ]
+    },
+    {
+      "slug": "scanare-alb-negru-color",
+      "name": "Servicii de scanare alb-negru și color",
+      "description": "Scanare documente A4/A3 alb-negru și color în oricare punct de lucru PIM. Salvare pe stick USB, HDD extern, CD, DVD etc. Preț identic în toate punctele de lucru.",
+      "base_price": 0.5,
+      "base_price_unit": "per pagină A4 alb-negru",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Format",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "A4", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "A3", "price_modifier": 0.5, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Tip",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "Alb-negru", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Color", "price_modifier": 0.5, "price_estimated": true }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "scanare-formate-mari",
+      "name": "Servicii de scanare formate mari",
+      "description": "Scanare planșe și postere alb-negru și color, lățime max. 914mm. Salvare pe stick USB, HDD extern, CD, DVD. Disponibil la Tudor, Independenței și Smârdan.",
+      "base_price": 5.0,
+      "base_price_unit": "per planșă/poster",
+      "price_estimated": true,
+      "options": []
+    },
+    {
+      "slug": "servicii-legatorie",
+      "name": "Servicii de legătorie",
+      "description": "Servicii de legătorie cu mai multe opțiuni de legare și copertare.",
+      "base_price": 6.0,
+      "base_price_unit": "pornind de la (arc plastic)",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Tip legare",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            {
+              "value": "Arc de plastic (spiră plastic)",
+              "description": "Cea mai populară printre studenți, făcută pe loc, cost redus.",
+              "price_modifier": 6.0,
+              "price_estimated": true
+            },
+            {
+              "value": "Arc metalic (spiră metalică)",
+              "description": "Preț în funcție de grosimea materialului legat. Disponibil la Smârdan și Independenței.",
+              "price_modifier": 2.0,
+              "price_estimated": false,
+              "price_tiers": [
+                { "label": "subțire", "price": 1.5 },
+                { "label": "mediu", "price": 2.0 },
+                { "label": "gros", "price": 2.5 }
+              ]
+            },
+            {
+              "value": "Legare clasică cu cartonare (copertă cartonată)",
+              "description": "Pentru lucrări de licență și cărți hardcover; gata pe loc sau în maxim 24h. Reduceri la cantitate la cerere. Disponibil la Independenței și Smârdan.",
+              "price_modifier": 20.0,
+              "price_estimated": true
+            },
+            {
+              "value": "Broșare carte (termoclei)",
+              "description": "Legare cu adeziv termic (termoclei). Disponibil la Independenței, Smârdan și Tudor T18.",
+              "price_modifier": 12.0,
+              "price_estimated": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "products": [
+    {
+      "slug": "imprimare-tricou",
+      "name": "Imprimare tricou personalizat",
+      "description": "Personalizare tricou pe baza graficii aduse de client. Tricouri albe la Independenței, tricouri colorate la Smârdan.",
+      "price": 40.0,
+      "price_estimated": true
+    },
+    {
+      "slug": "taiere-cutter-plotter",
+      "name": "Tăiere după contur (cutter plotter)",
+      "description": "Tăiere litere și forme din material autocolant. Disponibil la Smârdan.",
+      "price": 2.5,
+      "price_estimated": false,
+      "price_tiers": [
+        { "format": "A3", "price": 2.5 },
+        { "format": "A2", "price": 5.0 },
+        { "format": "A1", "price": 10.0 },
+        { "format": "A0 sau mai mare", "price": 20.0 }
+      ]
+    },
+    {
+      "slug": "insigna-rotunda-metalica",
+      "name": "Insignă rotundă metalică",
+      "description": "Insignă cu suprafață vizibilă circulară, diametru 25mm. Disponibil la Independenței și Smârdan.",
+      "price": 6.0,
+      "price_estimated": true
+    }
+  ]
+}
