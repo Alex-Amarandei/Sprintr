@@ -9,7 +9,7 @@ import {
   Title,
 } from "@mantine/core";
 import { Check, Clock, Package, Plus, TrendingUp } from "lucide-react";
-import { sampleOrders } from "@/lib/orders/sample";
+import { getMyShop, getShopOrders } from "@/lib/orders/queries";
 import { roCount } from "@/lib/utils/format";
 import { StatCard } from "@/components/ui/StatCard";
 import { RevenueBars } from "@/components/dashboard/RevenueBars";
@@ -35,16 +35,18 @@ const TOP = [
   { name: "Caiet A4 80 file", orders: 64, revenue: 954 },
 ];
 
-export default function ShopDashboardPage() {
+export default async function ShopDashboardPage() {
+  const [shop, orders] = await Promise.all([getMyShop(), getShopOrders()]);
   const today = new Intl.DateTimeFormat("ro-RO", {
     weekday: "long",
     day: "numeric",
     month: "long",
   }).format(new Date());
-  const newCount = sampleOrders.filter((o) => o.status === "pending").length;
-  const prepCount = sampleOrders.filter(
+  const newCount = orders.filter((o) => o.status === "pending").length;
+  const prepCount = orders.filter(
     (o) => o.status === "accepted" || o.status === "in_progress",
   ).length;
+  const doneCount = orders.filter((o) => o.status === "done").length;
 
   return (
     <Stack gap="xl">
@@ -53,7 +55,7 @@ export default function ShopDashboardPage() {
           <Text fz="sm" c="dimmed" tt="capitalize">
             {today}
           </Text>
-          <Title order={2}>Bună dimineața, PIM Copy 👋</Title>
+          <Title order={2}>Bună dimineața, {shop?.name ?? "magazin"} 👋</Title>
           <Text c="dimmed">
             Ai {roCount(newCount, "comandă nouă", "comenzi noi")} care așteaptă aprobare.
           </Text>
@@ -80,11 +82,11 @@ export default function ShopDashboardPage() {
         />
         <StatCard
           icon={<Check size={20} />}
-          value="18"
-          label="Finalizate azi"
-          delta="+12%"
+          value={String(doneCount)}
+          label="Finalizate"
           color="teal"
         />
+        {/* TODO(BE): revenue aggregation not computed yet — visual placeholder. */}
         <StatCard
           icon={<TrendingUp size={20} />}
           value="1.240 lei"
@@ -132,7 +134,7 @@ export default function ShopDashboardPage() {
         <Title order={3} mb="md">
           Comenzi
         </Title>
-        <ShopOrderQueue initialOrders={sampleOrders} limit={5} />
+        <ShopOrderQueue initialOrders={orders} limit={5} />
       </div>
     </Stack>
   );

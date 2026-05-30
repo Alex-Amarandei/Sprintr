@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button, Group } from "@mantine/core";
 import { Check, X } from "lucide-react";
 import { toast } from "sonner";
 import type { OrderStatus } from "@/lib/design/status";
+import { advanceOrderStatus } from "@/lib/orders/actions";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+
+const short = (id: string) => id.slice(0, 8);
 
 /**
  * Shop-side status + accept/reject/advance for an order detail header.
- * Local state only (presentational) — TODO(BE): persist via order update.
+ * Optimistic update + server persistence via the `advanceOrderStatus` action.
  */
 export function ShopOrderActions({
   id,
@@ -19,10 +22,20 @@ export function ShopOrderActions({
   initialStatus: OrderStatus;
 }) {
   const [status, setStatus] = useState<OrderStatus>(initialStatus);
+  const [pending, startTransition] = useTransition();
 
   const set = (s: OrderStatus, msg: string) => {
-    setStatus(s);
-    toast.success(msg);
+    const prev = status;
+    setStatus(s); // optimistic
+    startTransition(async () => {
+      const res = await advanceOrderStatus(id, s);
+      if (res.ok) {
+        toast.success(msg);
+      } else {
+        setStatus(prev); // rollback
+        toast.error(res.error ?? "Nu am putut actualiza comanda");
+      }
+    });
   };
 
   return (
@@ -33,26 +46,28 @@ export function ShopOrderActions({
           <Button
             variant="default"
             leftSection={<X size={16} />}
-            onClick={() => set("rejected", `Comanda #${id} respinsă`)}
+            disabled={pending}
+            onClick={() => set("rejected", `Comanda #${short(id)} respinsă`)}
           >
             Respinge
           </Button>
           <Button
             color="teal"
             leftSection={<Check size={16} />}
-            onClick={() => set("accepted", `Comanda #${id} acceptată`)}
+            loading={pending}
+            onClick={() => set("accepted", `Comanda #${short(id)} acceptată`)}
           >
             Acceptă
           </Button>
         </>
       )}
       {status === "accepted" && (
-        <Button color="cyan" onClick={() => set("in_progress", `#${id} în pregătire`)}>
+        <Button color="cyan" loading={pending} onClick={() => set("in_progress", `#${short(id)} în pregătire`)}>
           Începe pregătirea
         </Button>
       )}
       {status === "in_progress" && (
-        <Button color="teal" onClick={() => set("done", `#${id} finalizată`)}>
+        <Button color="teal" loading={pending} onClick={() => set("done", `#${short(id)} finalizată`)}>
           Marchează gata
         </Button>
       )}

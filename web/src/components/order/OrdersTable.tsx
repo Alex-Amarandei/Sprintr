@@ -47,7 +47,7 @@ function OrderRow({ order }: { order: SampleOrder }) {
           </ThemeIcon>
           <div style={{ minWidth: 0 }}>
             <Text fw={600} fz="sm">
-              #{order.id}
+              #{order.id.slice(0, 8)}
             </Text>
             <Text fz="xs" c="dimmed" truncate>
               {order.shopName} · {order.placedAt}
