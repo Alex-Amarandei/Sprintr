@@ -1,6 +1,7 @@
 import { Box, Group, Stack, Text, ThemeIcon } from "@mantine/core";
 import { Check, X } from "lucide-react";
 import { type OrderStatus, statusStep } from "@/lib/design/status";
+import { TintIcon } from "@/components/ui/TintIcon";
 
 const TIMELINE: { status: OrderStatus; label: string }[] = [
   { status: "pending", label: "Plasată" },
@@ -45,24 +46,33 @@ export function StatusTimeline({
         return (
           <Group key={step.status} align="flex-start" gap="sm" wrap="nowrap">
             <Stack gap={0} align="center">
-              <ThemeIcon
-                size={26}
-                radius="xl"
-                variant={future ? "light" : "filled"}
-                color={done ? "teal" : isCurrent ? "brand" : "mist"}
-              >
-                {done ? <Check size={14} /> : <span />}
-              </ThemeIcon>
+              {future ? (
+                <TintIcon size={26} radius="xl" color="mist">
+                  <span />
+                </TintIcon>
+              ) : (
+                <ThemeIcon
+                  size={26}
+                  radius="xl"
+                  variant="filled"
+                  color={done ? "teal" : "brand"}
+                >
+                  {done ? <Check size={14} /> : <span />}
+                </ThemeIcon>
+              )}
               {!last && (
                 <Box
                   w={2}
                   h={30}
-                  bg={done ? "teal.6" : "gray.3"}
+                  bg={done ? "teal.6" : "var(--mantine-color-default-border)"}
                 />
               )}
             </Stack>
             <Box pb={last ? 0 : "md"}>
-              <Text fw={isCurrent ? 700 : 500} c={future ? "dimmed" : "ink.9"}>
+              <Text
+                fw={isCurrent ? 700 : 500}
+                c={future ? "dimmed" : "var(--mantine-color-text)"}
+              >
                 {step.label}
               </Text>
               {time && (

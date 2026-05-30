@@ -8,7 +8,6 @@ import {
   Group,
   Stack,
   Text,
-  ThemeIcon,
   Title,
 } from "@mantine/core";
 import {
@@ -27,6 +26,7 @@ import { ChatPanel } from "@/components/order/ChatPanel";
 import { ShopOrderActions } from "@/components/order/ShopOrderActions";
 import { DownloadButton } from "@/components/order/DownloadButton";
 import { LinkAnchor, LinkActionIcon } from "@/components/ui/links";
+import { TintIcon } from "@/components/ui/TintIcon";
 
 export const metadata: Metadata = { title: "Detalii comandă" };
 
@@ -45,9 +45,9 @@ function InfoRow({
 }) {
   return (
     <Group gap="sm" wrap="nowrap" align="flex-start">
-      <ThemeIcon variant="light" color="mist" size={30} radius="md">
+      <TintIcon color="mist" size={30} radius="md">
         {icon}
-      </ThemeIcon>
+      </TintIcon>
       <div>
         <Text fz="xs" c="dimmed">
           {label}
@@ -189,9 +189,9 @@ export default async function ShopOrderDetailPage({ params }: Props) {
                 {files.map((f, i) => (
                   <Group key={i} justify="space-between" wrap="nowrap">
                     <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-                      <ThemeIcon variant="light" color="red" size={38} radius="md">
+                      <TintIcon color="red" size={38} radius="md">
                         <FileText size={18} />
-                      </ThemeIcon>
+                      </TintIcon>
                       <div style={{ minWidth: 0 }}>
                         <Text fz="sm" fw={500} truncate>
                           {f.pdfName}

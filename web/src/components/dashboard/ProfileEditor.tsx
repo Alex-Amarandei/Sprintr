@@ -199,7 +199,7 @@ export function ProfileEditor() {
                     ) : (
                       <Circle size={20} color="var(--mantine-color-gray-4)" />
                     )}
-                    <Text fz="sm" c={c.done ? "ink.9" : "dimmed"}>
+                    <Text fz="sm" c={c.done ? "var(--mantine-color-text)" : "dimmed"}>
                       {c.label}
                     </Text>
                   </Group>

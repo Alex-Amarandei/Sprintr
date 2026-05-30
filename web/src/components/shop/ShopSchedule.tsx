@@ -38,7 +38,7 @@ export function ShopSchedule({ schedule }: { schedule: WeeklySchedule }) {
       <Stack gap={4}>
         {groups.map((g) => (
           <Group key={g.label} justify="space-between" gap="sm">
-            <Text fz="sm" fw={g.containsToday ? 700 : 500} c={g.containsToday ? "ink.9" : "dimmed"}>
+            <Text fz="sm" fw={g.containsToday ? 700 : 500} c={g.containsToday ? "var(--mantine-color-text)" : "dimmed"}>
               {g.label}
               {g.containsToday && (
                 <Text span fz="xs" fw={700} c="brand.7" ml={6}>

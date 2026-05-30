@@ -63,7 +63,14 @@ export function ChatPanel({
         wrap="nowrap"
         style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
       >
-        <Avatar radius="xl" color="brand">
+        <Avatar
+          radius="xl"
+          color="brand"
+          style={{
+            backgroundColor: "var(--mantine-color-brand-1)",
+            color: "var(--mantine-color-brand-7)",
+          }}
+        >
           {initials}
         </Avatar>
         <div>
@@ -92,9 +99,9 @@ export function ChatPanel({
                 radius="lg"
                 px="md"
                 py={8}
-                bg={mine ? "ink.8" : "gray.1"}
+                bg={mine ? "brand.6" : "var(--mantine-color-default-hover)"}
               >
-                <Text fz="sm" c={mine ? "white" : "ink.9"}>
+                <Text fz="sm" c={mine ? "white" : "var(--mantine-color-text)"}>
                   {m.body}
                 </Text>
               </Paper>

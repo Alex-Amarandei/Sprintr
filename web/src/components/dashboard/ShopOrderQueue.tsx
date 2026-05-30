@@ -121,7 +121,15 @@ export function ShopOrderQueue({
           style={{ textDecoration: "none", color: "inherit", minWidth: 0, flex: 1 }}
         >
           <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-            <Avatar radius="xl" color="brand" size={38}>
+            <Avatar
+              radius="xl"
+              color="brand"
+              size={38}
+              style={{
+                backgroundColor: "var(--mantine-color-brand-1)",
+                color: "var(--mantine-color-brand-7)",
+              }}
+            >
               {initials(o.customerName)}
             </Avatar>
             <div style={{ minWidth: 0 }}>

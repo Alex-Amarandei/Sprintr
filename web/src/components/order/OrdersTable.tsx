@@ -9,10 +9,10 @@ import {
   Stack,
   Tabs,
   Text,
-  ThemeIcon,
 } from "@mantine/core";
 import { ChevronRight } from "lucide-react";
 import type { SampleOrder } from "@/lib/orders/sample";
+import { TintIcon } from "@/components/ui/TintIcon";
 import { SHOP_CATEGORY } from "@/components/shop/category";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { roCount } from "@/lib/utils/format";
@@ -42,9 +42,9 @@ function OrderRow({ order }: { order: SampleOrder }) {
         style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
       >
         <Group gap="md" wrap="nowrap" style={{ minWidth: 0 }}>
-          <ThemeIcon variant="light" color="mist" size={40} radius="md">
+          <TintIcon color="mist" size={40} radius="md">
             <Icon size={18} />
-          </ThemeIcon>
+          </TintIcon>
           <div style={{ minWidth: 0 }}>
             <Text fw={600} fz="sm">
               #{order.id}
