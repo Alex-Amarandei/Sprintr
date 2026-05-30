@@ -1,0 +1,417 @@
+{
+  "source": "http://printhaus.ro/",
+  "crawled_at": "2026-05-30",
+  "currency": "RON",
+  "notes": "Catalog structurat pentru PrintHaus Iași. PrintHaus NU afișează prețuri reale pe site (totul e prin calculator / 'cere ofertă'), deci TOATE prețurile de aici sunt fictive orientative bazate pe media pieței de print din Iași/România (mai 2026) — toate marcate \"price_estimated\": true. De validat cu magazinul înainte de lansare. Multe pagini-produs au configuratoare (format/hârtie/plastifiere/pliere) mapate pe option_groups.",
+  "shop": {
+    "name": "PrintHaus",
+    "description": "Tipografie digitală în Iași: print alb-negru/color, cărți de vizită, flyere, broșuri, stickere, afișe, bannere, roll-up, plus servicii de legătorie, plastifiere, print UV, gravare laser și scanare.",
+    "city": "Iași",
+    "country": "Romania",
+    "phone": "+40 738 592 319",
+    "address": "Șoseaua Ștefan cel Mare și Sfânt 4, Iași 700498",
+    "free_shipping_threshold": 200.0
+  },
+  "services": [
+    {
+      "slug": "print-alb-negru-color",
+      "name": "Print alb-negru / color",
+      "description": "Printează rapid documente, prezentări, cursuri, pliante sau postere. Formate A3/A4/A5, hârtie de la 80g la carton 250g.",
+      "base_price": 0.25,
+      "base_price_unit": "per pagină A4 alb-negru, hârtie 80g",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Format",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "A4", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "A3", "price_modifier": 0.5, "price_estimated": true },
+            { "value": "A5", "price_modifier": -0.1, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Culoare",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "Alb-negru", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Color", "price_modifier": 1.25, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Hârtie",
+          "type": "select",
+          "is_required": true,
+          "choices": [
+            { "value": "80g (documente, cursuri)", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "90g (prezentări)", "price_modifier": 0.1, "price_estimated": true },
+            { "value": "160g carton (broșuri, postere)", "price_modifier": 0.5, "price_estimated": true },
+            { "value": "250g carton premium (flyere, meniuri)", "price_modifier": 1.0, "price_estimated": true }
+          ]
+        },
+        { "label": "Număr de pagini", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "carti-de-vizita",
+      "name": "Cărți de vizită",
+      "description": "Cărți de vizită elegante, personalizate, format standard 9×5 cm. Carton 250–300g, plastifiere opțională, colțuri rotunjite.",
+      "base_price": 40.0,
+      "base_price_unit": "per set de 100 buc, o față, carton 250g",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Tip tipărire",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "O singură față", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Față-verso", "price_modifier": 15.0, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Carton",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "250 g/m² (standard)", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "300 g/m² (premium)", "price_modifier": 10.0, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Plastifiere",
+          "type": "select",
+          "is_required": false,
+          "choices": [
+            { "value": "Fără", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Mată", "price_modifier": 15.0, "price_estimated": true },
+            { "value": "Lucioasă", "price_modifier": 15.0, "price_estimated": true }
+          ]
+        },
+        { "label": "Colțuri rotunjite", "type": "boolean", "is_required": false, "price_modifier": 10.0, "price_estimated": true },
+        { "label": "Cantitate (multipli de 100)", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "flyere",
+      "name": "Flyere",
+      "description": "Flyere tipărite la calitate înaltă pentru evenimente, oferte sau servicii. Formate ⅓A4, A6, A5, A4; hârtie 80g–carton 250g.",
+      "base_price": 50.0,
+      "base_price_unit": "per 100 buc, A5 color, hârtie 90g",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Format",
+          "type": "select",
+          "is_required": true,
+          "choices": [
+            { "value": "A6 (mic, portabil)", "price_modifier": -15.0, "price_estimated": true },
+            { "value": "⅓ A4 (distribuție directă)", "price_modifier": -10.0, "price_estimated": true },
+            { "value": "A5 (standard)", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "A4 (mare)", "price_modifier": 25.0, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Culoare",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "Color", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Alb-negru (economic)", "price_modifier": -20.0, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Hârtie",
+          "type": "select",
+          "is_required": true,
+          "choices": [
+            { "value": "80g (economic)", "price_modifier": -5.0, "price_estimated": true },
+            { "value": "90g (recomandat)", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "160g carton", "price_modifier": 20.0, "price_estimated": true },
+            { "value": "250g carton premium", "price_modifier": 40.0, "price_estimated": true }
+          ]
+        },
+        { "label": "Cantitate (multipli de 100)", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "brosuri",
+      "name": "Broșuri",
+      "description": "Broșuri legate standard cu capse metalice la mijloc. Formate A4, A5, pătrat 20×20 cm; copertă și interior 80g–carton 250g; plastifiere opțională.",
+      "base_price": 8.0,
+      "base_price_unit": "per exemplar, A5 color, ~8 pagini",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Format",
+          "type": "select",
+          "is_required": true,
+          "choices": [
+            { "value": "A5 (compact)", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "A4 (standard)", "price_modifier": 4.0, "price_estimated": true },
+            { "value": "Pătrat 20×20 cm", "price_modifier": 5.0, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Culoare",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "Color", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Alb-negru", "price_modifier": -3.0, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Copertă",
+          "type": "select",
+          "is_required": true,
+          "choices": [
+            { "value": "90g hârtie", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "160g carton", "price_modifier": 2.0, "price_estimated": true },
+            { "value": "250g carton premium", "price_modifier": 3.5, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Plastifiere copertă",
+          "type": "select",
+          "is_required": false,
+          "choices": [
+            { "value": "Fără", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Mată", "price_modifier": 2.0, "price_estimated": true },
+            { "value": "Lucioasă", "price_modifier": 2.0, "price_estimated": true }
+          ]
+        },
+        { "label": "Număr de pagini", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "pliante",
+      "name": "Pliante",
+      "description": "Pliante pentru informații în format compact. Formate A4/A3, tipuri de pliere: 1 biguire, 2 biguiri, 2 biguiri Z, dublu paralel.",
+      "base_price": 70.0,
+      "base_price_unit": "per 100 buc, A4, o biguire",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Format",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "A4 (standard)", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "A3 (impact)", "price_modifier": 40.0, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Tip pliere",
+          "type": "select",
+          "is_required": true,
+          "choices": [
+            { "value": "1 biguire (2 panouri)", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "2 biguiri (3 secțiuni)", "price_modifier": 10.0, "price_estimated": true },
+            { "value": "2 biguiri Z (zig-zag)", "price_modifier": 10.0, "price_estimated": true },
+            { "value": "Pliere dublă paralelă (4 panouri)", "price_modifier": 20.0, "price_estimated": true }
+          ]
+        },
+        { "label": "Cantitate (multipli de 100)", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "stickere",
+      "name": "Stickere",
+      "description": "Elemente autocolante personalizate, tăiate în orice formă, livrate pe coli. Vinil adeziv sau adeziv transparent. Tarifare per m², minim 0,5 m².",
+      "base_price": 80.0,
+      "base_price_unit": "per m², vinil adeziv",
+      "pricing_model": "per_sqm",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Material",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "Vinil adeziv (acoperire completă)", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Adeziv transparent", "price_modifier": 10.0, "price_estimated": true }
+          ]
+        },
+        { "label": "Lățime (cm)", "type": "number", "is_required": true, "price_modifier": null },
+        { "label": "Înălțime (cm)", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "etichete-autocolante",
+      "name": "Etichete autocolante",
+      "description": "Etichete imprimate digital, o singură față, pe hârtie sau vinil autocolant. Formate A4/A3.",
+      "base_price": 3.0,
+      "base_price_unit": "per coală A4, hârtie autocolantă",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Format",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "A4", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "A3", "price_modifier": 3.0, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Material",
+          "type": "select",
+          "is_required": true,
+          "choices": [
+            { "value": "Hârtie (economic)", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Vinil (rezistent apă/zgârieturi)", "price_modifier": 4.0, "price_estimated": true },
+            { "value": "Vinil transparent", "price_modifier": 5.0, "price_estimated": true }
+          ]
+        },
+        { "label": "Număr de coli", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "afise",
+      "name": "Afișe",
+      "description": "Afișe pe suporturi premium, culori intense. Formate A2/A1/A0 sau non-standard; carton 120g–260g lucios sau whiteback 200g.",
+      "base_price": 25.0,
+      "base_price_unit": "per bucată, A2, carton 160g",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Format",
+          "type": "select",
+          "is_required": true,
+          "choices": [
+            { "value": "A2 (mediu)", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "A1 (mare)", "price_modifier": 15.0, "price_estimated": true },
+            { "value": "A0 (foarte mare)", "price_modifier": 45.0, "price_estimated": true }
+          ]
+        },
+        {
+          "label": "Suport",
+          "type": "select",
+          "is_required": true,
+          "choices": [
+            { "value": "Carton 120g", "price_modifier": -5.0, "price_estimated": true },
+            { "value": "Carton 160g", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Carton lucios 260g", "price_modifier": 10.0, "price_estimated": true },
+            { "value": "Whiteback 200g", "price_modifier": 8.0, "price_estimated": true }
+          ]
+        },
+        { "label": "Cantitate", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "banner-stradal",
+      "name": "Banner stradal",
+      "description": "Banner pentru promovare în aer liber, rezistent la intemperii. Material frontlit 400g. Tarifare per m², minim 0,5 m².",
+      "base_price": 35.0,
+      "base_price_unit": "per m², frontlit 400g",
+      "pricing_model": "per_sqm",
+      "price_estimated": true,
+      "options": [
+        { "label": "Lățime (cm)", "type": "number", "is_required": true, "price_modifier": null },
+        { "label": "Înălțime (cm)", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "roll-up",
+      "name": "Roll-up",
+      "description": "Sistem de afișaj portabil, ușor de montat și transportat, ideal pentru prezentări, târguri și evenimente.",
+      "base_price": 180.0,
+      "base_price_unit": "per bucată, 85×200 cm",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Dimensiune",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "85 × 200 cm", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "100 × 200 cm", "price_modifier": 40.0, "price_estimated": true }
+          ]
+        },
+        { "label": "Cantitate", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "legatorie-cu-arc",
+      "name": "Legătorie cu arc (spiră)",
+      "description": "Legare cu arc/spiră, documente ușor de consultat. Făcută pe loc, tiraje mici și mari.",
+      "base_price": 8.0,
+      "base_price_unit": "per exemplar",
+      "price_estimated": true,
+      "options": []
+    },
+    {
+      "slug": "legatorie-clasica",
+      "name": "Legătorie clasică (cartonată)",
+      "description": "Legătorie clasică cu copertă cartonată pentru cărți, cataloage și documente importante (ex. licență/disertație).",
+      "base_price": 25.0,
+      "base_price_unit": "per exemplar",
+      "price_estimated": true,
+      "options": []
+    },
+    {
+      "slug": "plastifiere-laminare",
+      "name": "Plastifiere / Laminare",
+      "description": "Protecție și durabilitate pentru documente; intensifică culorile și aspectul profesional.",
+      "base_price": 3.0,
+      "base_price_unit": "per coală A4",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Format",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "A4", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "A3", "price_modifier": 2.0, "price_estimated": true }
+          ]
+        },
+        { "label": "Număr de coli", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "scanare",
+      "name": "Scanare",
+      "description": "Scanare rapidă și precisă a documentelor, fotografiilor și ilustrațiilor în format digital.",
+      "base_price": 0.5,
+      "base_price_unit": "per pagină A4",
+      "price_estimated": true,
+      "options": [
+        {
+          "label": "Tip",
+          "type": "radio",
+          "is_required": true,
+          "choices": [
+            { "value": "Alb-negru", "price_modifier": 0.0, "price_estimated": true },
+            { "value": "Color", "price_modifier": 0.5, "price_estimated": true }
+          ]
+        },
+        { "label": "Număr de pagini", "type": "number", "is_required": true, "price_modifier": null }
+      ]
+    },
+    {
+      "slug": "print-uv",
+      "name": "Print UV",
+      "description": "Print UV cu culori vibrante și rezistență la uzură, pe diverse materiale. Preț pe bucată, în funcție de obiect și suprafață.",
+      "base_price": 15.0,
+      "base_price_unit": "per bucată (orientativ, cere ofertă)",
+      "price_estimated": true,
+      "quote_only": true,
+      "options": []
+    },
+    {
+      "slug": "gravare-decupare-laser",
+      "name": "Gravare / Decupare laser",
+      "description": "Gravare și decupare laser cu precizie milimetrică pentru inscripționări personalizate și proiecte creative. Preț pe bucată, în funcție de material.",
+      "base_price": 20.0,
+      "base_price_unit": "per bucată (orientativ, cere ofertă)",
+      "price_estimated": true,
+      "quote_only": true,
+      "options": []
+    }
+  ],
+  "products": []
+}

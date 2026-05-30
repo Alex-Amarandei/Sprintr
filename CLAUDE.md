@@ -215,6 +215,9 @@ must be reconciled to the 8-table scope.
 ## Seed data
 - `web/seed/pimcopy.json` — real PIM Copy (pimcopy.ro) catalog, shaped to our schema.
   Prices marked `price_estimated:true` are fictive placeholders; 3 are real (`:false`).
+- `web/seed/printhaus.json` — PrintHaus (printhaus.ro) catalog, 16 services, 38 option
+  groups. Site publishes NO real prices (all calculator/quote), so ALL prices here are
+  fictive estimates (`price_estimated:true`). Phone/address captured in the `shop` block.
 
 ## Migration log (keep appending; newest last)
 - `00_uuidv7_profiles` (applied 2026-05-30): added `public.uuid_generate_v7()`,
