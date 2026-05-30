@@ -554,3 +554,44 @@ it's JSONB; old documents without them stay valid):
 
 The builder UI can ignore Phase 2 until the table exists — the document shape is
 forward-compatible.
+
+---
+
+# Pricing, orders & offers — decided approach
+
+## Pricing/validation lives in an Edge Function, NOT the DB
+
+- The authoritative price engine is a **Supabase Edge Function** (Deno — the project's one
+  real custom server piece, alongside the WhatsApp ping). We deliberately do **not** compute
+  price in Postgres.
+- **Order placement flow:** the client sends the cart payload (line items + `answers` per
+  item + the client-computed total). The function **recomputes** the price from the live
+  catalog `document` (+ active offers), **validates** answers against the schema (§8 of the
+  builder spec), and:
+  - matches & valid → it **inserts the order** (service role) and returns it;
+  - mismatch or invalid → **reject**, no order.
+- The client still computes a price for live preview (same algorithm, §7), but it is never
+  trusted.
+
+## Orders = mixed cart, inserted only by the Edge Function
+
+- One **order** has N **line items**, each a `service` or `product`, each **freezing**
+  `item_title`, `answers` (jsonb), `price_breakdown` (jsonb), `line_total`, and `pdf_path`
+  (services). Instance copies values — a placed order never changes when the catalog does.
+- **RLS:** customers `select` only their own orders; **no client `insert`** — only the Edge
+  Function (service role) writes orders. This is what makes the price tamper-proof.
+- Order status: `pending → accepted → in_preparation → done` (+ `rejected`), per CLAUDE.md.
+
+## Offers — banner + cart-level promotions (separate from the catalog version)
+
+Offers are a **live** table (not part of `catalog_versions`). Two faces:
+- **Banner:** a catalog-configurable promo display (title/description + a show toggle).
+- **Promotions:** multiple **types** — percent off, fixed amount off, buy-X-get-Y, … —
+  with a **scope** (per product/item or per whole order), applied at **cart level** by the
+  Edge Function. Stored flexibly as `type` + `config jsonb` (same data-driven spirit as the
+  configurator), plus an active window. `catalog`+ manage; public reads active offers.
+
+## Inventory — deferred (Phase 2)
+
+No inventory tables yet. We add `inventory_items` + the `consumes`/`inventory_item_id`
+wiring (builder spec §11) **after the product POC** is finished.
