@@ -13,6 +13,7 @@ import { getMyShop, getShopOrders } from "@/lib/orders/queries";
 import { roCount } from "@/lib/utils/format";
 import { StatCard } from "@/components/ui/StatCard";
 import { RevenueBars } from "@/components/dashboard/RevenueBars";
+import { DashboardGreeting } from "@/components/dashboard/DashboardGreeting";
 import { ExportReportButton } from "@/components/dashboard/ExportReportButton";
 import { ShopOrderQueue } from "@/components/dashboard/ShopOrderQueue";
 
@@ -55,7 +56,7 @@ export default async function ShopDashboardPage() {
           <Text fz="sm" c="dimmed" tt="capitalize">
             {today}
           </Text>
-          <Title order={2}>Bună dimineața, {shop?.name ?? "magazin"} 👋</Title>
+          <DashboardGreeting name={shop?.name ?? "magazin"} />
           <Text c="dimmed">
             Ai {roCount(newCount, "comandă nouă", "comenzi noi")} care așteaptă aprobare.
           </Text>

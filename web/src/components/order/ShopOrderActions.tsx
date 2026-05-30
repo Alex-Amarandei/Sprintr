@@ -45,6 +45,7 @@ export function ShopOrderActions({
         <>
           <Button
             variant="default"
+            bg="stone.0"
             leftSection={<X size={16} />}
             disabled={pending}
             onClick={() => set("rejected", `Comanda #${short(id)} respinsă`)}

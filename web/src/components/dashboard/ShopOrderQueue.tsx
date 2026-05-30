@@ -72,8 +72,8 @@ export function ShopOrderQueue({
       return (
         <Group gap="xs" wrap="nowrap">
           <Button
-            variant="subtle"
-            color="gray"
+            variant="default"
+            bg="stone.0"
             size="xs"
             disabled={pending}
             onClick={() => setStatus(o.id, "rejected", `Comanda #${short(o.id)} respinsă`)}
@@ -169,7 +169,7 @@ export function ShopOrderQueue({
             <Box w={118} visibleFrom="sm">
               <StatusBadge status={o.status} />
             </Box>
-            <Box w={170} visibleFrom="sm" style={{ display: "flex", justifyContent: "flex-end" }}>
+            <Box w={170} ml="xl" visibleFrom="sm" style={{ display: "flex", justifyContent: "flex-end" }}>
               {act}
             </Box>
           </Group>
