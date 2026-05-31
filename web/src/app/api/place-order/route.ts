@@ -50,6 +50,7 @@ type CatalogItem = {
   base_price: number;
   category_id?: string | null;
   requires_upload?: boolean;
+  in_stock?: boolean;
   fields: CatalogField[];
 };
 type OrderFileRef = { path: string; name: string };
@@ -157,6 +158,7 @@ export async function POST(req: NextRequest) {
       const line = lines[i];
       const catalogItem = doc.items.find((it) => it.id === line.itemId);
       if (!catalogItem) return err(`Item ${line.itemId} not in catalog`, 422);
+      if (catalogItem.in_stock === false) return err(`"${line.title}" is out of stock`, 409);
 
       const { total, breakdown, quantity } = computeItemPrice(catalogItem, line.answers);
 

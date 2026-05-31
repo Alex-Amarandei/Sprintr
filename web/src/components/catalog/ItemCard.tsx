@@ -254,6 +254,7 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
           <Group>
             <Switch label="Necesită fișier atașat" checked={item.requires_upload} onChange={(e) => patch({ requires_upload: e.currentTarget.checked })} />
             <Switch label="Activ" checked={item.is_active} onChange={(e) => patch({ is_active: e.currentTarget.checked })} />
+            <Switch label="În stoc" checked={item.in_stock} onChange={(e) => patch({ in_stock: e.currentTarget.checked })} />
           </Group>
 
           {item.requires_upload && (

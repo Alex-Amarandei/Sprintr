@@ -122,6 +122,9 @@ export const itemSchema = z.object({
   // documents without it parse to []. TODO(BE): mirror in the server doc validator.
   images: z.array(z.string()).max(MAX_IMAGES).default([]),
   is_active: z.boolean().default(true),
+  // Availability: out-of-stock items are hidden from the customer catalog (distinct from
+  // is_active = published/listed). Default true; backward-compatible with old documents.
+  in_stock: z.boolean().default(true),
   sort_order: z.number().int().default(0),
   base_price: z.number().min(0).default(0),
   requires_upload: z.boolean().default(false),

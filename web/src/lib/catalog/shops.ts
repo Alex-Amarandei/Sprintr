@@ -100,7 +100,8 @@ export async function getShopCatalog(
     .maybeSingle();
   const doc = parseDocument(version?.document);
   return {
-    items: doc.items.filter((it) => it.is_active),
+    // Hide unpublished (is_active) AND out-of-stock items from customers.
+    items: doc.items.filter((it) => it.is_active && it.in_stock),
     categories: doc.categories,
   };
 }

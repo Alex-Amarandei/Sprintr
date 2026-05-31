@@ -55,6 +55,7 @@ export function newItem(kind: ItemKind = "service", sortOrder = 0): Item {
     image_path: null,
     images: [],
     is_active: true,
+    in_stock: true,
     sort_order: sortOrder,
     base_price: 0,
     requires_upload: kind === "service",

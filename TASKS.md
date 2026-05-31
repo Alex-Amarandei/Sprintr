@@ -47,7 +47,9 @@ something C1 builds (build against a stub until it lands).
 - [x] Allow multiple PDFs upload — `FileInput multiple` → `order_items.files jsonb` + own-folder
       security; client type-check via `accepted_file_types`. (Deep server-side §8 type/size = partial.)
 - [ ] Analytics table for stats (shops, ratings, etc.) — source for both dashboards
-- [ ] Filter out-of-stock products/services — needs stock data (inventory, Phase 2) → unblocks C3
+- [x] Filter out-of-stock products/services — lightweight `in_stock` flag on items (not full
+      Phase-2 inventory): "În stoc" switch in the catalog builder; `getShopCatalog` hides OOS;
+      place-order rejects ordering them (409).
 - [ ] Chat lifecycle backend 🔗 — gate chat to active orders; on `done`/`rejected` close it
       and open a separate **complaint/report** thread (new policy + `chat_kind`/`complaints`)
 - [ ] Owner: add users/employees — RPC/helper to resolve a profile by email and insert a

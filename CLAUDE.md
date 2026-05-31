@@ -1237,3 +1237,13 @@ Customers attach file(s) to an order line; the shop downloads them. **Storage = 
 - **Follow-ups:** deep server-side §8 validation (type/size/existence) is partial (client checks type
   via `accepted_file_types`; server checks ownership + required); orphaned pre-placement uploads
   aren't garbage-collected; customer-side re-download isn't surfaced yet.
+
+## Out-of-stock filtering — `in_stock` flag (2026-05-31)
+
+Lightweight availability flag on catalog items (NOT full Phase-2 inventory): `itemSchema.in_stock`
+(boolean, default `true`, backward-compatible) — **distinct from `is_active`** (published/listed).
+- **Shop sets it:** an "În stoc" `Switch` per item in the catalog builder (`ItemCard`), products + services.
+- **Customers can't see/order OOS:** `getShopCatalog` returns only `is_active && in_stock` items, so
+  out-of-stock items disappear from `/browse` + the shop page; `place-order` also rejects an OOS line
+  (409) so a stale cart can't slip through. Old documents default to in-stock via `parseDocument`.
+- Full inventory (`inventory_items`, counts, `consumes`) remains Phase 2; this is the simple gate.
