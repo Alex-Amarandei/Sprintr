@@ -1191,3 +1191,13 @@ target_id, trigger, code, config jsonb, stackable, starts_at, ends_at, active, c
   + `validateCode`, run `applyOffers` for the strikethrough; place-order is authoritative.
 - **place-order** accepts an optional `code` and returns `{subtotal, discount, shipping_fee,
   service_fee, platform_fee, applied_offers, total}`.
+
+## Order status: `in_delivery` added (migration `order_status_in_delivery`, 2026-05-31)
+
+`order_status` is now `pending | accepted | rejected | in_progress | in_delivery | done`.
+`in_delivery` sits between `in_progress` and `done` for **delivery** fulfilment (pickup skips
+it — FE branches on `fulfilment`). It is **non-terminal**, so the `orders_set_completed_at`
+trigger still fires only on `done`/`rejected` (no change). Shared token `lib/design/status.ts`:
+label **"În livrare"**, colour `grape`, and it's in `ORDER_FLOW` between `in_progress` and
+`done`. `advanceOrderStatus` already accepts any status, so no action change. FE follow-ups
+(tracked in TASKS): C3 shop-side "in delivery" action button, C2 customer timeline step.

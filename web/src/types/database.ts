@@ -680,7 +680,13 @@ export type Database = {
       offer_scope: "product" | "category" | "cart"
       offer_trigger: "automatic" | "code"
       offer_type: "percent" | "fixed" | "bxgy" | "free_shipping"
-      order_status: "pending" | "accepted" | "rejected" | "in_progress" | "done"
+      order_status:
+        | "pending"
+        | "accepted"
+        | "rejected"
+        | "in_progress"
+        | "in_delivery"
+        | "done"
       payment_method: "cash_in_store" | "cash_on_delivery" | "online"
       payment_status: "pending" | "paid" | "failed" | "refunded"
       review_target: "shop" | "employee" | "item"
@@ -819,7 +825,14 @@ export const Constants = {
       offer_scope: ["product", "category", "cart"],
       offer_trigger: ["automatic", "code"],
       offer_type: ["percent", "fixed", "bxgy", "free_shipping"],
-      order_status: ["pending", "accepted", "rejected", "in_progress", "done"],
+      order_status: [
+        "pending",
+        "accepted",
+        "rejected",
+        "in_progress",
+        "in_delivery",
+        "done",
+      ],
       payment_method: ["cash_in_store", "cash_on_delivery", "online"],
       payment_status: ["pending", "paid", "failed", "refunded"],
       review_target: ["shop", "employee", "item"],

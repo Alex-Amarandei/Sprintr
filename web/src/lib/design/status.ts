@@ -4,7 +4,7 @@ import type { Database } from "@/types/database";
 /**
  * Order-status design tokens — single source of truth for label + colour across
  * badges, pills, and the status timeline. Keyed to the DB enum `order_status`
- * (pending | accepted | rejected | in_progress | done).
+ * (pending | accepted | rejected | in_progress | in_delivery | done).
  */
 export type OrderStatus = Database["public"]["Enums"]["order_status"];
 
@@ -28,15 +28,20 @@ export const ORDER_STATUS: Record<OrderStatus, StatusMeta> = {
     badgeVariant: "filled",
   },
   in_progress: { label: "În pregătire", color: "cyan" },
+  in_delivery: { label: "În livrare", color: "grape" },
   done: { label: "Finalizată", color: "mist" },
   rejected: { label: "Respinsă", color: "red" },
 };
 
-/** Happy-path progression (rejected is a terminal branch, excluded). */
+/**
+ * Happy-path progression (rejected is a terminal branch, excluded). `in_delivery` only
+ * applies to delivery fulfilment — pickup orders skip it (FE branches on fulfilment).
+ */
 export const ORDER_FLOW: OrderStatus[] = [
   "pending",
   "accepted",
   "in_progress",
+  "in_delivery",
   "done",
 ];
 

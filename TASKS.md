@@ -35,7 +35,9 @@ something C1 builds (build against a stub until it lands).
       place-order, checkout-only display. (C2: checkout line)
 - [x] ~~Allow multiple vendor orders~~ — **DESCOPED** (not building): cart is single-shop by
       design (clears on shop switch); an order belongs to exactly one shop. No umbrella/multi-vendor order.
-- [ ] Add "in delivery" order status 🔗 — `order_status` enum migration
+- [x] Add "in delivery" order status 🔗 — `order_status` enum migration
+      (`in_delivery` between `in_progress`→`done`; shared token "În livrare"/grape in `ORDER_FLOW`;
+      `advanceOrderStatus` accepts it. FE wiring: C3 action button + C2 timeline step.)
 - [ ] Invoice download + generate invoices/receipts & export — PDF gen + storage + API
 
 ### Storage & data
