@@ -162,7 +162,12 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
       Attached `files` are in-memory File objects → stripped on persist + normalized to `[]`
       on load (they can't survive a reload; re-attach at checkout)._
 - [x] ~~Multi-vendor cart UX~~ — **DESCOPED** (not building): the cart stays single-shop (clears on shop switch)
-- [ ] Checkout: address pin selection
+- [x] Checkout: address pin selection — _interactive Leaflet/OSM map (no API key) + "Locația
+      curentă" geolocation in the delivery step; picks reverse-geocode (Nominatim) into the address
+      field, which also auto-prefills from the browser location on open. Coords flow to place-order
+      → frozen on `orders.delivery_lat/lng` (migration `20260531140752`); shop order detail links the
+      address to pin-exact Google Maps. All best-effort/additive — manual typing still works if the
+      map/geolocation fail. `LocationPicker` is client-only (`dynamic` `ssr:false`); helpers in `lib/geo/geocode.ts`._
 - [x] Phone field: numeric-only + validation — _shared `sanitizePhoneInput`/`phoneError`
       (`lib/utils/validation.ts`); checkout + profile phone strip non-numeric chars + validate (≥10 digits, `inputMode="tel"`)_
 - [x] Email field: regexp validation — _shared `emailError`; applied to the shop profile email

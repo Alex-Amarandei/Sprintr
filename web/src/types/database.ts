@@ -278,6 +278,8 @@ export type Database = {
           created_at: string
           customer_id: string
           delivery_address: string | null
+          delivery_lat: number | null
+          delivery_lng: number | null
           discount: number
           eta_minutes: number | null
           fulfilment: Database["public"]["Enums"]["fulfilment_type"]
@@ -308,6 +310,8 @@ export type Database = {
           created_at?: string
           customer_id: string
           delivery_address?: string | null
+          delivery_lat?: number | null
+          delivery_lng?: number | null
           discount?: number
           eta_minutes?: number | null
           fulfilment?: Database["public"]["Enums"]["fulfilment_type"]
@@ -338,6 +342,8 @@ export type Database = {
           created_at?: string
           customer_id?: string
           delivery_address?: string | null
+          delivery_lat?: number | null
+          delivery_lng?: number | null
           discount?: number
           eta_minutes?: number | null
           fulfilment?: Database["public"]["Enums"]["fulfilment_type"]
