@@ -1,198 +1,199 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import {
   ActionIcon,
   Badge,
-  Box,
-  Button,
-  Card,
   Group,
   Paper,
-  SimpleGrid,
   Stack,
   Switch,
   Text,
-  Textarea,
-  TextInput,
   Title,
 } from "@mantine/core";
-import { Palette, Plus, Trash2 } from "lucide-react";
-import { LinkButton } from "@/components/ui/links";
+import { Pencil, Plus, Tag, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { LinkActionIcon, LinkButton } from "@/components/ui/links";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { deleteOffer, setOfferActive } from "@/lib/offers/api";
+import type { OfferRow } from "@/lib/offers/types";
 
-type PromoType = "percent" | "fixed" | "bxgy";
-
-interface Promo {
-  id: string;
-  type: PromoType;
-  typeLabel: string;
-  title: string;
-  code: string;
-  window: string;
-  active: boolean;
-}
-
-const TYPE_COLOR: Record<PromoType, string> = {
+const TYPE_LABEL: Record<OfferRow["type"], string> = {
+  percent: "Procent",
+  fixed: "Sumă fixă",
+  bxgy: "Cumpără X, primești Y",
+  free_shipping: "Livrare gratuită",
+};
+const TYPE_COLOR: Record<OfferRow["type"], string> = {
   percent: "brand",
   fixed: "teal",
   bxgy: "cyan",
+  free_shipping: "grape",
 };
 
-const INITIAL_PROMOS: Promo[] = [
-  { id: "1", type: "percent", typeLabel: "Procent", title: "10% reducere licență", code: "STUDENT10", window: "01–07 Dec", active: true },
-  { id: "2", type: "fixed", typeLabel: "Sumă fixă", title: "Livrare gratuită peste 80 lei", code: "LIVRARE0", window: "Permanent", active: true },
-  { id: "3", type: "bxgy", typeLabel: "Cumpără X, primești Y", title: "La 2 pixuri, al 3-lea gratuit", code: "2PLUS1", window: "Permanent", active: false },
-  { id: "4", type: "percent", typeLabel: "Procent", title: "25% reducere toate produsele", code: "BLACKFRI25", window: "Expirat 29 Nov", active: false },
-];
+const fmtDate = (s: string) =>
+  new Intl.DateTimeFormat("ro-RO", { day: "2-digit", month: "short" }).format(new Date(s));
 
-export function OffersManager() {
-  const [banner, setBanner] = useState({
-    eyebrow: "Săptămâna studentului",
-    code: "STUDENT10",
-    title: "10% reducere la lucrări de licență",
-    description: "Cu codul STUDENT10, valid până duminică",
-    active: true,
-  });
-  const [promos, setPromos] = useState<Promo[]>(INITIAL_PROMOS);
+function typeValue(o: OfferRow): string {
+  const c = (o.config ?? {}) as { percent?: number; amount?: number; buy?: number; get?: number };
+  if (o.type === "percent") return `−${c.percent ?? 0}%`;
+  if (o.type === "fixed") return `−${c.amount ?? 0} lei`;
+  if (o.type === "bxgy") return `${c.buy ?? 0}+${c.get ?? 0} gratuit`;
+  return "Livrare gratuită";
+}
 
-  const set = (k: keyof typeof banner, v: string | boolean) =>
-    setBanner((b) => ({ ...b, [k]: v }));
+function windowLabel(o: OfferRow): string {
+  if (o.starts_at && o.ends_at) return `${fmtDate(o.starts_at)} – ${fmtDate(o.ends_at)}`;
+  if (o.ends_at) return `Până la ${fmtDate(o.ends_at)}`;
+  if (o.starts_at) return `Din ${fmtDate(o.starts_at)}`;
+  return "Permanent";
+}
+
+export function OffersManager({
+  canEdit,
+  initialOffers,
+  items,
+  categories,
+}: {
+  canEdit: boolean;
+  initialOffers: OfferRow[];
+  items: { id: string; title: string }[];
+  categories: { id: string; name: string }[];
+}) {
+  const [offers, setOffers] = useState<OfferRow[]>(initialOffers);
+  const [, startTransition] = useTransition();
+
+  const itemMap = useMemo(() => new Map(items.map((i) => [i.id, i.title])), [items]);
+  const catMap = useMemo(() => new Map(categories.map((c) => [c.id, c.name])), [categories]);
+
+  function scopeLabel(o: OfferRow): string {
+    if (o.scope === "cart") return "Toată comanda";
+    if (o.scope === "product") return `Produs: ${itemMap.get(o.target_id ?? "") ?? "—"}`;
+    return `Categorie: ${catMap.get(o.target_id ?? "") ?? "—"}`;
+  }
+
+  function toggle(o: OfferRow) {
+    const next = !o.active;
+    setOffers((prev) => prev.map((x) => (x.id === o.id ? { ...x, active: next } : x)));
+    startTransition(async () => {
+      try {
+        await setOfferActive(o.id, next);
+      } catch (e) {
+        setOffers((prev) => prev.map((x) => (x.id === o.id ? { ...x, active: o.active } : x)));
+        toast.error((e as Error).message || "Nu am putut actualiza promoția");
+      }
+    });
+  }
+
+  function remove(o: OfferRow) {
+    const prev = offers;
+    setOffers((cur) => cur.filter((x) => x.id !== o.id));
+    startTransition(async () => {
+      try {
+        await deleteOffer(o.id);
+        toast.success("Promoție ștearsă");
+      } catch (e) {
+        setOffers(prev);
+        toast.error((e as Error).message || "Nu am putut șterge promoția");
+      }
+    });
+  }
+
+  const activeCount = offers.filter((o) => o.active).length;
 
   return (
     <Stack gap="lg">
-      <Group justify="space-between" align="flex-end">
+      <Group justify="space-between" align="flex-end" wrap="wrap" gap="md">
         <div>
           <Title order={2}>Oferte & promoții</Title>
           <Text c="dimmed">
-            Atrage clienți noi cu promoții și un banner activ pe pagina ta.
+            {offers.length === 0
+              ? "Atrage clienți noi cu reduceri și oferte."
+              : `${activeCount} active din ${offers.length}.`}
           </Text>
         </div>
-        <LinkButton href="/dashboard/offers/new" leftSection={<Plus size={16} />}>
-          Promoție nouă
-        </LinkButton>
+        {canEdit && (
+          <LinkButton href="/dashboard/offers/new" leftSection={<Plus size={16} />}>
+            Promoție nouă
+          </LinkButton>
+        )}
       </Group>
 
-      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
-        {/* Banner editor */}
-        <Card>
-          <Group justify="space-between" mb="md">
-            <Text fw={700}>Banner principal</Text>
-            <Text fz="xs" c="dimmed">
-              Apare în vârful paginii magazinului
-            </Text>
-          </Group>
-
-          {/* Live preview */}
-          <Paper
-            radius="md"
-            p="lg"
-            mb="md"
-            style={{
-              background:
-                "linear-gradient(120deg, var(--mantine-color-ink-9), var(--mantine-color-brand-6))",
-            }}
-          >
-            <Text tt="uppercase" fz={10} fw={700} c="brand.1" style={{ letterSpacing: 0.6 }}>
-              {banner.eyebrow || "Eyebrow"}
-            </Text>
-            <Title order={3} c="white" mt={4}>
-              {banner.title || "Titlu promoție"}
-            </Title>
-            <Text c="gray.3" fz="sm" mt={4}>
-              {banner.description || "Descriere"}
-            </Text>
-          </Paper>
-
-          <Stack gap="sm">
-            <SimpleGrid cols={2} spacing="sm">
-              <TextInput
-                label="Eyebrow"
-                value={banner.eyebrow}
-                onChange={(e) => set("eyebrow", e.currentTarget.value)}
-              />
-              <TextInput
-                label="Cod"
-                value={banner.code}
-                onChange={(e) => set("code", e.currentTarget.value)}
-              />
-            </SimpleGrid>
-            <TextInput
-              label="Titlu"
-              value={banner.title}
-              onChange={(e) => set("title", e.currentTarget.value)}
-            />
-            <Textarea
-              label="Descriere"
-              autosize
-              minRows={2}
-              value={banner.description}
-              onChange={(e) => set("description", e.currentTarget.value)}
-            />
-            <Group justify="space-between" mt="xs">
-              <Switch
-                label="Banner activ"
-                checked={banner.active}
-                onChange={(e) => set("active", e.currentTarget.checked)}
-              />
-              <Button variant="default" leftSection={<Palette size={16} />}>
-                Schimbă culori
-              </Button>
-            </Group>
-          </Stack>
-        </Card>
-
-        {/* Promotions list */}
-        <Card>
-          <Text fw={700} mb="md">
-            Promoții active ({promos.filter((p) => p.active).length})
-          </Text>
-          <Stack gap="sm">
-            {promos.map((p) => (
-              <Paper key={p.id} withBorder radius="md" p="sm">
-                <Group justify="space-between" wrap="nowrap" align="flex-start">
-                  <div style={{ minWidth: 0 }}>
-                    <Group gap={6} mb={4}>
-                      <Badge variant="light" color={TYPE_COLOR[p.type]} size="sm">
-                        {p.typeLabel}
-                      </Badge>
-                      <Badge variant="light" color={p.active ? "teal" : "mist"} size="sm">
-                        {p.active ? "Activă" : "Inactivă"}
-                      </Badge>
+      {offers.length === 0 ? (
+        <EmptyState
+          icon={<Tag size={26} />}
+          title="Nicio promoție încă"
+          description="Creează prima ofertă — automată (se aplică singură) sau cu un cod promoțional."
+        />
+      ) : (
+        <Stack gap="sm">
+          {offers.map((o) => (
+            <Paper key={o.id} withBorder radius="md" p="md" opacity={o.active ? 1 : 0.6}>
+              <Group justify="space-between" wrap="nowrap" align="flex-start" gap="md">
+                <div style={{ minWidth: 0 }}>
+                  <Group gap={6} mb={6} wrap="wrap">
+                    <Badge variant="light" color={TYPE_COLOR[o.type]} size="sm">
+                      {TYPE_LABEL[o.type]}
+                    </Badge>
+                    <Badge variant="filled" color={TYPE_COLOR[o.type]} size="sm">
+                      {typeValue(o)}
+                    </Badge>
+                    <Badge variant="light" color="slate" size="sm">
+                      {scopeLabel(o)}
+                    </Badge>
+                    {o.trigger === "code" ? (
                       <Badge variant="outline" color="brand" size="sm">
-                        {p.code}
+                        Cod: {o.code}
                       </Badge>
-                    </Group>
-                    <Text fw={600} fz="sm">
-                      {p.title}
-                    </Text>
-                    <Text fz="xs" c="dimmed">
-                      {p.window}
-                    </Text>
-                  </div>
+                    ) : (
+                      <Badge variant="light" color="mist" size="sm">
+                        Automată
+                      </Badge>
+                    )}
+                    {o.stackable && (
+                      <Badge variant="light" color="teal" size="sm">
+                        Cumulabilă
+                      </Badge>
+                    )}
+                  </Group>
+                  <Text fw={600} fz="sm">
+                    {o.name}
+                  </Text>
+                  <Text fz="xs" c="dimmed">
+                    {windowLabel(o)}
+                  </Text>
+                </div>
+
+                {canEdit && (
                   <Group gap={4} wrap="nowrap">
                     <Switch
-                      checked={p.active}
-                      onChange={() =>
-                        setPromos((prev) =>
-                          prev.map((x) => (x.id === p.id ? { ...x, active: !x.active } : x))
-                        )
-                      }
+                      checked={o.active}
+                      onChange={() => toggle(o)}
+                      aria-label="Activează/dezactivează"
                     />
+                    <LinkActionIcon
+                      href={`/dashboard/offers/${o.id}/edit`}
+                      variant="subtle"
+                      color="gray"
+                      aria-label="Editează promoția"
+                    >
+                      <Pencil size={16} />
+                    </LinkActionIcon>
                     <ActionIcon
                       variant="subtle"
                       color="red"
                       aria-label="Șterge promoția"
-                      onClick={() => setPromos((prev) => prev.filter((x) => x.id !== p.id))}
+                      onClick={() => remove(o)}
                     >
-                      <Trash2 size={18} />
+                      <Trash2 size={16} />
                     </ActionIcon>
                   </Group>
-                </Group>
-              </Paper>
-            ))}
-          </Stack>
-        </Card>
-      </SimpleGrid>
+                )}
+              </Group>
+            </Paper>
+          ))}
+        </Stack>
+      )}
     </Stack>
   );
 }

@@ -70,6 +70,12 @@ export function ProfileEditor({
     normalizeWeek(initialSchedule)
   );
   const [pending, startTransition] = useTransition();
+  // Baseline of what's currently persisted, for dirty-tracking. Updated after each
+  // successful save so the button re-disables once there's nothing new to write.
+  // (Logo/banner/email persist via their own paths and aren't part of this payload.)
+  const [baseline, setBaseline] = useState<{ text: ProfileText; schedule: WeeklySchedule }>(
+    () => ({ text: initial, schedule: normalizeWeek(initialSchedule) })
+  );
 
   const [logoPath, setLogoPath] = useState<string | null>(initialLogo);
   const [bannerPath, setBannerPath] = useState<string | null>(initialBanner);
@@ -150,6 +156,15 @@ export function ProfileEditor({
         ? "Aproape gata — mai completează câteva detalii"
         : "Completează profilul pentru mai multă vizibilitate";
 
+  // Has anything in this button's payload (text fields + schedule) changed since the
+  // last save? Drives the disabled state so an untouched form can't be re-saved.
+  const dirty = useMemo(() => {
+    const textChanged = (Object.keys(form) as (keyof ProfileText)[]).some(
+      (k) => form[k] !== baseline.text[k]
+    );
+    return textChanged || JSON.stringify(schedule) !== JSON.stringify(baseline.schedule);
+  }, [form, schedule, baseline]);
+
   function save() {
     if (!shopId) {
       toast.error("Niciun magazin asociat contului tău");
@@ -157,8 +172,11 @@ export function ProfileEditor({
     }
     startTransition(async () => {
       const res = await updateShopProfile(shopId, { ...form, schedule });
-      if (res.ok) toast.success("Profil salvat");
-      else toast.error(res.error ?? "Nu am putut salva profilul");
+      if (res.ok) {
+        // Snapshot the just-saved values as the new baseline → button re-disables.
+        setBaseline({ text: form, schedule });
+        toast.success("Profil salvat");
+      } else toast.error(res.error ?? "Nu am putut salva profilul");
     });
   }
 
@@ -172,7 +190,7 @@ export function ProfileEditor({
         <Button
           leftSection={<Check size={16} />}
           loading={pending}
-          disabled={!shopId}
+          disabled={!shopId || !dirty}
           onClick={save}
         >
           Salvează modificările

@@ -2,7 +2,6 @@
 
 import {
   ActionIcon,
-  Image,
   NumberInput,
   Paper,
   Select,
@@ -13,8 +12,9 @@ import {
 } from "@mantine/core";
 import { Trash2 } from "lucide-react";
 import { TEXT_MAX, type Category, type Item } from "@/lib/catalog/schema";
-import { IMAGE_PLACEHOLDER, itemImageUrl, mainImage } from "@/lib/catalog/images";
+import { itemImageUrl, mainImage } from "@/lib/catalog/images";
 import { ItemImages } from "./ItemImages";
+import { ItemThumb } from "./ItemThumb";
 
 interface Props {
   item: Item;
@@ -41,16 +41,8 @@ export function ProductItemCard({ item, categories, onChange, onRemove, dragHand
         <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--mantine-spacing-md)", flexWrap: "nowrap" }}>
           {dragHandle}
 
-          {/* Main image (first of the gallery below). */}
-          <Image
-            src={mainUrl ?? undefined}
-            w={56}
-            h={56}
-            radius="md"
-            fit="cover"
-            fallbackSrc={IMAGE_PLACEHOLDER}
-            style={{ flexShrink: 0, border: "1px solid var(--mantine-color-default-border)" }}
-          />
+          {/* Main image (first of the gallery below) — icon placeholder when none. */}
+          <ItemThumb src={mainUrl} size={56} radius="md" />
 
           <Stack gap="xs" style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: "flex", gap: "var(--mantine-spacing-sm)", alignItems: "flex-end", flexWrap: "wrap" }}>

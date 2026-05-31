@@ -20,3 +20,15 @@ export async function getActiveOffers(shopId: string): Promise<OfferRow[]> {
   // member (who can read inactive ones too) still only gets live offers for the storefront.
   return ((data ?? []) as OfferRow[]).filter((o) => isOfferLive(o));
 }
+
+/** ALL offers for a shop (member view: active + inactive, automatic + code) — dashboard manager. */
+export async function getShopOffers(shopId: string): Promise<OfferRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("offers")
+    .select("*")
+    .eq("shop_id", shopId)
+    .order("created_at", { ascending: false });
+  if (error) return [];
+  return (data ?? []) as OfferRow[];
+}

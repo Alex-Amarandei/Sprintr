@@ -1,7 +1,10 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { CartLine } from "@/lib/catalog/cart";
+import { toCartLineInput, type CartLine } from "@/lib/catalog/cart";
+import { applyOffers, isOfferLive, toEngineOffer, type AppliedOffer } from "@/lib/catalog/offers";
+import { listShopOffers } from "@/lib/offers/api";
+import type { OfferRow } from "@/lib/offers/types";
 
 const STORAGE_KEY = "sprintr.cart.v1";
 
@@ -52,7 +55,17 @@ interface CartContextValue {
   /** The cart shop's delivery fee in lei (0 when empty). */
   deliveryFee: number;
   count: number;
+  /** Pre-discount subtotal (sum of line totals). */
   total: number;
+  /** Goods discount from live automatic offers applied to the cart. */
+  discount: number;
+  /** total − discount (what the customer pays for goods, before shipping/fees). */
+  payable: number;
+  /** A live automatic free-shipping offer is in effect. */
+  freeShipping: boolean;
+  appliedOffers: AppliedOffer[];
+  /** Discounted total for one line (for the strikethrough); falls back to its original. */
+  lineFinal: (lineId: string) => number;
   addLine: (line: CartLine, shop: CartShop) => void;
   removeLine: (lineId: string) => void;
   clear: () => void;
@@ -66,6 +79,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [shop, setShop] = useState<CartShop | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  // Live automatic offers for the cart's shop (for the discount preview).
+  const [offers, setOffers] = useState<OfferRow[]>([]);
 
   useEffect(() => {
     const c = loadCart();
@@ -83,9 +98,40 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [lines, shop, hydrated]);
 
+  // Load the cart shop's live automatic offers so the cart can preview the discount.
+  // Code-triggered offers are deliberately excluded (those apply only at checkout).
+  const shopId = shop?.id ?? null;
+  useEffect(() => {
+    if (!shopId) {
+      setOffers([]);
+      return;
+    }
+    let cancelled = false;
+    listShopOffers(shopId)
+      .then((rows) => {
+        if (!cancelled)
+          setOffers(rows.filter((o) => o.trigger === "automatic" && isOfferLive(o)));
+      })
+      .catch(() => {
+        if (!cancelled) setOffers([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [shopId]);
+
   const value = useMemo<CartContextValue>(() => {
-    const total =
-      Math.round(lines.reduce((s, l) => s + l.total, 0) * 100) / 100;
+    const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
+    const total = round2(lines.reduce((s, l) => s + l.total, 0));
+
+    // Apply offers for a live preview (shipping handled separately at checkout → baseShipping 0).
+    const result =
+      lines.length && offers.length
+        ? applyOffers(lines.map(toCartLineInput), offers.map(toEngineOffer), 0)
+        : null;
+    const discount = result?.discount ?? 0;
+    const lineMap = new Map((result?.lines ?? []).map((lr) => [lr.lineId, lr.finalTotal]));
+
     return {
       lines,
       shopId: shop?.id ?? null,
@@ -94,6 +140,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       deliveryFee: shop?.deliveryFee ?? 0,
       count: lines.length,
       total,
+      discount,
+      payable: round2(total - discount),
+      freeShipping: result?.freeShipping ?? false,
+      appliedOffers: result?.appliedOffers ?? [],
+      lineFinal: (lineId) =>
+        lineMap.get(lineId) ?? lines.find((l) => l.lineId === lineId)?.total ?? 0,
       // Cross-shop conflicts are resolved by the UI (confirm + clear) BEFORE calling
       // this, so here we just append; `clear()` runs first when switching shops.
       addLine: (line, s) => {
@@ -111,7 +163,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setShop(null);
       },
     };
-  }, [lines, shop]);
+  }, [lines, shop, offers]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

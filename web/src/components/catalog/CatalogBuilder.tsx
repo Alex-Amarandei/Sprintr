@@ -1,7 +1,8 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDisclosure } from "@mantine/hooks";
 import {
   ActionIcon,
   Alert,
@@ -11,13 +12,16 @@ import {
   Divider,
   Group,
   Menu,
+  Modal,
   Paper,
   Stack,
   Text,
   TextInput,
+  ThemeIcon,
   Title,
 } from "@mantine/core";
 import {
+  AlertCircle,
   ArrowUp,
   GripVertical,
   Pencil,
@@ -25,6 +29,7 @@ import {
   Rocket,
   Save,
   Trash2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -54,7 +59,7 @@ import {
 import { newCategory, newItem } from "@/lib/catalog/factories";
 import { isLocalImage, persistLocalImage } from "@/lib/catalog/images";
 import {
-  createDraft,
+  getOrCreateDraft,
   publishVersion,
   saveDraftDocument,
 } from "@/lib/catalog/api";
@@ -157,10 +162,16 @@ function CategorySection({
       radius="lg"
       p="md"
       style={{
+        // Grouping shell with a faint blur-free tint — subtle enough that the page background
+        // still reads through, but defined enough to bound the category. The frosted item cards
+        // inside stand on their own. A drag hovering the drop zone tints it brand.
         background: isOver
-          ? "light-dark(var(--mantine-color-stone-1), var(--mantine-color-stone-7))"
-          : "light-dark(var(--mantine-color-stone-0), var(--mantine-color-dark-6))",
-        transition: "background 120ms",
+          ? "color-mix(in srgb, var(--mantine-color-brand-5) 12%, transparent)"
+          : "light-dark(color-mix(in srgb, var(--mantine-color-stone-1) 16%, transparent), color-mix(in srgb, var(--mantine-color-dark-8) 18%, transparent))",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
+        borderColor: isOver ? "var(--mantine-color-brand-4)" : undefined,
+        transition: "background 120ms, border-color 120ms",
       }}
     >
       <Group justify="space-between" wrap="nowrap" mb="sm">
@@ -317,8 +328,20 @@ export function CatalogBuilder({
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
   const [liveId, setLiveId] = useState<string | null>(activeVersionId);
+  // "Ești sigur?" confirm before discarding unsaved edits on "Renunță".
+  const [confirmOpen, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
 
   const editing = canEdit && draftId !== null;
+
+  // "Changes to publish" = the working document differs from the live version. Stays true
+  // after a plain Save (the saved draft still isn't live) and false right after entering edit
+  // (the draft is a clone of live) or once edits are reverted — so Publică disables when a
+  // publish would be a no-op. sort_order is normalized so reorders count but index noise doesn't.
+  const hasUnpublishedChanges = useMemo(() => {
+    const canonical = (d: CatalogDocument) =>
+      JSON.stringify({ ...d, items: d.items.map((it, i) => ({ ...it, sort_order: i })) });
+    return canonical(doc) !== canonical(activeDocument);
+  }, [doc, activeDocument]);
 
   function updateDoc(items: Item[]) {
     setDoc({ ...doc, items });
@@ -328,17 +351,36 @@ export function CatalogBuilder({
   async function startEditing() {
     setBusy(true);
     try {
-      const draft = await createDraft(shopId);
+      // Reuse the shop's existing draft if one exists, else clone the live version into a
+      // fresh one — so leaving edit mode and coming back doesn't create duplicate drafts.
+      const draft = await getOrCreateDraft(shopId);
       setDraftId(draft.id);
       setVersion(draft.version);
       setDoc(parseDocument(draft.document));
       setDirty(false);
-      toast.success(`Schiță creată (v${draft.version}) — poți edita catalogul`);
+      toast.success(`Poți edita catalogul — schița v${draft.version}`);
     } catch (e) {
-      toast.error(`Nu am putut crea schița: ${(e as Error).message}`);
+      toast.error(`Nu am putut deschide schița: ${(e as Error).message}`);
     } finally {
       setBusy(false);
     }
+  }
+
+  /**
+   * Leave edit mode without publishing — back to the read-only live catalog. The draft is
+   * kept in the DB (re-entering edit resumes it); only unsaved in-memory edits are dropped.
+   * With unsaved edits we ask for confirmation first (modal); otherwise we exit straight away.
+   */
+  function requestCancelEditing() {
+    if (dirty) openConfirm();
+    else doCancelEditing();
+  }
+  function doCancelEditing() {
+    closeConfirm();
+    setDraftId(null);
+    setVersion(null);
+    setDoc(activeDocument);
+    setDirty(false);
   }
 
   function addItem(kind: ItemKind, categoryId: string | null = null) {
@@ -573,6 +615,15 @@ export function CatalogBuilder({
             (editing ? (
               <>
                 <Button
+                  variant="subtle"
+                  color="gray"
+                  leftSection={<X size={16} />}
+                  onClick={requestCancelEditing}
+                  disabled={busy}
+                >
+                  Renunță
+                </Button>
+                <Button
                   variant="default"
                   leftSection={<Save size={16} />}
                   onClick={save}
@@ -585,6 +636,7 @@ export function CatalogBuilder({
                   leftSection={<Rocket size={16} />}
                   onClick={publishDraft}
                   loading={busy}
+                  disabled={!hasUnpublishedChanges}
                 >
                   Publică
                 </Button>
@@ -725,6 +777,36 @@ export function CatalogBuilder({
       >
         <ArrowUp size={18} />
       </ActionIcon>
+
+      {/* "Ești sigur?" — guards against losing unsaved edits when leaving edit mode. */}
+      <Modal
+        opened={confirmOpen}
+        onClose={closeConfirm}
+        withCloseButton={false}
+        centered
+        size="sm"
+        padding="xl"
+      >
+        <Stack align="center" gap="sm">
+          <ThemeIcon variant="light" color="yellow" size={56} radius="xl">
+            <AlertCircle size={26} />
+          </ThemeIcon>
+          <Text fw={800} fz="lg" ta="center" c="var(--mantine-color-text)">
+            Ești sigur?
+          </Text>
+          <Text c="dimmed" ta="center" fz="sm">
+            Ai modificări nesalvate care se vor pierde dacă ieși din editare.
+          </Text>
+          <Group grow w="100%" mt="md" gap="sm">
+            <Button variant="default" onClick={closeConfirm}>
+              Nu
+            </Button>
+            <Button color="red" leftSection={<X size={16} />} onClick={doCancelEditing}>
+              Da, renunță
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Stack>
   );
 }

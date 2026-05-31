@@ -124,7 +124,10 @@ export function ShopOrderQueue({
         <Group gap="xs" wrap="nowrap">
           <Button
             variant="default"
-            bg="stone.0"
+            // Theme-aware surface (see ShopOrderActions): soft stone in light mode, dark
+            // raised-surface token in dark mode — a hardcoded `stone.0` made the default
+            // variant's light text unreadable on a near-white button in dark mode.
+            bg="light-dark(var(--mantine-color-stone-0), var(--mantine-color-dark-6))"
             size="xs"
             disabled={pending}
             onClick={() => setStatus(o.id, "rejected", `Comanda #${short(o.id)} respinsă`)}
