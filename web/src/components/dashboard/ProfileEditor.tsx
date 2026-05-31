@@ -23,6 +23,11 @@ import { toast } from "sonner";
 import { updateShopProfile } from "@/lib/shop/actions";
 import type { ShopProfileInput } from "@/lib/shop/types";
 import {
+  emailError,
+  phoneError,
+  sanitizePhoneInput,
+} from "@/lib/utils/validation";
+import {
   DAY_LABELS,
   DAY_ORDER,
   type WeekdayKey,
@@ -53,6 +58,8 @@ export function ProfileEditor({
   meta: { hasLogo: boolean; hasBanner: boolean; itemCount: number };
 }) {
   const [form, setForm] = useState<ProfileText>(initial);
+  // Email has no `shops` column yet → local state, validated but not persisted.
+  const [email, setEmail] = useState("");
   const [schedule, setSchedule] = useState<WeeklySchedule>(() =>
     normalizeWeek(initialSchedule)
   );
@@ -186,9 +193,26 @@ export function ProfileEditor({
               </SimpleGrid>
               <Textarea label="Descriere" autosize minRows={2} {...field("description")} />
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
-                <TextInput label="Telefon" {...field("phone")} />
-                {/* No email column on `shops` — visual only. */}
-                <TextInput label="Email" defaultValue="contact@pimcopy.ro" />
+                <TextInput
+                  label="Telefon"
+                  inputMode="tel"
+                  {...field("phone")}
+                  onChange={(e) => {
+                    const phone = sanitizePhoneInput(e.currentTarget.value);
+                    setForm((f) => ({ ...f, phone }));
+                  }}
+                  error={form.phone ? phoneError(form.phone) : null}
+                />
+                {/* No email column on `shops` — visual only, but validated. */}
+                <TextInput
+                  label="Email"
+                  type="email"
+                  inputMode="email"
+                  placeholder="contact@magazin.ro"
+                  value={email}
+                  onChange={(e) => setEmail(e.currentTarget.value)}
+                  error={email ? emailError(email) : null}
+                />
               </SimpleGrid>
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
                 <TextInput label="Adresă" {...field("address")} />
