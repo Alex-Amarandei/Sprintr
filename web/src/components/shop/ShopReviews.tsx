@@ -48,7 +48,7 @@ export function ShopReviews({
               <Group justify="space-between" align="center" mb={r.comment ? 6 : 0}>
                 <Group gap="sm" align="center">
                   <Rating value={r.rating} readOnly size="sm" color="brand" />
-                  <Badge variant="light" color="teal" size="sm">
+                  <Badge variant="light" color="stone" size="sm">
                     {r.isOwn ? "Recenzia ta" : "Client verificat"}
                   </Badge>
                 </Group>

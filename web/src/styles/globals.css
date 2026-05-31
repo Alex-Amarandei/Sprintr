@@ -157,9 +157,6 @@ body {
  * chips/icons read identically in both schemes. The `-1/-2/-7` shades are scheme-independent.
  */
 [data-mantine-color-scheme="dark"] {
-  /* mist-5 reads too dark on the charcoal-blue dark background — lift dimmed text. */
-  --mantine-color-dimmed: var(--mantine-color-mist-4);
-
   --mantine-color-brand-light: var(--mantine-color-brand-1);
   --mantine-color-brand-light-hover: var(--mantine-color-brand-2);
   --mantine-color-brand-light-color: var(--mantine-color-brand-7);

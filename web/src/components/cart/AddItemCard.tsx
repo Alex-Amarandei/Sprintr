@@ -145,26 +145,26 @@ export function AddItemCard({
               {formatPrice(fromPrice)}
             </Text>
           </div>
+          {/* Simple text-style action (no filled container) — keeps the card clean. */}
           {configurable ? (
             <Button
-              leftSection={<Settings2 size={16} />}
+              leftSection={<Settings2 size={15} />}
               onClick={open}
-              variant="light"
-              // Real bg/color props (not the --button-* vars, which Mantine sets
-              // inline itself) so the button looks identical in dark and light mode.
-              styles={{
-                root: {
-                  backgroundColor: "var(--mantine-color-brand-1)",
-                  color: "var(--mantine-color-brand-7)",
-                },
-              }}
+              variant="subtle"
+              color="brand"
+              size="compact-sm"
+              px={6}
             >
               Configurează
             </Button>
           ) : (
             <Button
-              leftSection={<Plus size={16} />}
+              leftSection={<Plus size={15} />}
               onClick={() => tryAdd(buildCartLine(item))}
+              variant="subtle"
+              color="brand"
+              size="compact-sm"
+              px={6}
             >
               Adaugă
             </Button>
