@@ -61,7 +61,16 @@ export default async function OrderDetailPage({ params }: Props) {
             <StatusBadge status={order.status} />
           </Group>
           <Text c="dimmed" mt={4}>
-            {order.shopName} · Plasată {order.placedAt}
+            <LinkAnchor
+              href={`/shop/${order.shopId}`}
+              c="dimmed"
+              fw={600}
+              underline="hover"
+            >
+              {order.shopName}
+            </LinkAnchor>
+            {" · Plasată "}
+            {order.placedAt}
             {order.eta ? ` · ETA ${order.eta}` : ""}
           </Text>
         </div>

@@ -10,6 +10,7 @@ import {
   MessageSquare,
   Package,
   ShoppingBag,
+  Star,
   Store,
   Tag,
   Users,
@@ -29,6 +30,7 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
       { href: "/dashboard/analytics", label: "Statistici", icon: BarChart3 },
       { href: "/dashboard/orders", label: "Comenzi", icon: ShoppingBag },
       { href: "/dashboard/messages", label: "Mesaje", icon: MessageSquare },
+      { href: "/dashboard/reviews", label: "Recenzii", icon: Star },
     ],
   },
   {
