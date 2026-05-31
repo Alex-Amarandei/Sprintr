@@ -136,13 +136,21 @@ export async function POST(req: NextRequest) {
       }>;
       fulfilment: "delivery" | "pickup";
       delivery_address?: string;
+      delivery_lat?: number; // optional precise drop-off coords (checkout map/geolocation)
+      delivery_lng?: number;
       contact_phone?: string;
       notes?: string;
       payment_method: "cash_in_store" | "cash_on_delivery" | "online";
       code?: string; // optional promo code typed at checkout
     };
 
-    const { shop_id, lines, fulfilment, delivery_address, contact_phone, notes, payment_method, code } = body;
+    const { shop_id, lines, fulfilment, delivery_address, delivery_lat, delivery_lng, contact_phone, notes, payment_method, code } = body;
+
+    // Validate coordinates server-side; store null on anything out of range (never trust the client).
+    const inRange = (v: unknown, max: number) =>
+      typeof v === "number" && Number.isFinite(v) && Math.abs(v) <= max;
+    const deliveryLat = inRange(delivery_lat, 90) ? (delivery_lat as number) : null;
+    const deliveryLng = inRange(delivery_lng, 180) ? (delivery_lng as number) : null;
 
     if (!shop_id || !lines?.length) return err("shop_id and lines are required", 400);
     if (fulfilment === "delivery" && !delivery_address) return err("delivery_address required", 400);
@@ -256,6 +264,8 @@ export async function POST(req: NextRequest) {
         catalog_version_id: version.id,
         fulfilment,
         delivery_address: delivery_address ?? null,
+        delivery_lat: deliveryLat,
+        delivery_lng: deliveryLng,
         contact_phone: contact_phone ?? null,
         notes: notes ?? null,
         subtotal,

@@ -47,18 +47,12 @@ export default async function ShopLayout({
         component="aside"
         visibleFrom="md"
         w={SIDEBAR_WIDTH}
+        bg="var(--mantine-color-body)"
         style={{
           position: "fixed",
           insetBlock: 0,
           left: 0,
-          // Frosted nav panel: the aurora softly shows through, and it's separated from the
-          // page by a faint hairline + soft shadow (depth) rather than a hard 1px border.
-          backgroundColor:
-            "light-dark(color-mix(in srgb, var(--mantine-color-white) 70%, transparent), color-mix(in srgb, var(--mantine-color-dark-7) 58%, transparent))",
-          backdropFilter: "blur(18px) saturate(140%)",
-          WebkitBackdropFilter: "blur(18px) saturate(140%)",
-          boxShadow:
-            "1px 0 0 0 color-mix(in srgb, var(--mantine-color-default-border) 55%, transparent), 16px 0 32px -28px rgba(0, 0, 0, 0.28)",
+          borderRight: "1px solid var(--mantine-color-default-border)",
         }}
       >
         <Box p="lg">

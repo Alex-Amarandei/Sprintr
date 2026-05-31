@@ -67,6 +67,9 @@ export interface SampleOrder {
   notes?: string;
   contactPhone?: string;
   deliveryAddress?: string;
+  /** Precise drop-off coordinates from the checkout map/geolocation (for the shop's map link). */
+  deliveryLat?: number;
+  deliveryLng?: number;
   fulfilment?: "delivery" | "pickup";
   paymentMethod?: string;
   /** Payment state: pending | paid | failed | refunded (drives the shop's payment badge). */

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -13,6 +14,7 @@ import {
   Button,
   Divider,
   Group,
+  Loader,
   Modal,
   Radio,
   SimpleGrid,
@@ -28,16 +30,37 @@ import {
   Banknote,
   CheckCircle2,
   CreditCard,
+  LocateFixed,
   Store,
   Truck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils/format";
 import { phoneError, sanitizePhoneInput } from "@/lib/utils/validation";
+import { getCurrentPosition, reverseGeocode, type LatLng } from "@/lib/geo/geocode";
 import { useCart } from "./CartContext";
 import { createClient } from "@/lib/supabase/client";
 import { uploadOrderFiles } from "@/lib/storage/orderFiles";
 import { confirmOrderPayment } from "@/lib/orders/payment";
+
+// The map picker is client-only (Leaflet touches `window`) → load it lazily, never on the server.
+const LocationPicker = dynamic(() => import("./LocationPicker"), {
+  ssr: false,
+  loading: () => (
+    <Group
+      justify="center"
+      align="center"
+      h={240}
+      style={{
+        border: "1px solid var(--mantine-color-default-border)",
+        borderRadius: "var(--mantine-radius-md)",
+      }}
+    >
+      <Loader size="sm" />
+    </Group>
+  ),
+});
 
 // Only initialise Stripe when the publishable key is actually configured —
 // `loadStripe(undefined)` throws, and the key is absent in local/dev without Stripe.
@@ -59,6 +82,9 @@ interface PlaceOrderResult {
 interface DeliveryFormValues {
   fulfilment: "delivery" | "pickup";
   delivery_address: string;
+  /** Optional precise coordinates from the map/geolocation (helps the shop + courier). */
+  delivery_lat: number | null;
+  delivery_lng: number | null;
   contact_phone: string;
   notes: string;
   payment_method: "cash_in_store" | "cash_on_delivery" | "online";
@@ -82,6 +108,8 @@ function DeliveryStep({
     initialValues: {
       fulfilment: "delivery",
       delivery_address: "",
+      delivery_lat: null,
+      delivery_lng: null,
       contact_phone: "",
       notes: "",
       // Delivery is the default fulfilment → must be paid online.
@@ -97,6 +125,42 @@ function DeliveryStep({
   });
 
   const pickup = form.values.fulfilment === "pickup";
+  const [locating, setLocating] = useState(false);
+
+  // Apply a chosen point: store coords + best-effort reverse-geocode into the address field.
+  // `setValues` (not two `setFieldValue`s) so a click/drag updates everything in one render.
+  async function applyPoint(p: LatLng) {
+    form.setValues({ delivery_lat: p.lat, delivery_lng: p.lng });
+    const addr = await reverseGeocode(p);
+    if (addr) form.setFieldValue("delivery_address", addr);
+  }
+
+  async function useCurrentLocation() {
+    setLocating(true);
+    const p = await getCurrentPosition();
+    setLocating(false);
+    if (!p) {
+      toast.error("Nu am putut accesa locația. Verifică permisiunile browserului.");
+      return;
+    }
+    await applyPoint(p);
+  }
+
+  // On open, try to prefill the address from the current location — only when delivery is
+  // selected and the address is still empty (per the request). Silent if permission is
+  // denied/unavailable; the user can always type or pick on the map instead.
+  const autoTried = useRef(false);
+  useEffect(() => {
+    if (autoTried.current) return;
+    autoTried.current = true;
+    if (form.values.fulfilment !== "delivery" || form.values.delivery_address.trim()) return;
+    void (async () => {
+      const p = await getCurrentPosition();
+      if (!p || form.values.delivery_address.trim()) return; // bail if the user typed meanwhile
+      await applyPoint(p);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <form onSubmit={form.onSubmit(onNext)}>
@@ -149,12 +213,37 @@ function DeliveryStep({
         </Radio.Group>
 
         {!pickup && (
-          <TextInput
-            label="Adresă de livrare"
-            placeholder="Str. Lăpușneanu 12, Iași"
-            required
-            {...form.getInputProps("delivery_address")}
-          />
+          <Stack gap="xs">
+            <TextInput
+              label="Adresă de livrare"
+              placeholder="Str. Lăpușneanu 12, Iași"
+              required
+              {...form.getInputProps("delivery_address")}
+            />
+            <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
+              <Text fz="xs" c="dimmed">
+                Alege punctul pe hartă sau folosește locația curentă — ajută magazinul și curierul.
+              </Text>
+              <Button
+                size="xs"
+                variant="light"
+                leftSection={<LocateFixed size={14} />}
+                loading={locating}
+                onClick={useCurrentLocation}
+                style={{ flexShrink: 0 }}
+              >
+                Locația curentă
+              </Button>
+            </Group>
+            <LocationPicker
+              value={
+                form.values.delivery_lat != null && form.values.delivery_lng != null
+                  ? { lat: form.values.delivery_lat, lng: form.values.delivery_lng }
+                  : null
+              }
+              onPick={applyPoint}
+            />
+          </Stack>
         )}
 
         <TextInput
@@ -397,6 +486,8 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
         })),
         fulfilment: values.fulfilment,
         delivery_address: values.delivery_address || undefined,
+        delivery_lat: values.delivery_lat ?? undefined,
+        delivery_lng: values.delivery_lng ?? undefined,
         contact_phone: values.contact_phone,
         notes: values.notes || undefined,
         payment_method: values.payment_method,

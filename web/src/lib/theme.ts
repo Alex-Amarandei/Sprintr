@@ -49,39 +49,16 @@ const stone: MantineColorsTuple = [
   "#75787c", "#5e6063", "#48494c", "#333436", "#1f2021",
 ];
 
-// Dark — overrides Mantine's default neutral-grey `dark` ramp so dark mode is on-brand:
-// a cool charcoal-blue tuned to the Slate · Ink hue, not muddy grey. Mantine derives every
-// dark-scheme token from this, so a single coherent ramp restyles the whole dark theme:
-//   0 = primary text · 3 = placeholder · 4 = borders/dividers · 5 = hover/subtle fill
-//   6 = raised surfaces (cards, inputs, menus) · 7 = body background · 8–9 = deeper wells.
-// Surfaces (6) sit a clear step above the body (7) for "lift"; borders (4) stay visible but quiet.
-const dark: MantineColorsTuple = [
-  "#c5d1db", "#aab8c4", "#8896a4", "#62717e", "#3a4751",
-  "#2a353f", "#222e38", "#1a232b", "#131b22", "#0d141a",
-];
-
-// Glass surfaces — Card/Paper panels are translucent + backdrop-blurred so the fixed aurora
-// background (blobs + dot grid) frosts through them on every page. Translucency alone reads as
-// opaque over a near-uniform background; it's the blur that picks up and smears what's behind
-// into the glassy look. In dark we tint with the *lighter* dark-5 so the pane reads as glass
-// catching light over the darker body; in light, a translucent white. `light-dark()` for both.
-const GLASS_BG =
-  "light-dark(" +
-  "color-mix(in srgb, var(--mantine-color-white) 68%, transparent)," +
-  "color-mix(in srgb, var(--mantine-color-dark-5) 55%, transparent))";
-
-// Frost the backdrop and lift the blurred blob colours a touch so glass feels alive.
-const GLASS_BLUR = "blur(14px) saturate(150%)";
-
 export const theme = createTheme({
   primaryColor: "brand",
   primaryShade: 6,
   autoContrast: true, // readable text on filled brand/teal/ink surfaces
-  colors: { brand, slate, ink, teal, cyan, mist, stone, dark },
+  colors: { brand, slate, ink, teal, cyan, mist, stone },
 
-  // Radius scale: button 8 (md) · card 12 (lg) · banner 16 (xl).
+  // Radius scale — tightened for crisper, less-rounded corners:
+  // input/button 6 (md) · card 8 (lg) · banner 12 (xl).
   defaultRadius: "md",
-  radius: { xs: "4px", sm: "6px", md: "8px", lg: "12px", xl: "16px" },
+  radius: { xs: "3px", sm: "4px", md: "6px", lg: "8px", xl: "12px" },
 
   // Spacing rhythm from the prototype: 4 · 8 · 12 · 16 · 24 · 32 · 48.
   spacing: { xs: "8px", sm: "12px", md: "16px", lg: "24px", xl: "32px" },
@@ -112,26 +89,8 @@ export const theme = createTheme({
     Button: { defaultProps: { radius: "md" } },
     ActionIcon: { defaultProps: { radius: "md" } },
     Title: { defaultProps: { c: "var(--mantine-color-text)" } },
-    Card: {
-      defaultProps: { radius: "lg", padding: "lg", withBorder: true },
-      styles: {
-        root: {
-          backgroundColor: GLASS_BG,
-          backdropFilter: GLASS_BLUR,
-          WebkitBackdropFilter: GLASS_BLUR,
-        },
-      },
-    },
-    Paper: {
-      defaultProps: { radius: "lg" },
-      styles: {
-        root: {
-          backgroundColor: GLASS_BG,
-          backdropFilter: GLASS_BLUR,
-          WebkitBackdropFilter: GLASS_BLUR,
-        },
-      },
-    },
+    Card: { defaultProps: { radius: "lg", padding: "lg", withBorder: true } },
+    Paper: { defaultProps: { radius: "lg" } },
     Badge: {
       defaultProps: { radius: "sm", fw: 600 },
       styles: { label: { textTransform: "none" } },

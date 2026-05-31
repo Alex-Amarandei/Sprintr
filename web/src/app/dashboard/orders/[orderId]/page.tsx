@@ -23,6 +23,7 @@ import {
   Truck,
 } from "lucide-react";
 import { getOrderDetail, getShopOrders } from "@/lib/orders/queries";
+import { mapsLink } from "@/lib/geo/geocode";
 import { createClient } from "@/lib/supabase/server";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { ChatPanel } from "@/components/order/ChatPanel";
@@ -119,7 +120,27 @@ export default async function ShopOrderDetailPage({ params }: Props) {
             value={order.fulfilment === "pickup" ? "Ridicare din magazin" : "Livrare la domiciliu"}
           />
           {order.fulfilment !== "pickup" && order.deliveryAddress && (
-            <InfoRow icon={<MapPin size={15} />} label="Adresă" value={order.deliveryAddress} />
+            <InfoRow
+              icon={<MapPin size={15} />}
+              label="Adresă"
+              value={(() => {
+                // Pin-exact Google Maps link when the customer picked coordinates, else an
+                // address search — so the shop/courier can navigate straight to the drop-off.
+                const href = mapsLink({
+                  lat: order.deliveryLat,
+                  lng: order.deliveryLng,
+                  address: order.deliveryAddress,
+                });
+                return href ? (
+                  <Anchor href={href} target="_blank" rel="noopener noreferrer">
+                    {order.deliveryAddress}
+                    {order.deliveryLat != null && order.deliveryLng != null ? " · Vezi pe hartă" : ""}
+                  </Anchor>
+                ) : (
+                  order.deliveryAddress
+                );
+              })()}
+            />
           )}
           {order.paymentMethod && (
             <InfoRow
