@@ -554,6 +554,11 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
       centered
       closeOnClickOutside={step !== "payment"}
       closeOnEscape={step !== "payment"}
+      styles={{
+        // Solid surface — the modal was reading semi-transparent over the page.
+        content: { backgroundColor: "light-dark(#ffffff, var(--mantine-color-dark-7))" },
+        header: { backgroundColor: "light-dark(#ffffff, var(--mantine-color-dark-7))" },
+      }}
     >
       {error && (
         <Alert icon={<AlertCircle size={16} />} color="red" mb="md" onClose={() => setError(null)} withCloseButton>

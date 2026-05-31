@@ -77,7 +77,14 @@ export function CartBar() {
             )}
           </div>
         }
-        styles={{ header: { alignItems: "flex-start" } }}
+        styles={{
+          // Solid surface — the drawer was reading semi-transparent over the page.
+          content: { backgroundColor: "light-dark(#ffffff, var(--mantine-color-dark-7))" },
+          header: {
+            alignItems: "flex-start",
+            backgroundColor: "light-dark(#ffffff, var(--mantine-color-dark-7))",
+          },
+        }}
       >
         {lines.length === 0 ? (
           <EmptyState
