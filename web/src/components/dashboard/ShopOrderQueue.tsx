@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState, useTransition } from "react";
+import { useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -48,25 +48,33 @@ export function ShopOrderQueue({
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const channelKey = useId();
+  const seenIds = useRef<Set<string>>(new Set(initialOrders.map((o) => o.id)));
 
-  // Adopt fresh server data whenever the page re-fetches (after a realtime refresh or a
-  // status action's revalidation), so the queue reflects the database.
+  // Adopt fresh server data after a re-fetch, and toast for any order that NEWLY became
+  // visible — a cash order placed, or an online order that just got paid. Diffing the
+  // fetched list (not raw INSERT events) means unpaid/abandoned online orders, which the
+  // server filters out until paid, never trigger a false "new order" alert.
   useEffect(() => {
+    const fresh = initialOrders.filter((o) => !seenIds.current.has(o.id));
+    if (fresh.length) {
+      toast.success(
+        fresh.length === 1 ? "Comandă nouă primită 🛎️" : `${fresh.length} comenzi noi 🛎️`
+      );
+      fresh.forEach((o) => seenIds.current.add(o.id));
+    }
     setOrders(initialOrders);
   }, [initialOrders]);
 
-  // Live queue: when an order is inserted/updated, re-fetch. RLS scopes Realtime delivery
-  // to this shop's own orders, so no shop_id filter is needed. Push-based — no polling.
+  // Live queue: any order insert/update for this shop triggers a re-fetch. RLS scopes
+  // Realtime delivery to this shop's own orders, so no shop_id filter is needed. The
+  // re-fetch re-applies the "paid online / cash" visibility filter. Push-based — no polling.
   useEffect(() => {
     const channel = supabase
       .channel(`shop-orders-${channelKey}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
-        (payload) => {
-          if (payload.eventType === "INSERT") toast.success("Comandă nouă primită 🛎️");
-          router.refresh();
-        }
+        () => router.refresh()
       )
       .subscribe();
     return () => {

@@ -162,6 +162,10 @@ export async function getShopOrders(): Promise<SampleOrder[]> {
     .from("orders")
     .select(ORDER_SELECT)
     .eq("shop_id", membership.shop_id)
+    // An online order is only "placed" once paid — hide unpaid/abandoned card checkouts
+    // from the shop (the row is created before payment to mint the Stripe intent). Cash
+    // orders are placed on creation, which is the final checkout step.
+    .or("payment_method.neq.online,payment_status.eq.paid")
     .order("created_at", { ascending: false });
   if (error || !data) return [];
 

@@ -70,6 +70,39 @@ export type Database = {
           },
         ]
       }
+      message_reads: {
+        Row: {
+          last_read_at: string
+          order_id: string
+          profile_id: string
+        }
+        Insert: {
+          last_read_at?: string
+          order_id: string
+          profile_id: string
+        }
+        Update: {
+          last_read_at?: string
+          order_id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reads_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reads_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           body: string
@@ -648,6 +681,20 @@ export type Database = {
         Args: { p_version_id: string }
         Returns: undefined
       }
+      shop_conversations: {
+        Args: never
+        Returns: {
+          customer_id: string
+          customer_name: string
+          last_at: string
+          last_body: string
+          last_sender: string
+          order_id: string
+          status: Database["public"]["Enums"]["order_status"]
+          unread: number
+        }[]
+      }
+      shop_unread_count: { Args: never; Returns: number }
       validate_offer_code: {
         Args: { p_code: string; p_shop_id: string }
         Returns: {
