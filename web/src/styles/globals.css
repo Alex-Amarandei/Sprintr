@@ -127,6 +127,14 @@ body {
   }
 }
 
+/* Order queue rows: highlight on hover so it's clear the row is clickable (→ order details). */
+.order-row {
+  transition: background-color 120ms ease;
+}
+.order-row:hover {
+  background-color: var(--mantine-color-default-hover);
+}
+
 /* Catalog item cards: subtle lift + accent border on hover. */
 .catalog-card {
   transition:

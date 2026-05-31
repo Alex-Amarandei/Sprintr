@@ -229,12 +229,13 @@ export function ShopOrderQueue({
       <Box
         key={o.id}
         p="md"
+        className="order-row"
         style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
       >
         <Group justify="space-between" wrap="nowrap" gap="md">
           <Link
             href={`/dashboard/orders/${o.id}`}
-            style={{ textDecoration: "none", color: "inherit", minWidth: 0, flex: 1 }}
+            style={{ textDecoration: "none", color: "inherit", minWidth: 0, flex: 1, cursor: "pointer" }}
           >
             <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
               <Avatar
