@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import { parseDocument, type Item } from "./schema";
+import { parseDocument, type Category, type Item } from "./schema";
 import type { SampleShop, ShopCategory } from "./samples";
 
 /**
@@ -58,6 +58,7 @@ function toView(row: {
       row.schedule as Schedule | null,
       row.schedule_overrides as Record<string, ScheduleDay> | null
     ),
+    schedule: (row.schedule as SampleShop["schedule"]) ?? null,
   };
 }
 
@@ -82,18 +83,24 @@ export async function getShopView(id: string): Promise<SampleShop | null> {
 }
 
 /** Items from the shop's live (active) catalog version. */
-export async function getShopCatalog(id: string): Promise<Item[]> {
+export async function getShopCatalog(
+  id: string
+): Promise<{ items: Item[]; categories: Category[] }> {
   const supabase = await createClient();
   const { data: shop } = await supabase
     .from("shops")
     .select("active_version_id")
     .eq("id", id)
     .maybeSingle();
-  if (!shop?.active_version_id) return [];
+  if (!shop?.active_version_id) return { items: [], categories: [] };
   const { data: version } = await supabase
     .from("catalog_versions")
     .select("document")
     .eq("id", shop.active_version_id)
     .maybeSingle();
-  return parseDocument(version?.document).items.filter((it) => it.is_active);
+  const doc = parseDocument(version?.document);
+  return {
+    items: doc.items.filter((it) => it.is_active),
+    categories: doc.categories,
+  };
 }

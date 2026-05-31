@@ -1,5 +1,7 @@
 // Shop view-model shared by the browse list and shop profile pages.
 
+import type { WeeklySchedule } from "@/lib/shop/schedule";
+
 /** Visual category — drives the card's icon + gradient. */
 export type ShopCategory = "print" | "copy" | "binding" | "stationery";
 
@@ -19,4 +21,6 @@ export interface SampleShop {
   /** When closed, the next opening time, e.g. "09:00". */
   opensAt?: string;
   phone?: string;
+  /** Real weekly hours from `shops.schedule` (null when the shop hasn't set any). */
+  schedule?: WeeklySchedule | null;
 }

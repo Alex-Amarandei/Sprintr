@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   ActionIcon,
+  Anchor,
   Box,
   Card,
   Divider,
@@ -43,7 +44,7 @@ function InfoRow({
 }: {
   icon: React.ReactNode;
   label: string;
-  value: string;
+  value: React.ReactNode;
 }) {
   return (
     <Group gap="sm" wrap="nowrap" align="flex-start">
@@ -95,7 +96,22 @@ export default async function ShopOrderDetailPage({ params }: Props) {
           <InfoRow
             icon={<Phone size={15} />}
             label="Contact"
-            value={`${order.customerName}${order.contactPhone ? ` · ${order.contactPhone}` : ""}`}
+            value={
+              <>
+                {order.customerName}
+                {order.contactPhone && (
+                  <>
+                    {" · "}
+                    <Anchor
+                      href={`tel:${order.contactPhone.replace(/\s+/g, "")}`}
+                      inherit
+                    >
+                      {order.contactPhone}
+                    </Anchor>
+                  </>
+                )}
+              </>
+            }
           />
           <InfoRow
             icon={order.fulfilment === "pickup" ? <Store size={15} /> : <Truck size={15} />}

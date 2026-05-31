@@ -80,32 +80,40 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 ## 🖥️ C2 — Customer App
 
 ### Homepage / branding / auth
-- [ ] Modify logo + SprintR homepage
-- [ ] Remove order-configuration box → replace with logo
-- [ ] Remove fake/mock data from homepage
+- [x] Modify logo + SprintR homepage — *animated aurora gradient bg (shared `PageBackground`),
+      fancy floating logo hero, scroll-reveal step cards, header logo + theme toggle*
+- [x] Remove order-configuration box → replace with logo
+- [x] Remove fake/mock data from homepage — *dropped "12+ magazine / <60 min / 4.9★" stats*
 - [ ] "From the app in a few minutes" text change
-- [ ] Remove "Order now" button from navbar
+- [x] Remove "Order now" button from navbar
 - [ ] Footer legal section / Terms & Conditions (+ `/terms` page)
-- [ ] Redesign login page
+- [x] Redesign login page — *branded split layout (brand panel + aurora bg), polished
+      login/register cards; consistent header logo/theme toggle*
 - [ ] **Role badge** in header — show the role you logged in as (customer/shop/admin).
       Shared component, owned here; C3 imports it into the dashboard header
 - [ ] Adjust toast colors based on theme (global Toaster)
 - [ ] Recheck homepage at the end (QA pass)
 
 ### Browse
-- [ ] Make search bar functional
-- [ ] Remove filter bar
-- [ ] Grey out closed stores
-- [ ] Check store opening/closing time logic (`isOpenNow`)
+- [x] Make search bar functional — *client-side debounced (250ms) search over
+      name/description/address/category/tags via a `SearchProvider` + `ShopResults`*
+- [x] Remove filter bar
+- [x] Grey out closed stores — *closed `ShopCard`s dim + desaturate the gradient header*
+- [x] Check store opening/closing time logic (`isOpenNow`) — *now reads the real DB
+      `shops.schedule` on the store page; closed shops gate ordering (add-to-cart allowed,
+      checkout blocked with a notice)*
 
 ### Store page (`/shop/[id]`)
 - [ ] Remove button from stores header
-- [ ] Remove share & favorite buttons
+- [x] Remove share & favorite buttons
 - [ ] Make address clickable → Google Maps
-- [ ] Make phone number clickable → native dial
-- [ ] Move promotion above schedule; fill freed space with services/products
-- [ ] Replace service/product pills with icon + tooltip
-- [ ] Display products per category on each store
+- [x] Make phone number clickable → native dial — *`tel:` links on store page + order detail*
+- [x] Move promotion above schedule; fill freed space with services/products — *promo + schedule
+      now full-width stacked; catalog spans full width (3-col grid)*
+- [x] Replace service/product pills with icon + tooltip — *kind shown as a tinted icon
+      (FileText/Package) with a tooltip on each catalog card*
+- [x] Display products per category on each store — *catalog grouped into `document.categories`
+      sections (count badge + divider); degrades to one grid when a shop has no categories*
 - [ ] Active offers per store in banner ⬅BE 🔗
 - [ ] Offers: strikethrough old price, render the new one beside it ⬅BE 🔗
 - [ ] Rating & Reviews per store — customer display + post-purchase review
@@ -212,6 +220,9 @@ real thing.
 
 ## 🔮 Future tasks (to distribute)
 Captured here as they come up; not yet assigned to a lane.
-- [ ] Warn before cart loss — the cart is single-shop client state that's wiped on a full
+- [~] Warn before cart loss — the cart is single-shop client state that's wiped on a full
       reload and cleared when switching shops. Warn the user before they lose it: a
       `beforeunload` prompt on refresh/back-navigation + a confirm dialog when switching shops.
+      *DONE: cross-shop confirm dialog ("Există deja produse în coș de la {magazin}" →
+      Anulează / Golește coșul) before adding from another shop. TODO: `beforeunload` prompt
+      on refresh/back; persist cart in localStorage (see Cart/checkout above).*
