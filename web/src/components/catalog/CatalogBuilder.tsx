@@ -162,10 +162,16 @@ function CategorySection({
       radius="lg"
       p="md"
       style={{
+        // Grouping shell with a faint blur-free tint — subtle enough that the page background
+        // still reads through, but defined enough to bound the category. The frosted item cards
+        // inside stand on their own. A drag hovering the drop zone tints it brand.
         background: isOver
-          ? "light-dark(var(--mantine-color-stone-1), var(--mantine-color-stone-7))"
-          : "light-dark(var(--mantine-color-stone-0), var(--mantine-color-dark-6))",
-        transition: "background 120ms",
+          ? "color-mix(in srgb, var(--mantine-color-brand-5) 12%, transparent)"
+          : "light-dark(color-mix(in srgb, var(--mantine-color-stone-1) 16%, transparent), color-mix(in srgb, var(--mantine-color-dark-8) 18%, transparent))",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
+        borderColor: isOver ? "var(--mantine-color-brand-4)" : undefined,
+        transition: "background 120ms, border-color 120ms",
       }}
     >
       <Group justify="space-between" wrap="nowrap" mb="sm">

@@ -7,7 +7,6 @@ import {
   Button,
   Divider,
   Group,
-  Image,
   Menu,
   MultiSelect,
   NumberInput,
@@ -46,10 +45,11 @@ import {
 } from "@/lib/catalog/schema";
 import { newField } from "@/lib/catalog/factories";
 import { FILE_TYPE_OPTIONS } from "@/lib/catalog/fileTypes";
-import { IMAGE_PLACEHOLDER, itemImageUrl, mainImage } from "@/lib/catalog/images";
+import { itemImageUrl, mainImage } from "@/lib/catalog/images";
 import { formatPrice, roCount } from "@/lib/utils/format";
 import { FieldEditor } from "./FieldEditor";
 import { ItemImages } from "./ItemImages";
+import { ItemThumb } from "./ItemThumb";
 
 const TYPE_LABELS: Record<FieldType, string> = {
   single_select: "Selecție unică",
@@ -170,15 +170,7 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
       <Group justify="space-between" wrap="nowrap" gap="xs" p="md">
         <Group gap="xs" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
           {dragHandle}
-          <Image
-            src={mainUrl ?? undefined}
-            w={40}
-            h={40}
-            radius="sm"
-            fit="cover"
-            fallbackSrc={IMAGE_PLACEHOLDER}
-            style={{ flexShrink: 0, border: "1px solid var(--mantine-color-default-border)" }}
-          />
+          <ItemThumb src={mainUrl} size={40} radius="sm" />
           <div
             style={{ minWidth: 0, flex: 1, cursor: "pointer" }}
             onClick={() => setOpen((o) => !o)}
