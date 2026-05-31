@@ -28,21 +28,22 @@ body {
   position: absolute;
   inset: 0;
   background-image: radial-gradient(
-    var(--mantine-color-default-border) 1px,
-    transparent 1px
+    var(--mantine-color-default-border) 1.3px,
+    transparent 1.3px
   );
-  background-size: 26px 26px;
+  background-size: 34px 34px;
+  /* Soft full-viewport vignette so dots fill the whole page and only fade at the edges. */
   -webkit-mask-image: radial-gradient(
-    ellipse 70% 50% at 50% 20%,
-    #000 0%,
-    transparent 80%
+    ellipse 120% 110% at 50% 40%,
+    #000 45%,
+    transparent 100%
   );
   mask-image: radial-gradient(
-    ellipse 70% 50% at 50% 20%,
-    #000 0%,
-    transparent 80%
+    ellipse 120% 110% at 50% 40%,
+    #000 45%,
+    transparent 100%
   );
-  opacity: 0.5;
+  opacity: 0.28;
 }
 .hero-blob {
   position: absolute;
