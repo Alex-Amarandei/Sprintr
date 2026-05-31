@@ -56,14 +56,17 @@ export function ShopCatalogTabs({
   const grid = (list: Item[]) => (
     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
       {list.map((item) => (
-        <AddItemCard
-          key={item.id}
-          item={item}
-          shopId={shopId}
-          shopName={shopName}
-          shopOpen={shopOpen}
-          shopDeliveryFee={shopDeliveryFee}
-        />
+        // Plain wrapper carries the deep-link anchor id (guaranteed in the DOM) + scroll offset
+        // for the sticky header — see order lines linking to /shop/[id]#item-<id>.
+        <div key={item.id} id={`item-${item.id}`} style={{ scrollMarginTop: 84 }}>
+          <AddItemCard
+            item={item}
+            shopId={shopId}
+            shopName={shopName}
+            shopOpen={shopOpen}
+            shopDeliveryFee={shopDeliveryFee}
+          />
+        </div>
       ))}
     </SimpleGrid>
   );

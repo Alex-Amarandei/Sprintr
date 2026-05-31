@@ -84,14 +84,7 @@ export function AddItemCard({
   }
 
   return (
-    <Paper
-      withBorder
-      radius="lg"
-      p="lg"
-      className="catalog-card"
-      id={`item-${item.id}`}
-      style={{ scrollMarginTop: 80 }}
-    >
+    <Paper withBorder radius="lg" p="lg" className="catalog-card">
       <Stack gap="sm" h="100%" justify="space-between">
         {mainUrl && (
           <Image
