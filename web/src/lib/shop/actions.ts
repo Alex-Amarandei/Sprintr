@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { ACTIVE_SHOP_COOKIE } from "./active";
+import { getActiveShopId, ACTIVE_SHOP_COOKIE } from "./active";
 import type { ShopProfileInput } from "./types";
+import type { Database, Json } from "@/types/database";
 
 /**
  * Switch the active shop (multi-shop owners). Validates membership, writes the
@@ -90,6 +91,64 @@ export async function setShopImage(
   const supabase = await createClient();
   const patch = kind === "logo" ? { logo_path: path } : { banner_path: path };
   const { error } = await supabase.from("shops").update(patch).eq("id", shopId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/dashboard/profile");
+  revalidatePath(`/shop/${shopId}`);
+  revalidatePath("/browse");
+  return { ok: true };
+}
+
+/**
+ * Temporary pause: close the storefront through `untilDate` (inclusive) by writing `null`
+ * (= closed) `schedule_overrides` entries per day — `isOpenNow` already honours these over the
+ * weekly schedule, so the open/closed badge + order gating flip automatically. Passing `null`
+ * resumes (clears today-and-future pause entries). No `is_active` column — this IS the mechanism.
+ */
+export async function setShopPause(
+  untilDate: string | null
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Neautentificat" };
+  const shopId = await getActiveShopId();
+  if (!shopId) return { ok: false, error: "Niciun magazin asociat" };
+
+  const { data: shop } = await supabase
+    .from("shops")
+    .select("schedule_overrides")
+    .eq("id", shopId)
+    .maybeSingle();
+
+  const overrides: Record<string, Json> = {
+    ...((shop?.schedule_overrides as Record<string, Json> | null) ?? {}),
+  };
+  const today = new Date().toISOString().slice(0, 10);
+
+  // Clear any existing pause first (closed entries from today onward), then re-apply.
+  for (const key of Object.keys(overrides)) {
+    if (key >= today && overrides[key] === null) delete overrides[key];
+  }
+  if (untilDate) {
+    const end = untilDate < today ? today : untilDate;
+    const d = new Date(`${today}T00:00:00Z`);
+    const endDate = new Date(`${end}T00:00:00Z`);
+    let guard = 0;
+    while (d <= endDate && guard++ < 400) {
+      overrides[d.toISOString().slice(0, 10)] = null;
+      d.setUTCDate(d.getUTCDate() + 1);
+    }
+  }
+
+  const { error } = await supabase
+    .from("shops")
+    .update({
+      schedule_overrides:
+        overrides as unknown as Database["public"]["Tables"]["shops"]["Update"]["schedule_overrides"],
+    })
+    .eq("id", shopId);
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/dashboard/profile");

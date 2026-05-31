@@ -214,7 +214,10 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 - [x] Profile status with real data — _loadShopProfile() drives a live completeness % +
       checklist (logo/banner/description/schedule/products/phone). Also wired the weekly
       **schedule editor to load + persist** to `shops.schedule` (was hardcoded)_
-- [ ] "Deactivate store temporarily" button logic (needs `shops.is_active` ⬅BE)
+- [x] "Deactivate store temporarily" — **no `is_active` column**; implemented as a temporary
+      pause via `schedule_overrides` (closes the shop through a picked date). `setShopPause` action
+      writes/clears `null` day-entries; `isOpenNow` already honours them, so the open/closed badge +
+      checkout gating ("Magazin închis") flip automatically. Profile editor: date picker + pause/resume.
 - [ ] Make the Change-Logo button work (upload ⬅BE)
 - [ ] Select shop when a user owns multiple shops
 - [ ] **Owner role: create / add users & employees** — owner-only members UI

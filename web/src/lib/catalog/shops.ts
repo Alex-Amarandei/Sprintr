@@ -65,6 +65,8 @@ function toView(row: {
       row.schedule_overrides as Record<string, ScheduleDay> | null
     ),
     schedule: (row.schedule as SampleShop["schedule"]) ?? null,
+    scheduleOverrides:
+      (row.schedule_overrides as SampleShop["scheduleOverrides"]) ?? {},
     logoUrl: shopAssetUrl(row.logo_path),
     bannerUrl: shopAssetUrl(row.banner_path),
   };

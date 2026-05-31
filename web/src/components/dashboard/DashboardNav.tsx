@@ -10,8 +10,8 @@ import {
   MessageSquare,
   Package,
   ShoppingBag,
+  Store,
   Tag,
-  User,
   Users,
   Wrench,
 } from "lucide-react";
@@ -43,7 +43,7 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
     title: "Magazin",
     items: [
       { href: "/dashboard/members", label: "Echipă", icon: Users },
-      { href: "/dashboard/profile", label: "Profil", icon: User },
+      { href: "/dashboard/profile", label: "Magazin", icon: Store },
     ],
   },
 ];

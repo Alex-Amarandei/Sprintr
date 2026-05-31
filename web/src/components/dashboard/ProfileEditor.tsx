@@ -18,11 +18,11 @@ import {
   TextInput,
   ThemeIcon,
   Title,
-  Tooltip,
 } from "@mantine/core";
 import { Check, Circle, Image as ImageIcon, Printer } from "lucide-react";
 import { toast } from "sonner";
-import { setShopImage, updateShopProfile } from "@/lib/shop/actions";
+import { useRouter } from "next/navigation";
+import { setShopImage, setShopPause, updateShopProfile } from "@/lib/shop/actions";
 import type { ShopProfileInput } from "@/lib/shop/types";
 import { shopAssetUrl, uploadShopAsset } from "@/lib/storage/shopAssets";
 import { MAX_IMAGE_MB } from "@/lib/catalog/images";
@@ -42,6 +42,27 @@ type ProfileText = Omit<ShopProfileInput, "schedule">;
 
 const DEFAULT_HOURS = { open: "09:00", close: "18:00" };
 
+const todayKey = () => new Date().toISOString().slice(0, 10);
+
+/** Last consecutive closed (override === null) day starting today, or null if not paused. */
+function pausedUntil(
+  overrides: Record<string, { open: string; close: string } | null>
+): string | null {
+  const d = new Date(`${todayKey()}T00:00:00Z`);
+  let last: string | null = null;
+  for (let guard = 0; guard < 400; guard++) {
+    const key = d.toISOString().slice(0, 10);
+    if (overrides[key] === null) {
+      last = key;
+      d.setUTCDate(d.getUTCDate() + 1);
+    } else break;
+  }
+  return last;
+}
+
+const fmtDay = (iso: string) =>
+  new Intl.DateTimeFormat("ro-RO", { day: "numeric", month: "long" }).format(new Date(`${iso}T00:00:00`));
+
 /** Ensure every weekday key is present (missing/null = closed). */
 function normalizeWeek(schedule: WeeklySchedule | null): WeeklySchedule {
   return DAY_ORDER.reduce((acc, key) => {
@@ -54,6 +75,7 @@ export function ProfileEditor({
   shopId,
   initial,
   schedule: initialSchedule,
+  scheduleOverrides,
   logoPath: initialLogo,
   bannerPath: initialBanner,
   meta,
@@ -61,15 +83,39 @@ export function ProfileEditor({
   shopId: string | null;
   initial: ProfileText;
   schedule: WeeklySchedule | null;
+  scheduleOverrides: Record<string, { open: string; close: string } | null>;
   logoPath: string | null;
   bannerPath: string | null;
   meta: { itemCount: number };
 }) {
+  const router = useRouter();
   const [form, setForm] = useState<ProfileText>(initial);
   const [schedule, setSchedule] = useState<WeeklySchedule>(() =>
     normalizeWeek(initialSchedule)
   );
   const [pending, startTransition] = useTransition();
+
+  // Temporary pause (writes `schedule_overrides`, no `is_active` column). Derived live from the
+  // server prop so it refreshes after the action.
+  const pauseUntilCurrent = pausedUntil(scheduleOverrides);
+  const [pauseDate, setPauseDate] = useState(todayKey());
+  const [pausing, setPausing] = useState(false);
+
+  async function applyPause(until: string | null) {
+    if (!shopId) {
+      toast.error("Niciun magazin asociat contului tău");
+      return;
+    }
+    setPausing(true);
+    const res = await setShopPause(until);
+    setPausing(false);
+    if (res.ok) {
+      toast.success(until ? "Magazinul a fost pus în pauză" : "Activitate reluată");
+      router.refresh();
+    } else {
+      toast.error(res.error ?? "Nu am putut actualiza pauza");
+    }
+  }
   // Baseline of what's currently persisted, for dirty-tracking. Updated after each
   // successful save so the button re-disables once there's nothing new to write.
   // (Logo/banner/email persist via their own paths and aren't part of this payload.)
@@ -442,15 +488,57 @@ export function ProfileEditor({
             </Card>
 
             <Card>
-              <Text fw={600}>Dezactivează temporar magazinul?</Text>
-              <Text fz="sm" c="dimmed" mt={4}>
-                Clienții nu vor mai putea plasa comenzi noi, dar comenzile active rămân.
-              </Text>
-              <Tooltip label="Disponibil în curând">
-                <Button variant="default" color="red" mt="sm" fullWidth data-disabled onClick={(e) => e.preventDefault()}>
-                  Pauză temporară
-                </Button>
-              </Tooltip>
+              {pauseUntilCurrent ? (
+                <>
+                  <Group gap="xs">
+                    <Badge color="red" variant="light">
+                      În pauză
+                    </Badge>
+                    <Text fw={600}>Magazin închis temporar</Text>
+                  </Group>
+                  <Text fz="sm" c="dimmed" mt={4}>
+                    Închis până la {fmtDay(pauseUntilCurrent)} inclusiv. Clienții văd magazinul ca
+                    fiind închis și nu pot plasa comenzi.
+                  </Text>
+                  <Button
+                    color="teal"
+                    mt="sm"
+                    fullWidth
+                    loading={pausing}
+                    disabled={!shopId}
+                    onClick={() => applyPause(null)}
+                  >
+                    Reia activitatea
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Text fw={600}>Pune magazinul în pauză?</Text>
+                  <Text fz="sm" c="dimmed" mt={4}>
+                    Marchează magazinul închis până la o dată aleasă. Clienții nu mai pot plasa
+                    comenzi; comenzile active rămân.
+                  </Text>
+                  <TextInput
+                    type="date"
+                    label="Până la (inclusiv)"
+                    mt="sm"
+                    min={todayKey()}
+                    value={pauseDate}
+                    onChange={(e) => setPauseDate(e.currentTarget.value)}
+                  />
+                  <Button
+                    variant="default"
+                    color="red"
+                    mt="sm"
+                    fullWidth
+                    loading={pausing}
+                    disabled={!shopId || !pauseDate}
+                    onClick={() => applyPause(pauseDate)}
+                  >
+                    Pune în pauză
+                  </Button>
+                </>
+              )}
             </Card>
           </Stack>
         </Box>

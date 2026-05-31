@@ -3,13 +3,18 @@ import { Avatar, Badge, Box, Card, Group, Stack, Text } from "@mantine/core";
 import { Clock, Star } from "lucide-react";
 import type { SampleShop } from "@/lib/catalog/samples";
 import { OpenBadge } from "@/components/ui/OpenBadge";
+import { getScheduleStatus } from "@/lib/shop/schedule";
 import { roCount } from "@/lib/utils/format";
 import { SHOP_CATEGORY } from "./category";
 
 export function ShopCard({ shop }: { shop: SampleShop }) {
   const cat = SHOP_CATEGORY[shop.category ?? "print"];
   const Icon = cat.icon;
-  const open = shop.isOpen ?? true;
+  // Real open/closed + label from the weekly schedule honouring date overrides (pause).
+  const status = shop.schedule
+    ? getScheduleStatus(shop.schedule, shop.scheduleOverrides ?? {})
+    : null;
+  const open = status ? status.open : shop.isOpen ?? true;
   const banner = shop.bannerUrl ?? null;
   const logo = shop.logoUrl ?? null;
 
@@ -101,10 +106,10 @@ export function ShopCard({ shop }: { shop: SampleShop }) {
         </Group>
 
         <Group justify="space-between" mt="xs" wrap="nowrap">
-          <Group gap={4} c={open ? "dimmed" : "red.7"}>
-            <Clock size={14} />
-            <Text fz="xs" fw={open ? 400 : 600}>
-              {open ? shop.eta ?? "—" : `Deschide la ${shop.opensAt ?? "09:00"}`}
+          <Group gap={4} c={open ? "dimmed" : "red.7"} wrap="nowrap" style={{ minWidth: 0 }}>
+            <Clock size={14} style={{ flexShrink: 0 }} />
+            <Text fz="xs" fw={open ? 400 : 600} truncate>
+              {status ? status.label : open ? shop.eta ?? "—" : "Închis"}
             </Text>
           </Group>
           {shop.reviews != null && (
