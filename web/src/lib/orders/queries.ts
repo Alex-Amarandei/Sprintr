@@ -213,17 +213,19 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
     catalogItems = parseDocument(ver?.document).items;
   }
 
-  // Messages (read-only; no realtime in this pass).
+  // Messages — split into the order thread and the post-completion complaint thread.
   const { data: msgs } = await supabase
     .from("messages")
-    .select("sender_id, body, created_at")
+    .select("sender_id, body, created_at, kind")
     .eq("order_id", id)
     .order("created_at", { ascending: true });
-  const messages: SampleMessage[] = (msgs ?? []).map((m) => ({
+  const toMsg = (m: { sender_id: string; body: string; created_at: string }): SampleMessage => ({
     from: m.sender_id === order.customer_id ? "customer" : "shop",
     body: m.body,
     at: timeOnly(m.created_at),
-  }));
+  });
+  const messages: SampleMessage[] = (msgs ?? []).filter((m) => m.kind !== "complaint").map(toMsg);
+  const complaintMessages: SampleMessage[] = (msgs ?? []).filter((m) => m.kind === "complaint").map(toMsg);
 
   const items = (order.order_items ?? []) as RawItem[];
   const lines: SampleOrderLine[] = items.map((it) => ({
@@ -251,6 +253,7 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
     delivery: round2(total - subtotal),
     lines,
     messages,
+    complaintMessages,
     notes: order.notes ?? undefined,
     contactPhone: order.contact_phone ?? undefined,
     deliveryAddress: order.delivery_address ?? undefined,

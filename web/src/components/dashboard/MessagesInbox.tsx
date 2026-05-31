@@ -44,6 +44,7 @@ export function MessagesInbox({
   const [conversations, setConversations] = useState(initial);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [messages, setMessages] = useState<SampleMessage[] | null>(null);
+  const [complaintMessages, setComplaintMessages] = useState<SampleMessage[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Adopt fresh server data when the page re-fetches.
@@ -72,6 +73,7 @@ export function MessagesInbox({
   async function openConversation(c: ShopConversation) {
     setSelectedId(c.orderId);
     setMessages(null);
+    setComplaintMessages([]);
     setLoading(true);
     // Optimistically clear this thread's unread; markRead persists + updates the dot.
     setConversations((prev) =>
@@ -81,15 +83,20 @@ export function MessagesInbox({
 
     const { data } = await supabase
       .from("messages")
-      .select("sender_id, body, created_at")
+      .select("sender_id, body, created_at, kind")
       .eq("order_id", c.orderId)
       .order("created_at", { ascending: true });
-    const msgs: SampleMessage[] = (data ?? []).map((m) => ({
+    const toMsg = (m: {
+      sender_id: string;
+      body: string;
+      created_at: string;
+    }): SampleMessage => ({
       from: m.sender_id === c.customerId ? "customer" : "shop",
       body: m.body,
       at: timeOnly(m.created_at),
-    }));
-    setMessages(msgs);
+    });
+    setMessages((data ?? []).filter((m) => m.kind !== "complaint").map(toMsg));
+    setComplaintMessages((data ?? []).filter((m) => m.kind === "complaint").map(toMsg));
     setLoading(false);
   }
 
@@ -209,7 +216,8 @@ export function MessagesInbox({
                   peerName={selected.customerName}
                   perspective="shop"
                   initialMessages={messages}
-                  disabled={chatClosed(selected.status)}
+                  complaintMessages={complaintMessages}
+                  orderClosed={chatClosed(selected.status)}
                   height={580}
                   onMessage={handleIncoming}
                 />

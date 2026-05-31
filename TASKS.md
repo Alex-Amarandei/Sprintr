@@ -50,8 +50,9 @@ something C1 builds (build against a stub until it lands).
 - [x] Filter out-of-stock products/services — lightweight `in_stock` flag on items (not full
       Phase-2 inventory): "În stoc" switch in the catalog builder; `getShopCatalog` hides OOS;
       place-order rejects ordering them (409).
-- [ ] Chat lifecycle backend 🔗 — gate chat to active orders; on `done`/`rejected` close it
-      and open a separate **complaint/report** thread (new policy + `chat_kind`/`complaints`)
+- [x] Chat lifecycle backend 🔗 — gate chat to active orders + complaint thread on close
+      (`messages.kind` enum order|complaint; RLS posts order-kind while active, complaint-kind
+      once done/rejected; ChatPanel tab on closed orders; inbox + both detail pages split threads)
 - [ ] Owner: add users/employees — RPC/helper to resolve a profile by email and insert a
       `shop_permissions` row (backs C3's members UI) 🔗
 

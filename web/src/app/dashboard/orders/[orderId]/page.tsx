@@ -134,8 +134,9 @@ export default async function ShopOrderDetailPage({ params }: Props) {
         peerName={order.customerName}
         perspective="shop"
         initialMessages={order.messages}
+        complaintMessages={order.complaintMessages ?? []}
         height={420}
-        disabled={chatClosed}
+        orderClosed={chatClosed}
       />
     </Stack>
   );

@@ -108,6 +108,7 @@ export type Database = {
           body: string
           created_at: string
           id: string
+          kind: Database["public"]["Enums"]["message_kind"]
           order_id: string
           sender_id: string
         }
@@ -115,6 +116,7 @@ export type Database = {
           body: string
           created_at?: string
           id?: string
+          kind?: Database["public"]["Enums"]["message_kind"]
           order_id: string
           sender_id: string
         }
@@ -122,6 +124,7 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          kind?: Database["public"]["Enums"]["message_kind"]
           order_id?: string
           sender_id?: string
         }
@@ -727,6 +730,7 @@ export type Database = {
       catalog_version_status: "draft" | "published" | "archived"
       fulfilment_type: "delivery" | "pickup"
       item_kind: "service" | "product"
+      message_kind: "order" | "complaint"
       offer_scope: "product" | "category" | "cart"
       offer_trigger: "automatic" | "code"
       offer_type: "percent" | "fixed" | "bxgy" | "free_shipping"
@@ -872,6 +876,7 @@ export const Constants = {
       catalog_version_status: ["draft", "published", "archived"],
       fulfilment_type: ["delivery", "pickup"],
       item_kind: ["service", "product"],
+      message_kind: ["order", "complaint"],
       offer_scope: ["product", "category", "cart"],
       offer_trigger: ["automatic", "code"],
       offer_type: ["percent", "fixed", "bxgy", "free_shipping"],

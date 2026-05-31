@@ -34,6 +34,8 @@ export interface SampleOrder {
   subtotal: number;
   delivery: number;
   messages: SampleMessage[];
+  /** Complaint-thread messages (post-completion). */
+  complaintMessages?: SampleMessage[];
   // Shop-side fulfilment details.
   notes?: string;
   contactPhone?: string;

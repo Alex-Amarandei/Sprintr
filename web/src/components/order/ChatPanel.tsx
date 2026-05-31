@@ -7,6 +7,7 @@ import {
   Box,
   Group,
   Paper,
+  SegmentedControl,
   Stack,
   Text,
   TextInput,
@@ -19,6 +20,7 @@ import type { SampleMessage } from "@/lib/orders/sample";
 import { Dot } from "@/components/ui/Dot";
 import { LinkActionIcon } from "@/components/ui/links";
 
+type Thread = "order" | "complaint";
 type ChatMsg = {
   /** DB id once known (null for server-rendered history) — used to dedup the realtime echo. */
   id: string | null;
@@ -31,11 +33,12 @@ const timeOnly = (iso: string) =>
   new Intl.DateTimeFormat("ro-RO", { hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
 
 /**
- * Per-order chat backed by the `messages` table.
- * - history is server-rendered into `initialMessages`;
- * - new messages insert directly (RLS-guarded) and arrive via Supabase Realtime;
- * - a message is "mine" when its sender matches `currentUserId`. Incoming rows are
- *   classified by side using `customerId` (sender === customer → customer, else shop).
+ * Per-order chat backed by the `messages` table, with TWO threads:
+ *  - "order" — normal coordination, open while the order is active;
+ *  - "complaint" — opens once the order is done/rejected so the customer can still report a
+ *    problem after delivery (RLS enforces the windows; this just reflects them).
+ * One Realtime subscription per order (filter `order_id`); incoming rows route to a thread by
+ * `kind`. (Two subscriptions with the same filter would dedup and starve one — so keep it one.)
  */
 export function ChatPanel({
   orderId,
@@ -43,9 +46,10 @@ export function ChatPanel({
   customerId,
   peerName,
   initialMessages,
+  complaintMessages = [],
   height = 520,
   perspective = "customer",
-  disabled = false,
+  orderClosed = false,
   onMessage,
 }: {
   orderId: string;
@@ -55,33 +59,36 @@ export function ChatPanel({
   customerId?: string;
   /** The other party's name (shop on the customer side, customer on the shop side). */
   peerName: string;
+  /** Order-thread history. */
   initialMessages: SampleMessage[];
+  /** Complaint-thread history. */
+  complaintMessages?: SampleMessage[];
   height?: number;
   perspective?: "customer" | "shop";
-  /** Order is closed (done/rejected/archived) → posting is blocked by RLS, so disable input. */
-  disabled?: boolean;
+  /** Order is terminal (done/rejected) → order thread read-only, complaint thread open. */
+  orderClosed?: boolean;
   /** Called when an incoming (non-own) message arrives via Realtime — e.g. to mark read. */
   onMessage?: () => void;
 }) {
   const supabase = useMemo(() => createClient(), []);
   const mySide = perspective === "shop" ? "shop" : "customer";
-  // Unique channel topic per mounted instance (defensive — avoids the "cannot add
-  // postgres_changes after subscribe()" collision if two panels ever co-exist). NOTE:
-  // this does NOT make it safe to mount two ChatPanels for the SAME order on one client —
-  // Realtime dedups identical postgres_changes subscriptions (same table+filter) and
-  // routes events to only one, starving the other. Render ONE panel per order.
   const channelKey = useId();
 
-  const [messages, setMessages] = useState<ChatMsg[]>(() =>
-    initialMessages.map((m) => ({ id: null, ...m }))
+  const [orderMsgs, setOrderMsgs] = useState<ChatMsg[]>(() =>
+    initialMessages.map((m) => ({ id: null, ...m })),
   );
+  const [complaintMsgs, setComplaintMsgs] = useState<ChatMsg[]>(() =>
+    complaintMessages.map((m) => ({ id: null, ...m })),
+  );
+  // When the order is closed the complaint thread is the actionable one — default to it.
+  const [tab, setTab] = useState<Thread>(orderClosed ? "complaint" : "order");
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
 
   const seen = useRef(new Set<string>());
   const viewportRef = useRef<HTMLDivElement>(null);
 
-  // Live subscription: new messages on this order arrive here (RLS scopes to participants).
+  // Single live subscription; route each incoming row to its thread by `kind`.
   useEffect(() => {
     const channel = supabase
       .channel(`order-chat-${orderId}-${channelKey}`)
@@ -94,20 +101,19 @@ export function ChatPanel({
             sender_id: string;
             body: string;
             created_at: string;
+            kind: Thread;
           };
           if (seen.current.has(row.id)) return; // already shown (our own optimistic insert)
           seen.current.add(row.id);
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: row.id,
-              from: row.sender_id === customerId ? "customer" : "shop",
-              body: row.body,
-              at: timeOnly(row.created_at),
-            },
-          ]);
+          const msg: ChatMsg = {
+            id: row.id,
+            from: row.sender_id === customerId ? "customer" : "shop",
+            body: row.body,
+            at: timeOnly(row.created_at),
+          };
+          (row.kind === "complaint" ? setComplaintMsgs : setOrderMsgs)((prev) => [...prev, msg]);
           onMessage?.();
-        }
+        },
       )
       .subscribe();
 
@@ -116,22 +122,27 @@ export function ChatPanel({
     };
   }, [supabase, orderId, customerId, channelKey, onMessage]);
 
-  // Keep the newest message in view.
+  const messages = tab === "complaint" ? complaintMsgs : orderMsgs;
+
+  // Keep the newest message in view (on thread switch + new messages).
   useEffect(() => {
     const el = viewportRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages.length]);
+  }, [messages.length, tab]);
+
+  // Order thread is read-only once closed; complaint thread is only open once closed.
+  const inputDisabled = tab === "order" ? orderClosed : !orderClosed;
 
   async function send() {
     const body = text.trim();
-    if (!body || sending || disabled) return;
+    if (!body || sending || inputDisabled) return;
 
     setSending(true);
     setText("");
 
     const { data, error } = await supabase
       .from("messages")
-      .insert({ order_id: orderId, sender_id: currentUserId, body })
+      .insert({ order_id: orderId, sender_id: currentUserId, body, kind: tab })
       .select("id, created_at")
       .single();
 
@@ -143,12 +154,9 @@ export function ChatPanel({
       return;
     }
 
-    // Show it immediately and mark seen so the realtime echo doesn't duplicate it.
     seen.current.add(data.id);
-    setMessages((prev) => [
-      ...prev,
-      { id: data.id, from: mySide, body, at: timeOnly(data.created_at) },
-    ]);
+    const msg: ChatMsg = { id: data.id, from: mySide, body, at: timeOnly(data.created_at) };
+    (tab === "complaint" ? setComplaintMsgs : setOrderMsgs)((prev) => [...prev, msg]);
   }
 
   const initials = peerName
@@ -158,9 +166,16 @@ export function ChatPanel({
     .join("")
     .toUpperCase();
 
-  // Link to the order being discussed (shop → dashboard view, customer → their view).
   const orderHref =
     perspective === "shop" ? `/dashboard/orders/${orderId}` : `/order/${orderId}`;
+
+  const placeholder = inputDisabled
+    ? tab === "order"
+      ? "Conversația comenzii este închisă"
+      : "Reclamațiile sunt disponibile după finalizarea comenzii"
+    : tab === "complaint"
+      ? "Descrie problema..."
+      : "Scrie un mesaj...";
 
   return (
     <Paper
@@ -216,8 +231,29 @@ export function ChatPanel({
         </Tooltip>
       </Group>
 
+      {/* Thread switch — only once the order is closed (complaint thread exists). */}
+      {orderClosed && (
+        <Box p="xs" style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
+          <SegmentedControl
+            fullWidth
+            size="xs"
+            value={tab}
+            onChange={(v) => setTab(v as Thread)}
+            data={[
+              { value: "complaint", label: "Reclamație" },
+              { value: "order", label: "Conversație" },
+            ]}
+          />
+        </Box>
+      )}
+
       {/* Messages */}
       <Stack ref={viewportRef} p="md" gap="sm" style={{ flex: 1, overflowY: "auto" }}>
+        {messages.length === 0 && tab === "complaint" && (
+          <Text fz="sm" c="dimmed" ta="center" py="md">
+            Ai o problemă cu această comandă? Scrie-ne aici și magazinul îți răspunde.
+          </Text>
+        )}
         {messages.map((m, i) => {
           const mine = m.from === mySide;
           return (
@@ -255,9 +291,9 @@ export function ChatPanel({
         </ActionIcon>
         <TextInput
           flex={1}
-          placeholder={disabled ? "Conversația este închisă" : "Scrie un mesaj..."}
+          placeholder={placeholder}
           value={text}
-          disabled={disabled}
+          disabled={inputDisabled}
           onChange={(e) => setText(e.currentTarget.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
         />
@@ -266,7 +302,7 @@ export function ChatPanel({
           size="lg"
           onClick={send}
           loading={sending}
-          disabled={disabled || !text.trim()}
+          disabled={inputDisabled || !text.trim()}
           aria-label="Trimite"
         >
           <Send size={18} />

@@ -137,7 +137,8 @@ export default async function OrderDetailPage({ params }: Props) {
             customerId={order.customerId}
             peerName={order.shopName}
             initialMessages={order.messages}
-            disabled={chatClosed}
+            complaintMessages={order.complaintMessages ?? []}
+            orderClosed={chatClosed}
           />
         </Box>
       </Flex>
