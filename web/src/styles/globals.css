@@ -108,6 +108,19 @@ body {
   }
 }
 
+/* Catalog item cards: subtle lift + accent border on hover. */
+.catalog-card {
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+.catalog-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--mantine-shadow-md);
+  border-color: var(--mantine-color-brand-3);
+}
+
 /* Landing "how it works" cards: lift + ember border on hover. */
 .hero-step-card {
   transition:

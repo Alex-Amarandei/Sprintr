@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
-  ActionIcon,
+  Anchor,
   Box,
   Card,
   Group,
@@ -10,15 +10,7 @@ import {
   ThemeIcon,
   Title,
 } from "@mantine/core";
-import {
-  Clock,
-  Heart,
-  MapPin,
-  Phone,
-  Share2,
-  Star,
-  Upload,
-} from "lucide-react";
+import { Clock, MapPin, Phone, Star } from "lucide-react";
 import { getShopView, getShopCatalog } from "@/lib/catalog/shops";
 import { SHOP_CATEGORY } from "@/components/shop/category";
 import { OpenBadge } from "@/components/ui/OpenBadge";
@@ -36,16 +28,19 @@ interface Props {
 export default async function ShopDetailPage({ params }: Props) {
   const { shopId } = await params;
 
-  const [shop, items] = await Promise.all([
+  const [shop, catalog] = await Promise.all([
     getShopView(shopId),
     getShopCatalog(shopId),
   ]);
   if (!shop) notFound();
+  const { items, categories } = catalog;
   const cat = SHOP_CATEGORY[shop.category ?? "print"];
   const Icon = cat.icon;
 
-  // TODO(BE): pass the shop's real `schedule` jsonb instead of SAMPLE_SCHEDULE.
-  const open = getScheduleStatus(SAMPLE_SCHEDULE).open;
+  // Real weekly hours from the DB (`shops.schedule`); fall back to a sample only for
+  // shops that haven't set any. `isOpen` (override-aware) drives the open/closed gate.
+  const schedule = shop.schedule ?? SAMPLE_SCHEDULE;
+  const open = shop.isOpen ?? getScheduleStatus(schedule).open;
 
   return (
     <Stack gap="lg">
@@ -75,7 +70,7 @@ export default async function ShopDetailPage({ params }: Props) {
                 <Title order={2}>{shop.name}</Title>
                 <OpenBadge open={open} label={open ? "Deschis acum" : undefined} />
               </Group>
-              <Text c="dimmed" mt={4} maw={560}>
+              <Text c="dimmed" mt={4}>
                 {shop.description}
               </Text>
               <Group gap="lg" mt="sm" c="dimmed">
@@ -101,60 +96,58 @@ export default async function ShopDetailPage({ params }: Props) {
                   <Text fz="sm">{shop.address}</Text>
                 </Group>
                 {shop.phone && (
-                  <Group gap={4}>
-                    <Phone size={15} />
-                    <Text fz="sm">{shop.phone}</Text>
-                  </Group>
+                  <Anchor
+                    href={`tel:${shop.phone.replace(/\s+/g, "")}`}
+                    c="dimmed"
+                    underline="hover"
+                  >
+                    <Group gap={4}>
+                      <Phone size={15} />
+                      <Text fz="sm">{shop.phone}</Text>
+                    </Group>
+                  </Anchor>
                 )}
               </Group>
             </div>
           </Group>
-          <Group gap="xs" wrap="nowrap" visibleFrom="sm">
-            <ActionIcon variant="default" size="lg" aria-label="Favorite">
-              <Heart size={18} />
-            </ActionIcon>
-            <ActionIcon variant="default" size="lg" aria-label="Distribuie">
-              <Share2 size={18} />
-            </ActionIcon>
-          </Group>
         </Group>
       </Card>
 
-      <Group align="flex-start" gap="lg" wrap="nowrap" mx="md">
-        {/* Main: program + catalog */}
-        <Stack gap="lg" style={{ flex: 1, minWidth: 0 }}>
-          {/* Program */}
-          {/* TODO(BE): pass the shop's real `schedule` jsonb instead of SAMPLE_SCHEDULE. */}
-          <ShopSchedule schedule={SAMPLE_SCHEDULE} />
+      {/* Active promo (visual; offers wiring TODO) — full width */}
+      <Card mx="md">
+        <Text tt="uppercase" fz="xs" fw={700} c="brand.6" style={{ letterSpacing: 0.6 }}>
+          Promoție activă
+        </Text>
+        <Text fw={700} fz="lg" mt="xs">
+          10% reducere licență
+        </Text>
+        <Text c="dimmed" fz="sm" mt={4}>
+          Aplică automat cu codul{" "}
+          <Text span fw={700} c="var(--mantine-color-text)">
+            STUDENT10
+          </Text>{" "}
+          la coș.
+        </Text>
+      </Card>
 
-          {/* Catalog */}
-          <div>
-            <Title order={3} mb="xs">
-              Catalog
-            </Title>
-            <ShopCatalogTabs items={items} shopId={shopId} />
-          </div>
-        </Stack>
+      {/* Program — full width */}
+      <Box mx="md">
+        <ShopSchedule schedule={schedule} />
+      </Box>
 
-        {/* Sidebar: active promo (visual; offers wiring TODO) */}
-        <Box w={300} visibleFrom="md" style={{ flexShrink: 0 }}>
-          <Card>
-            <Text tt="uppercase" fz="xs" fw={700} c="brand.6" style={{ letterSpacing: 0.6 }}>
-              Promoție activă
-            </Text>
-            <Text fw={700} fz="lg" mt="xs">
-              10% reducere licență
-            </Text>
-            <Text c="dimmed" fz="sm" mt={4}>
-              Aplică automat cu codul{" "}
-              <Text span fw={700} c="var(--mantine-color-text)">
-                STUDENT10
-              </Text>{" "}
-              la coș.
-            </Text>
-          </Card>
-        </Box>
-      </Group>
+      {/* Catalog (full width) */}
+      <Box mx="md">
+        <Title order={3} mb="xs">
+          Catalog
+        </Title>
+        <ShopCatalogTabs
+          items={items}
+          categories={categories}
+          shopId={shopId}
+          shopName={shop.name}
+          shopOpen={open}
+        />
+      </Box>
     </Stack>
   );
 }

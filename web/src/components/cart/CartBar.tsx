@@ -3,6 +3,7 @@
 import { useDisclosure } from "@mantine/hooks";
 import {
   ActionIcon,
+  Alert,
   Button,
   Divider,
   Drawer,
@@ -13,14 +14,22 @@ import {
   Text,
   ThemeIcon,
 } from "@mantine/core";
-import { ArrowRight, FileText, Package, ShoppingCart, Trash2 } from "lucide-react";
+import {
+  ArrowRight,
+  Clock,
+  FileText,
+  Package,
+  ShoppingCart,
+  Trash2,
+} from "lucide-react";
 import { formatPrice, roCount } from "@/lib/utils/format";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useCart } from "./CartContext";
 import { CheckoutModal } from "./CheckoutModal";
 
 export function CartBar() {
-  const { lines, count, total, removeLine, clear } = useCart();
+  const { lines, count, total, shopOpen, shopName, removeLine, clear } =
+    useCart();
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
   const [checkoutOpened, { open: openCheckout, close: closeCheckout }] = useDisclosure(false);
 
@@ -130,16 +139,28 @@ export function CartBar() {
               </Group>
             </Paper>
 
+            {!shopOpen && (
+              <Alert
+                variant="light"
+                color="red"
+                icon={<Clock size={18} />}
+                title="Magazinul este închis"
+              >
+                {shopName ?? "Magazinul"} este închis acum. Poți păstra produsele
+                în coș și finaliza comanda când se redeschide.
+              </Alert>
+            )}
             <Button
               size="md"
               fullWidth
               rightSection={<ArrowRight size={16} />}
+              disabled={!shopOpen}
               onClick={() => {
                 closeDrawer();
                 openCheckout();
               }}
             >
-              Finalizează comanda
+              {shopOpen ? "Finalizează comanda" : "Magazin închis"}
             </Button>
             <Button variant="subtle" color="gray" fullWidth onClick={clear}>
               Golește coșul
