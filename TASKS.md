@@ -33,7 +33,8 @@ something C1 builds (build against a stub until it lands).
       as `shipping_fee`, configurable via `updateShopProfile`/read via `getMyShop`. (C3: profile form field)
 - [x] Add mandatory fixed service fee per order — flat 2 lei `orders.service_fee`, computed in
       place-order, checkout-only display. (C2: checkout line)
-- [ ] Allow multiple vendor orders 🔗 — orders/placement data model
+- [x] ~~Allow multiple vendor orders~~ — **DESCOPED** (not building): cart is single-shop by
+      design (clears on shop switch); an order belongs to exactly one shop. No umbrella/multi-vendor order.
 - [ ] Add "in delivery" order status 🔗 — `order_status` enum migration
 - [ ] Invoice download + generate invoices/receipts & export — PDF gen + storage + API
 
@@ -107,7 +108,7 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 
 ### Cart / checkout / orders
 - [ ] Persist cart in localStorage
-- [ ] Multi-vendor cart UX 🔗 (pairs with C1's order model)
+- [x] ~~Multi-vendor cart UX~~ — **DESCOPED** (not building): the cart stays single-shop (clears on shop switch)
 - [ ] Checkout: address pin selection
 - [ ] Phone field: numeric-only + validation
 - [ ] Service-fee / delivery-tax line display ⬅BE
@@ -159,7 +160,8 @@ real thing.
    lines (drives store banner, strikethrough prices, shop admin UI).
 2. **Chat lifecycle / complaints** — how order close flips chat off and what the new
    complaint thread looks like (drives both frontends' chat UI).
-3. **Multi-vendor orders** — one order per shop vs. one umbrella order (drives cart + placement).
+3. ~~**Multi-vendor orders**~~ — **DECIDED: single-shop only.** One order = one shop; the cart is
+   single-shop (clears on shop switch). No umbrella/multi-vendor order. (Nothing to build.)
 4. **Statuses & fees** — final `order_status` values (incl. "in delivery") and the
    fee/tax breakdown fields on `orders`.
 5. **Storage** — S3 path convention + multi-file `answers` shape (drives upload widgets +
