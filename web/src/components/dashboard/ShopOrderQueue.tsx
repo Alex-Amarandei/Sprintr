@@ -10,9 +10,7 @@ import {
   Box,
   Button,
   Group,
-  Pagination,
   Paper,
-  Select,
   Stack,
   Tabs,
   Text,
@@ -28,6 +26,9 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { roCount } from "@/lib/utils/format";
 
 type Filter = "all" | "new" | "prep";
+
+/** Rows revealed per scroll step (DOM-only batching; the full list is already loaded). */
+const BATCH = 25;
 
 const initials = (n: string) =>
   n.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -61,11 +62,13 @@ export function ShopOrderQueue({
   const [orders, setOrders] = useState<SampleOrder[]>(initialOrders);
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
-  const [pageSize, setPageSize] = useState(20);
-  const [page, setPage] = useState(1);
+  // Rows revealed so far. The full set is already in memory (server-fetched) — this just keeps
+  // the DOM light by rendering in batches, auto-growing as the user scrolls. Silent: no control.
+  const [visibleCount, setVisibleCount] = useState(BATCH);
   const [pending, startTransition] = useTransition();
-  // Search + pagination only on the full Comenzi page (the dashboard preview passes `limit`).
+  // Search + lazy reveal only on the full Comenzi page (the dashboard preview passes `limit`).
   const paginated = limit === undefined;
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -132,16 +135,29 @@ export function ShopOrderQueue({
 
   const filtered = orders.filter((o) => inTab(o, filter) && matchesQuery(o));
   const total = filtered.length;
-  const pageCount = Math.max(1, Math.ceil(total / pageSize));
-  const shown = limit
-    ? filtered.slice(0, limit)
-    : filtered.slice((page - 1) * pageSize, page * pageSize);
+  const shown = limit ? filtered.slice(0, limit) : filtered.slice(0, visibleCount);
+  const hasMore = !limit && visibleCount < total;
   const count = (f: Filter) => orders.filter((o) => inTab(o, f) && matchesQuery(o)).length;
 
-  // Reset to the first page whenever the result set changes underneath us.
+  // Collapse back to the first batch whenever the result set changes underneath us.
   useEffect(() => {
-    setPage(1);
-  }, [query, filter, pageSize]);
+    setVisibleCount(BATCH);
+  }, [query, filter]);
+
+  // Reveal the next batch when the bottom sentinel scrolls into view.
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) setVisibleCount((c) => c + BATCH);
+      },
+      { rootMargin: "400px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMore]);
 
   function actions(o: SampleOrder) {
     if (o.status === "pending") {
@@ -284,35 +300,20 @@ export function ShopOrderQueue({
   return (
     <Stack gap="md">
       {paginated && (
-        <Group justify="space-between" wrap="wrap" gap="sm">
-          <TextInput
-            placeholder="Caută după #comandă, client sau produs…"
-            leftSection={<Search size={16} />}
-            rightSection={
-              query ? (
-                <ActionIcon variant="subtle" color="gray" onClick={() => setQuery("")} aria-label="Șterge căutarea">
-                  <X size={14} />
-                </ActionIcon>
-              ) : null
-            }
-            value={query}
-            onChange={(e) => setQuery(e.currentTarget.value)}
-            style={{ flex: 1, minWidth: 240 }}
-          />
-          <Group gap="xs" wrap="nowrap">
-            <Text fz="sm" c="dimmed">
-              Pe pagină
-            </Text>
-            <Select
-              data={["20", "50", "100"]}
-              value={String(pageSize)}
-              onChange={(v) => setPageSize(Number(v) || 20)}
-              allowDeselect={false}
-              w={92}
-              aria-label="Comenzi pe pagină"
-            />
-          </Group>
-        </Group>
+        <TextInput
+          placeholder="Caută după #comandă, client sau produs…"
+          leftSection={<Search size={16} />}
+          rightSection={
+            query ? (
+              <ActionIcon variant="subtle" color="gray" onClick={() => setQuery("")} aria-label="Șterge căutarea">
+                <X size={14} />
+              </ActionIcon>
+            ) : null
+          }
+          value={query}
+          onChange={(e) => setQuery(e.currentTarget.value)}
+          maw={440}
+        />
       )}
 
       <Paper withBorder radius="lg" p={0} style={{ overflow: "hidden" }}>
@@ -335,14 +336,15 @@ export function ShopOrderQueue({
       </Paper>
 
       {paginated && total > 0 && (
-        <Group justify="space-between" wrap="wrap" gap="sm">
-          <Text fz="sm" c="dimmed">
-            {roCount(total, "comandă", "comenzi")}
+        <>
+          <Text fz="sm" c="dimmed" ta="center">
+            {hasMore
+              ? `Afișezi ${Math.min(visibleCount, total)} din ${roCount(total, "comandă", "comenzi")}`
+              : roCount(total, "comandă", "comenzi")}
           </Text>
-          {pageCount > 1 && (
-            <Pagination total={pageCount} value={page} onChange={setPage} color="brand" size="sm" />
-          )}
-        </Group>
+          {/* Auto-reveals the next batch when scrolled near (IntersectionObserver). */}
+          {hasMore && <div ref={sentinelRef} aria-hidden style={{ height: 1 }} />}
+        </>
       )}
     </Stack>
   );
