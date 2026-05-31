@@ -41,6 +41,29 @@ something C1 builds (build against a stub until it lands).
 - [ ] Owner: add users/employees — RPC/helper to resolve a profile by email and insert a
       `shop_permissions` row (backs C3's members UI) 🔗
 
+### Gaps from CLAUDE.md audit (added 2026-05-31)
+Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the split above.
+- [ ] **WhatsApp courier ping on accept** 🔗 — CORE scope, currently only an `orders.whatsapp_sent`
+      column exists (migration 5); no send code. Server-side send to the courier group on shop
+      accept, then set `whatsapp_sent` (creds server-only; real API vs `wa.me` fallback TBD).
+- [ ] **Server-side validation parity** — the place-order reprice/validator must accept the FE
+      schema extensions or it rejects valid carts: option `swatch`, `categories` + item
+      `category_id`, item `accepted_file_types`, and multi-file `file` answers. **Likely the cause
+      of "Fix internal server error when placing order" above** — check first.
+- [ ] **Uploaded files end-to-end** 🔗 — upload at checkout → persist the storage path into
+      `order_items.answers` `file` fields → signed-URL endpoint (service role) for the shop's
+      `DownloadButton`. Today the `order-files` bucket is own-folder only (shops can't read; path
+      isn't stored). Pairs with "Store PDFs in S3" / "Allow multiple PDFs upload".
+- [ ] **Shop → customer identity (RLS)** — `profiles` only has `profiles_select_own`; add a policy
+      so shop members can read `full_name`/`phone` of customers who placed an order at their shop
+      (queue/detail currently fall back to "Client").
+- [ ] **Order ETA** — no column/source; FE omits the ETA text/timeline until one exists. Decide
+      shop-set vs computed estimate and add the column.
+- [ ] **Shop profile persistence** — extend `updateShopProfile` to save `schedule` (weekly-hours
+      jsonb) + email; today only name/description/phone/address persist (backs C3 profile editor).
+- [ ] **(minor) Product SKU + unit** — no schema columns; the simple product editor drops them.
+      Add columns only if SKU/unit must survive.
+
 ---
 
 ## 🖥️ C2 — Customer App
