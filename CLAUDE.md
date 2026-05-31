@@ -1179,3 +1179,15 @@ target_id, trigger, code, config jsonb, stackable, starts_at, ends_at, active, c
 - **`service_fee`** = flat **2 lei** on every order, shown **only at checkout** (not in cart).
 - **Platform fee (6%)** is **left untouched** here — it moves into the Stripe flow (redirect a
   % to us) as a separate task; do NOT rework it under the offers work.
+
+### API surface (BE-ready — wire the UI to these)
+- **Engine:** `lib/catalog/offers.ts` → `applyOffers(lines, offers, baseShipping)` (pure; client
+  preview + server reprice both use it), `toEngineOffer(row)`, `isOfferLive(row)`.
+- **Dashboard CRUD (C3):** `lib/offers/api.ts` → `listShopOffers`, `createOffer`, `updateOffer`,
+  `setOfferActive`, `deleteOffer`, `validateCode(shop,code)`; `lib/offers/types.ts` →
+  `OfferInput` + `normalizeOfferInput` (enforces the scope/code/config guards client-side).
+- **Storefront (C2):** `lib/offers/queries.ts` → `getActiveOffers(shopId)` (server-only; live
+  automatic only → banner if 1, carousel if many). Customer cart preview: read `getActiveOffers`
+  + `validateCode`, run `applyOffers` for the strikethrough; place-order is authoritative.
+- **place-order** accepts an optional `code` and returns `{subtotal, discount, shipping_fee,
+  service_fee, platform_fee, applied_offers, total}`.

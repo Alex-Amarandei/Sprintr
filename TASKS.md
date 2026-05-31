@@ -18,8 +18,8 @@ something C1 builds (build against a stub until it lands).
 ## 🖥️ C1 — Backend, Data & Infra
 
 ### Offers system (foundation) 🔗
-- [ ] Add offer banners + **general offers system** — `offers` table + API/repricing
-      (table ✅ + place-order repricing ✅; remaining: CRUD/read API helpers + banner read layer)
+- [x] Add offer banners + **general offers system** — `offers` table + API/repricing
+      (table + place-order repricing + `lib/offers/{api,queries,types}.ts`; dashboard/banner UI wiring = C2/C3)
 - [x] Promos per product / category / cart — discount engine in the pricing module
       (`lib/catalog/offers.ts`: compounding + best-pick, wired into place-order; client/dashboard UI = C2/C3)
 - [x] Verify price calculation logic (`lib/catalog/pricing.ts` ↔ server reprice parity)
