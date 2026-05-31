@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getShopUnreadCount } from "@/lib/messages/queries";
 import { getShopOrderCounts } from "@/lib/orders/queries";
 import { getViewerIdentity } from "@/lib/auth/identity";
+import { getMyNotifications } from "@/lib/notifications/queries";
 
 const SIDEBAR_WIDTH = 260;
 
@@ -37,6 +38,7 @@ export default async function ShopLayout({
   const unread = await getShopUnreadCount();
   const { pending, inProgress } = await getShopOrderCounts();
   const viewer = await getViewerIdentity();
+  const notifs = await getMyNotifications();
 
   return (
     <UnreadProvider initialCount={unread}>
@@ -76,6 +78,7 @@ export default async function ShopLayout({
       >
         {viewer && (
           <DashboardTopbar
+            userId={viewer.id}
             name={viewer.name}
             email={viewer.email}
             avatarUrl={viewer.avatarUrl}
@@ -83,6 +86,8 @@ export default async function ShopLayout({
             shops={viewer.shops}
             activeShopId={viewer.activeShop?.id ?? null}
             activeShopName={viewer.activeShop?.name ?? "Magazin"}
+            notifItems={notifs.items}
+            notifUnread={notifs.unread}
           />
         )}
         {children}

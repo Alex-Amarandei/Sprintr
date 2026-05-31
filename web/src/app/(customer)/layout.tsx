@@ -1,7 +1,9 @@
 import { Box, Container, Group } from "@mantine/core";
 import { LinkAnchor } from "@/components/ui/links";
 import { ProfileMenu, LoginIconLink } from "@/components/auth/ProfileMenu";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { getViewerIdentity } from "@/lib/auth/identity";
+import { getMyNotifications } from "@/lib/notifications/queries";
 import { CartProvider } from "@/components/cart/CartContext";
 import { CartBar } from "@/components/cart/CartBar";
 import { SearchProvider } from "@/components/search/SearchContext";
@@ -17,6 +19,7 @@ export default async function CustomerLayout({
   children: React.ReactNode;
 }) {
   const viewer = await getViewerIdentity();
+  const notifs = viewer ? await getMyNotifications() : { items: [], unread: 0 };
   return (
     <CartProvider>
       <SearchProvider>
@@ -46,12 +49,19 @@ export default async function CustomerLayout({
                 <ThemeToggle />
                 <CartBar />
                 {viewer ? (
-                  <ProfileMenu
-                    name={viewer.name}
-                    email={viewer.email}
-                    avatarUrl={viewer.avatarUrl}
-                    hasShopRole={viewer.shops.length > 0}
-                  />
+                  <>
+                    <NotificationBell
+                      userId={viewer.id}
+                      initialItems={notifs.items}
+                      initialUnread={notifs.unread}
+                    />
+                    <ProfileMenu
+                      name={viewer.name}
+                      email={viewer.email}
+                      avatarUrl={viewer.avatarUrl}
+                      hasShopRole={viewer.shops.length > 0}
+                    />
+                  </>
                 ) : (
                   <LoginIconLink />
                 )}

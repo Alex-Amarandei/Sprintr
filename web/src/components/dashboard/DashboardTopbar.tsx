@@ -8,6 +8,8 @@ import { Check, ChevronDown, LogOut, Store, UserRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { setActiveShop } from "@/lib/shop/actions";
 import { initials } from "@/lib/utils/format";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import type { AppNotification } from "@/lib/notifications/queries";
 
 type Shop = { id: string; name: string; role: string };
 
@@ -22,6 +24,7 @@ const ROLE_LABEL: Record<string, string> = {
  * belong to several shops, and an account menu (view-as-customer + sign out) (right).
  */
 export function DashboardTopbar({
+  userId,
   name,
   email,
   avatarUrl,
@@ -29,7 +32,10 @@ export function DashboardTopbar({
   shops,
   activeShopId,
   activeShopName,
+  notifItems,
+  notifUnread,
 }: {
+  userId: string;
   name: string;
   email: string;
   avatarUrl: string | null;
@@ -37,6 +43,8 @@ export function DashboardTopbar({
   shops: Shop[];
   activeShopId: string | null;
   activeShopName: string;
+  notifItems: AppNotification[];
+  notifUnread: number;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -105,6 +113,8 @@ export function DashboardTopbar({
       </Group>
       )}
 
+      <Group gap="xs" wrap="nowrap">
+      <NotificationBell userId={userId} initialItems={notifItems} initialUnread={notifUnread} />
       <Menu
         position="bottom-end"
         width={240}
@@ -145,6 +155,7 @@ export function DashboardTopbar({
           </Menu.Item>
         </Menu.Dropdown>
       </Menu>
+      </Group>
     </Group>
   );
 }
