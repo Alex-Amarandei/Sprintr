@@ -119,10 +119,14 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 - [ ] Rating & Reviews per store — customer display + post-purchase review
 
 ### Cart / checkout / orders
-- [ ] Persist cart in localStorage
+- [x] Persist cart in localStorage — *cart (lines + shop) saved to `localStorage`
+      (`sprintr.cart.v1`), rehydrated after mount (empty SSR → no hydration mismatch)*
 - [x] ~~Multi-vendor cart UX~~ — **DESCOPED** (not building): the cart stays single-shop (clears on shop switch)
 - [ ] Checkout: address pin selection
-- [ ] Phone field: numeric-only + validation
+- [x] Phone field: numeric-only + validation — *shared `sanitizePhoneInput`/`phoneError`
+      (`lib/utils/validation.ts`); checkout + profile phone strip non-numeric chars + validate (≥10 digits, `inputMode="tel"`)*
+- [x] Email field: regexp validation — *shared `emailError`; applied to the shop profile email
+      (only reachable editable email — customer flow is Google-only). Reusable for future email fields.*
 - [ ] Service-fee / delivery-tax line display ⬅BE
 - [ ] Retrieve client order history + "My orders" analytics check
 - [ ] Customer-side chat lifecycle UI — active vs. complaint thread ⬅BE 🔗

@@ -1,7 +1,24 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { CartLine } from "@/lib/catalog/cart";
+
+const STORAGE_KEY = "sprintr.cart.v1";
+
+type PersistedCart = { lines: CartLine[]; shop: CartShop | null };
+
+function loadCart(): PersistedCart {
+  if (typeof window === "undefined") return { lines: [], shop: null };
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { lines: [], shop: null };
+    const parsed = JSON.parse(raw) as PersistedCart;
+    if (!Array.isArray(parsed.lines)) return { lines: [], shop: null };
+    return { lines: parsed.lines, shop: parsed.shop ?? null };
+  } catch {
+    return { lines: [], shop: null };
+  }
+}
 
 /** Identity of the shop a cart belongs to, captured when lines are added. */
 export interface CartShop {
@@ -27,8 +44,27 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  // Start empty so SSR and the first client render match; rehydrate from
+  // localStorage after mount, then persist on every change.
   const [lines, setLines] = useState<CartLine[]>([]);
   const [shop, setShop] = useState<CartShop | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const c = loadCart();
+    setLines(c.lines);
+    setShop(c.shop);
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ lines, shop }));
+    } catch {
+      /* storage full / unavailable — non-fatal */
+    }
+  }, [lines, shop, hydrated]);
 
   const value = useMemo<CartContextValue>(() => {
     const total =

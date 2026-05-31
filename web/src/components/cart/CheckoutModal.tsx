@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/utils/format";
+import { phoneError, sanitizePhoneInput } from "@/lib/utils/validation";
 import { useCart } from "./CartContext";
 import { createClient } from "@/lib/supabase/client";
 
@@ -84,8 +85,7 @@ function DeliveryStep({
         values.fulfilment === "delivery" && !v.trim()
           ? "Adresa de livrare este obligatorie"
           : null,
-      contact_phone: (v) =>
-        !v.trim() ? "Numărul de telefon este obligatoriu" : null,
+      contact_phone: phoneError,
     },
   });
 
@@ -157,7 +157,11 @@ function DeliveryStep({
           label="Telefon de contact"
           placeholder="+40 7XX XXX XXX"
           required
+          inputMode="tel"
           {...form.getInputProps("contact_phone")}
+          onChange={(e) =>
+            form.setFieldValue("contact_phone", sanitizePhoneInput(e.target.value))
+          }
         />
 
         <Textarea
