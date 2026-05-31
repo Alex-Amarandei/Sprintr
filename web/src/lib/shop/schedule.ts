@@ -102,12 +102,23 @@ export type ScheduleStatus = {
  */
 export function getScheduleStatus(
   schedule: WeeklySchedule,
+  overrides: Record<string, { open: string; close: string } | null> = {},
   now: Date = new Date(),
 ): ScheduleStatus {
   const today = todayKey(now);
   const nowMin = now.getHours() * 60 + now.getMinutes();
-  const todays = schedule[today];
 
+  // Effective hours for the day `offset` days from now: a date-specific override (incl. a
+  // `null` "closed" entry from a temporary pause) wins over the recurring weekly schedule.
+  const hoursFor = (offset: number, weekday: WeekdayKey): { open: string; close: string } | null => {
+    const d = new Date(now);
+    d.setUTCDate(d.getUTCDate() + offset);
+    const dateKey = d.toISOString().slice(0, 10);
+    if (dateKey in overrides) return overrides[dateKey];
+    return schedule[weekday];
+  };
+
+  const todays = hoursFor(0, today);
   if (todays && nowMin >= toMinutes(todays.open) && nowMin < toMinutes(todays.close)) {
     return { open: true, today, label: `Deschis · până la ${todays.close}` };
   }
@@ -116,7 +127,7 @@ export function getScheduleStatus(
   const startIdx = DAY_ORDER.indexOf(today);
   for (let offset = 0; offset < 8; offset++) {
     const key = DAY_ORDER[(startIdx + offset) % 7];
-    const hours = schedule[key];
+    const hours = hoursFor(offset, key);
     if (!hours) continue;
     const opensAt = toMinutes(hours.open);
     if (offset === 0 && nowMin >= opensAt) continue; // already past today's open window

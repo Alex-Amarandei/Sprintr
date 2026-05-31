@@ -12,8 +12,14 @@ import {
  * Header shows the live open/closed status; consecutive days with identical
  * hours are collapsed into ranges (e.g. "Luni – Vineri · 08:00 – 20:00").
  */
-export function ShopSchedule({ schedule }: { schedule: WeeklySchedule }) {
-  const status = getScheduleStatus(schedule);
+export function ShopSchedule({
+  schedule,
+  overrides = {},
+}: {
+  schedule: WeeklySchedule;
+  overrides?: Record<string, { open: string; close: string } | null>;
+}) {
+  const status = getScheduleStatus(schedule, overrides);
   const groups = groupSchedule(schedule);
 
   return (

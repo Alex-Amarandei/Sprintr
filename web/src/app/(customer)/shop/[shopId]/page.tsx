@@ -48,7 +48,8 @@ export default async function ShopDetailPage({ params }: Props) {
   // Real weekly hours from the DB (`shops.schedule`); fall back to a sample only for
   // shops that haven't set any. `isOpen` (override-aware) drives the open/closed gate.
   const schedule = shop.schedule ?? SAMPLE_SCHEDULE;
-  const open = shop.isOpen ?? getScheduleStatus(schedule).open;
+  const overrides = shop.scheduleOverrides ?? {};
+  const open = shop.isOpen ?? getScheduleStatus(schedule, overrides).open;
 
   return (
     <Stack gap="lg">
@@ -165,7 +166,7 @@ export default async function ShopDetailPage({ params }: Props) {
 
       {/* Program — full width */}
       <Box mx="md">
-        <ShopSchedule schedule={schedule} />
+        <ShopSchedule schedule={schedule} overrides={overrides} />
       </Box>
 
       {/* Catalog (full width) */}
