@@ -60,6 +60,19 @@ const dark: MantineColorsTuple = [
   "#2a353f", "#222e38", "#1a232b", "#131b22", "#0d141a",
 ];
 
+// Glass surfaces — Card/Paper panels are translucent + backdrop-blurred so the fixed aurora
+// background (blobs + dot grid) frosts through them on every page. Translucency alone reads as
+// opaque over a near-uniform background; it's the blur that picks up and smears what's behind
+// into the glassy look. In dark we tint with the *lighter* dark-5 so the pane reads as glass
+// catching light over the darker body; in light, a translucent white. `light-dark()` for both.
+const GLASS_BG =
+  "light-dark(" +
+  "color-mix(in srgb, var(--mantine-color-white) 68%, transparent)," +
+  "color-mix(in srgb, var(--mantine-color-dark-5) 55%, transparent))";
+
+// Frost the backdrop and lift the blurred blob colours a touch so glass feels alive.
+const GLASS_BLUR = "blur(14px) saturate(150%)";
+
 export const theme = createTheme({
   primaryColor: "brand",
   primaryShade: 6,
@@ -99,8 +112,26 @@ export const theme = createTheme({
     Button: { defaultProps: { radius: "md" } },
     ActionIcon: { defaultProps: { radius: "md" } },
     Title: { defaultProps: { c: "var(--mantine-color-text)" } },
-    Card: { defaultProps: { radius: "lg", padding: "lg", withBorder: true } },
-    Paper: { defaultProps: { radius: "lg" } },
+    Card: {
+      defaultProps: { radius: "lg", padding: "lg", withBorder: true },
+      styles: {
+        root: {
+          backgroundColor: GLASS_BG,
+          backdropFilter: GLASS_BLUR,
+          WebkitBackdropFilter: GLASS_BLUR,
+        },
+      },
+    },
+    Paper: {
+      defaultProps: { radius: "lg" },
+      styles: {
+        root: {
+          backgroundColor: GLASS_BG,
+          backdropFilter: GLASS_BLUR,
+          WebkitBackdropFilter: GLASS_BLUR,
+        },
+      },
+    },
     Badge: {
       defaultProps: { radius: "sm", fw: 600 },
       styles: { label: { textTransform: "none" } },
