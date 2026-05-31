@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   Divider,
+  Flex,
   Group,
   Stack,
   Text,
@@ -61,9 +62,9 @@ export default async function OrderDetailPage({ params }: Props) {
         </Button>
       </Group>
 
-      <Group align="flex-start" gap="lg" wrap="nowrap">
+      <Flex direction={{ base: "column", md: "row" }} align="flex-start" gap="lg">
         {/* Left: status + items */}
-        <Stack gap="lg" style={{ flex: 1, minWidth: 0 }}>
+        <Stack gap="lg" style={{ flex: 1, minWidth: 0, width: "100%" }}>
           <Card>
             <Text fw={700} mb="md">
               Status comandă
@@ -124,8 +125,10 @@ export default async function OrderDetailPage({ params }: Props) {
           </Card>
         </Stack>
 
-        {/* Right: chat */}
-        <Box w={380} visibleFrom="md" style={{ flexShrink: 0 }}>
+        {/* Chat — ONE instance only. Two ChatPanels here would open two identical
+            postgres_changes subscriptions; Realtime dedups them server-side and routes
+            events to just one, so the visible panel could receive nothing. */}
+        <Box w={{ base: "100%", md: 380 }} style={{ flexShrink: 0 }}>
           <ChatPanel
             orderId={order.id}
             currentUserId={user?.id ?? ""}
@@ -135,20 +138,7 @@ export default async function OrderDetailPage({ params }: Props) {
             disabled={chatClosed}
           />
         </Box>
-      </Group>
-
-      {/* Chat on mobile (below) */}
-      <Box hiddenFrom="md">
-        <ChatPanel
-          orderId={order.id}
-          currentUserId={user?.id ?? ""}
-          customerId={order.customerId}
-          peerName={order.shopName}
-          initialMessages={order.messages}
-          height={440}
-          disabled={chatClosed}
-        />
-      </Box>
+      </Flex>
     </Stack>
   );
 }

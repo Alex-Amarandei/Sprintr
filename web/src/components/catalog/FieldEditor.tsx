@@ -20,6 +20,7 @@ import {
 import { ChevronUp, Pencil, Plus, Trash2 } from "lucide-react";
 import {
   fieldTypes,
+  TEXT_MAX,
   type Field,
   type FieldOption,
   type FieldType,
@@ -115,12 +116,14 @@ export function FieldEditor({
           <Group grow align="flex-end">
             <TextInput
               label="Etichetă (vizibilă clientului)"
+              maxLength={TEXT_MAX}
               value={field.label}
               onChange={(e) => patch({ label: e.currentTarget.value })}
             />
             <TextInput
               label="Cheie (machine)"
               description="doar a-z, 0-9, _"
+              maxLength={TEXT_MAX}
               value={field.key}
               onChange={(e) =>
                 patch({
@@ -177,7 +180,7 @@ export function FieldEditor({
               <NumberInput label="Min" w={90} value={field.min} onChange={(v) => patch({ min: typeof v === "number" ? v : 0 })} />
               <NumberInput label="Max (gol = ∞)" w={120} value={field.max ?? undefined} onChange={(v) => patch({ max: typeof v === "number" ? v : null })} />
               <NumberInput label="Pas" w={90} min={0} step={0.5} value={field.step} onChange={(v) => patch({ step: typeof v === "number" ? v : 1 })} />
-              <TextInput label="Unitate" w={120} placeholder="ex. pagini" value={field.unit ?? ""} onChange={(e) => patch({ unit: e.currentTarget.value || null })} />
+              <TextInput label="Unitate" w={120} maxLength={TEXT_MAX} placeholder="ex. pagini" value={field.unit ?? ""} onChange={(e) => patch({ unit: e.currentTarget.value || null })} />
               <PriceRuleInput label="Preț câmp" value={field.price} numberFieldKeys={numberFieldKeys} onChange={(price) => patch({ price })} />
             </Group>
           )}
@@ -227,10 +230,11 @@ function OptionsEditor({
             }}
           >
             <Group align="flex-end" gap="sm" wrap="wrap">
-              <TextInput label="Etichetă" w={160} value={opt.label} onChange={(e) => update(i, { label: e.currentTarget.value })} />
+              <TextInput label="Etichetă" w={160} maxLength={TEXT_MAX} value={opt.label} onChange={(e) => update(i, { label: e.currentTarget.value })} />
               <TextInput
                 label="Valoare"
                 w={130}
+                maxLength={TEXT_MAX}
                 value={opt.value}
                 onChange={(e) => update(i, { value: e.currentTarget.value.toLowerCase().replace(/[^a-z0-9_]/g, "_") })}
               />

@@ -5,6 +5,7 @@ import {
   Box,
   Card,
   Divider,
+  Flex,
   Group,
   Stack,
   Text,
@@ -172,9 +173,9 @@ export default async function ShopOrderDetailPage({ params }: Props) {
         <ShopOrderActions id={order.id} initialStatus={order.status} />
       </Group>
 
-      <Group align="flex-start" gap="lg" wrap="nowrap">
+      <Flex direction={{ base: "column", md: "row" }} align="flex-start" gap="lg">
         {/* Left: status + products + files + notes */}
-        <Stack gap="lg" style={{ flex: 1, minWidth: 0 }}>
+        <Stack gap="lg" style={{ flex: 1, minWidth: 0, width: "100%" }}>
           <Card>
             <Text fw={700} mb="md">
               Status comandă
@@ -268,14 +269,13 @@ export default async function ShopOrderDetailPage({ params }: Props) {
           )}
         </Stack>
 
-        {/* Right: customer/delivery + chat (desktop) */}
-        <Box w={360} visibleFrom="md" style={{ flexShrink: 0 }}>
+        {/* Right (desktop) / below (mobile): customer/delivery + chat. ONE instance only —
+            two would open two identical postgres_changes subscriptions and Realtime would
+            route events to just one, so the visible chat could receive nothing. */}
+        <Box w={{ base: "100%", md: 360 }} style={{ flexShrink: 0 }}>
           {sidebar}
         </Box>
-      </Group>
-
-      {/* Client + chat on mobile (below the main content) */}
-      <Box hiddenFrom="md">{sidebar}</Box>
+      </Flex>
     </Stack>
   );
 }

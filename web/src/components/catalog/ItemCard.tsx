@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActionIcon,
   Badge,
   Button,
   Divider,
   Group,
+  Image,
   Menu,
   MultiSelect,
   NumberInput,
@@ -36,18 +37,19 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
   fieldTypes,
-  itemKinds,
+  TEXT_MAX,
   type Category,
   type Field,
   type FieldType,
   type FileTypeKey,
   type Item,
-  type ItemKind,
 } from "@/lib/catalog/schema";
 import { newField } from "@/lib/catalog/factories";
 import { FILE_TYPE_OPTIONS } from "@/lib/catalog/fileTypes";
+import { IMAGE_PLACEHOLDER, itemImageUrl, mainImage } from "@/lib/catalog/images";
 import { formatPrice, roCount } from "@/lib/utils/format";
 import { FieldEditor } from "./FieldEditor";
+import { ItemImages } from "./ItemImages";
 
 const TYPE_LABELS: Record<FieldType, string> = {
   single_select: "Selecție unică",
@@ -59,18 +61,21 @@ const TYPE_LABELS: Record<FieldType, string> = {
 
 /** A field row wrapped as a dnd-kit sortable, with its own drag handle. */
 function SortableFieldEditor({
+  id,
   field,
   numberFieldKeys,
   onChange,
   onRemove,
 }: {
+  /** Stable client-side row id — decoupled from the editable `field.key`. */
+  id: string;
   field: Field;
   numberFieldKeys: string[];
   onChange: (f: Field) => void;
   onRemove: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: field.key });
+    useSortable({ id });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -113,15 +118,36 @@ interface Props {
 export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: Props) {
   const [open, setOpen] = useState(!item.title);
 
+  // Stable client-side ids for the field rows. The schema identifies fields by `key`, but
+  // `key` is user-editable — using it as the React/dnd id remounts the row on every keystroke
+  // (collapsing it and dropping input focus). These ids are minted once per row and moved in
+  // lockstep with the fields, so editing a key no longer remounts the row.
+  const uidRef = useRef(0);
+  const [fieldIds, setFieldIds] = useState<string[]>(() =>
+    item.fields.map(() => `fld-${uidRef.current++}`)
+  );
+  // Reconcile if the fields array is replaced from outside (keeps ids aligned by position).
+  useEffect(() => {
+    setFieldIds((prev) =>
+      prev.length === item.fields.length
+        ? prev
+        : item.fields.map((_, i) => prev[i] ?? `fld-${uidRef.current++}`)
+    );
+  }, [item.fields.length]);
+
   const patch = (changes: Partial<Item>) => onChange({ ...item, ...changes });
   const numberFieldKeys = item.fields.filter((f) => f.type === "number").map((f) => f.key);
   const setFields = (fields: Field[]) => onChange({ ...item, fields });
-  const addField = (type: FieldType) =>
+  const addField = (type: FieldType) => {
+    setFieldIds((ids) => [...ids, `fld-${uidRef.current++}`]);
     setFields([...item.fields, newField(type, item.fields.length)]);
+  };
   const updateField = (i: number, field: Field) =>
     setFields(item.fields.map((f, idx) => (idx === i ? field : f)));
-  const removeField = (i: number) =>
+  const removeField = (i: number) => {
+    setFieldIds((ids) => ids.filter((_, idx) => idx !== i));
     setFields(item.fields.filter((_, idx) => idx !== i));
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } })
@@ -129,19 +155,30 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
   function onFieldDragEnd(e: DragEndEvent) {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
-    const oldI = item.fields.findIndex((f) => f.key === active.id);
-    const newI = item.fields.findIndex((f) => f.key === over.id);
+    const oldI = fieldIds.indexOf(String(active.id));
+    const newI = fieldIds.indexOf(String(over.id));
     if (oldI < 0 || newI < 0) return;
+    setFieldIds((ids) => arrayMove(ids, oldI, newI));
     setFields(arrayMove(item.fields, oldI, newI));
   }
 
   const categoryName = categories.find((c) => c.id === item.category_id)?.name;
+  const mainUrl = itemImageUrl(mainImage(item));
 
   return (
     <Paper withBorder radius="lg" shadow="xs">
       <Group justify="space-between" wrap="nowrap" gap="xs" p="md">
         <Group gap="xs" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
           {dragHandle}
+          <Image
+            src={mainUrl ?? undefined}
+            w={40}
+            h={40}
+            radius="sm"
+            fit="cover"
+            fallbackSrc={IMAGE_PLACEHOLDER}
+            style={{ flexShrink: 0, border: "1px solid var(--mantine-color-default-border)" }}
+          />
           <div
             style={{ minWidth: 0, flex: 1, cursor: "pointer" }}
             onClick={() => setOpen((o) => !o)}
@@ -184,14 +221,7 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
         <Stack gap="md" px="md" pb="md">
           <Divider />
           <Group grow align="flex-start">
-            <TextInput label="Titlu" value={item.title} onChange={(e) => patch({ title: e.currentTarget.value })} />
-            <Select
-              label="Tip"
-              value={item.kind}
-              allowDeselect={false}
-              data={itemKinds.map((k) => ({ value: k, label: k === "service" ? "Serviciu" : "Produs" }))}
-              onChange={(v) => v && patch({ kind: v as ItemKind })}
-            />
+            <TextInput label="Titlu" maxLength={TEXT_MAX} value={item.title} onChange={(e) => patch({ title: e.currentTarget.value })} />
             <NumberInput
               label="Preț de bază (RON)"
               min={0}
@@ -206,6 +236,7 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
             label="Descriere"
             autosize
             minRows={2}
+            maxLength={TEXT_MAX}
             value={item.description ?? ""}
             onChange={(e) => patch({ description: e.currentTarget.value || null })}
           />
@@ -236,14 +267,18 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
             />
           )}
 
+          <Divider label="Imagini" labelPosition="left" />
+          <ItemImages images={item.images} onChange={(images) => patch({ images })} />
+
           <Divider label="Câmpuri configurabile" labelPosition="left" />
 
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onFieldDragEnd}>
-            <SortableContext items={item.fields.map((f) => f.key)} strategy={verticalListSortingStrategy}>
+            <SortableContext items={fieldIds} strategy={verticalListSortingStrategy}>
               <Stack gap="sm">
                 {item.fields.map((field, i) => (
                   <SortableFieldEditor
-                    key={field.key}
+                    key={fieldIds[i]}
+                    id={fieldIds[i]}
                     field={field}
                     numberFieldKeys={numberFieldKeys}
                     onChange={(f) => updateField(i, f)}

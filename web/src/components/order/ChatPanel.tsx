@@ -60,8 +60,11 @@ export function ChatPanel({
 }) {
   const supabase = useMemo(() => createClient(), []);
   const mySide = perspective === "shop" ? "shop" : "customer";
-  // Unique per mounted instance: the page renders ChatPanel twice (desktop + mobile copies),
-  // so a shared topic would collide ("cannot add postgres_changes after subscribe()").
+  // Unique channel topic per mounted instance (defensive — avoids the "cannot add
+  // postgres_changes after subscribe()" collision if two panels ever co-exist). NOTE:
+  // this does NOT make it safe to mount two ChatPanels for the SAME order on one client —
+  // Realtime dedups identical postgres_changes subscriptions (same table+filter) and
+  // routes events to only one, starving the other. Render ONE panel per order.
   const channelKey = useId();
 
   const [messages, setMessages] = useState<ChatMsg[]>(() =>
