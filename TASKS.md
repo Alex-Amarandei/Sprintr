@@ -176,3 +176,11 @@ real thing.
   *toast colors*, and *reviews-display* to whoever frees up first.
 - Already done: **live chat (base)** is wired to Supabase Realtime — the lifecycle/complaint
   split above builds on top of it.
+
+---
+
+## 🔮 Future tasks (to distribute)
+Captured here as they come up; not yet assigned to a lane.
+- [ ] Warn before cart loss — the cart is single-shop client state that's wiped on a full
+      reload and cleared when switching shops. Warn the user before they lose it: a
+      `beforeunload` prompt on refresh/back-navigation + a confirm dialog when switching shops.
