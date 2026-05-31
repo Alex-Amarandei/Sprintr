@@ -34,3 +34,24 @@ export async function updateShopProfile(
   revalidatePath(`/shop/${shopId}`);
   return { ok: true };
 }
+
+/**
+ * Save (or clear) the shop's logo / banner storage path. The file is uploaded client-side
+ * to the public `shop-assets` bucket first; this persists the resulting path. RLS authorizes
+ * (owner-only `shops` update).
+ */
+export async function setShopImage(
+  shopId: string,
+  kind: "logo" | "banner",
+  path: string | null
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+  const patch = kind === "logo" ? { logo_path: path } : { banner_path: path };
+  const { error } = await supabase.from("shops").update(patch).eq("id", shopId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/dashboard/profile");
+  revalidatePath(`/shop/${shopId}`);
+  revalidatePath("/browse");
+  return { ok: true };
+}

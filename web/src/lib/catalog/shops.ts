@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { parseDocument, type Category, type Item } from "./schema";
+import { shopAssetUrl } from "@/lib/storage/shopAssets";
 import type { SampleShop, ShopCategory } from "./samples";
 
 /**
@@ -44,6 +45,8 @@ function toView(row: {
   description: string | null;
   address: string | null;
   phone: string | null;
+  logo_path: string | null;
+  banner_path: string | null;
   schedule: unknown;
   schedule_overrides: unknown;
 }): SampleShop {
@@ -59,6 +62,8 @@ function toView(row: {
       row.schedule_overrides as Record<string, ScheduleDay> | null
     ),
     schedule: (row.schedule as SampleShop["schedule"]) ?? null,
+    logoUrl: shopAssetUrl(row.logo_path),
+    bannerUrl: shopAssetUrl(row.banner_path),
   };
 }
 
@@ -66,7 +71,7 @@ export async function getShops(): Promise<SampleShop[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("shops")
-    .select("id, name, description, address, phone, schedule, schedule_overrides")
+    .select("id, name, description, address, phone, logo_path, banner_path, schedule, schedule_overrides")
     .order("created_at", { ascending: true });
   if (error || !data) return [];
   return data.map(toView);
@@ -76,7 +81,7 @@ export async function getShopView(id: string): Promise<SampleShop | null> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("shops")
-    .select("id, name, description, address, phone, schedule, schedule_overrides")
+    .select("id, name, description, address, phone, logo_path, banner_path, schedule, schedule_overrides")
     .eq("id", id)
     .maybeSingle();
   return data ? toView(data) : null;
