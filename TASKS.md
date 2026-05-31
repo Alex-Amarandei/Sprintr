@@ -301,5 +301,7 @@ Captured here as they come up; not yet assigned to a lane.
   =brand, in-progress=cyan; sidebar + mobile drawer), mirroring the Mesaje unread badge.
 - [x] **Comenzi search** — search box on `/dashboard/orders` (matches #order, customer
   name/email/phone, item titles) in `ShopOrderQueue` (full page only).
-- [x] **Comenzi pagination** — configurable page size (20 / 50 / 100) + `Pagination` footer in
-  `ShopOrderQueue` (full page only; dashboard preview keeps its `limit`).
+- [x] **Comenzi lazy loading** — silent infinite scroll (IntersectionObserver, fixed 25-row batch)
+  revealing the already-loaded list to keep the DOM light + an "X din Y" counter. No user knob:
+  data is fetched server-side in one go, so a "load N" control would be misleading. (Full page
+  only; dashboard preview keeps its `limit`. True server-side paging deferred until volume needs it.)
