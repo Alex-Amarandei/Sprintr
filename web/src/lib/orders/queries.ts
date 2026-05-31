@@ -233,6 +233,7 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
     shopId: order.shop_id,
     shopName: order.shops?.name ?? "Magazin",
     customerName,
+    customerId: order.customer_id,
     category: "print",
     itemsCount: lines.length,
     total,

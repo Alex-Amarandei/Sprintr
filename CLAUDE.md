@@ -1107,3 +1107,24 @@ order-detail client+chat invisible on mobile; cramped fixed-width input/queue ro
   rendering couldn't be exercised in-tool — the remote Chrome renders at a fixed 1440 viewport
   and `/dashboard/*` never reaches network-idle (screenshots/JS eval hang). Desktop confirmed
   clean (sidebar visible, no horizontal overflow).
+
+## Live chat — WIRED to Supabase Realtime (FE/BE, 2026-05-31) ✅
+
+Closes the "TODO(BE): wire to Supabase Realtime on the messages table" — the mandatory
+per-order chat is now real (was presentational, local-state only).
+- **Client-side, no server action** (matches migration 5's design: participants `insert`
+  directly under RLS, Realtime delivers). `components/order/ChatPanel.tsx`:
+  - History is server-rendered via `getOrderDetail()` into `initialMessages`.
+  - Sending does `supabase.from("messages").insert({order_id, sender_id, body}).select()`
+    (browser client) → optimistic append, then dedups the Realtime echo by row `id`.
+  - Subscribes to `postgres_changes` INSERT filtered `order_id=eq.<id>` on a per-order
+    channel; RLS scopes delivery to participants (customer + shop members). Auto-scrolls.
+  - Incoming rows are classified into customer/shop **sides** via the order's `customerId`
+    (sender === customer → customer, else shop). Input is **disabled** when the order is
+    `done`/`rejected` (the insert RLS policy blocks posting on closed orders anyway).
+- **Props now required:** `orderId`, `currentUserId` (logged-in profile id = sender), and
+  `customerId`. Both detail pages (`(customer)/order/[orderId]`, `dashboard/orders/[orderId]`)
+  fetch the user server-side and pass these + `disabled`.
+- `getOrderDetail()` now also returns `customerId`; `SampleOrder` gained `customerId?`.
+- Verified: `tsc --noEmit` clean + production build compiles both order routes. Full
+  2-party live delivery needs a logged-in customer+shop session to exercise end-to-end.

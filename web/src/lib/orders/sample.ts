@@ -19,6 +19,8 @@ export interface SampleOrder {
   shopName: string;
   /** Customer who placed it — shown on the shop dashboard queue. */
   customerName: string;
+  /** Customer's profile id — used by the chat to classify message sides. */
+  customerId?: string;
   category: ShopCategory;
   itemsCount: number;
   total: number;

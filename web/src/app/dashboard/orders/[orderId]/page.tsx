@@ -21,6 +21,7 @@ import {
   Truck,
 } from "lucide-react";
 import { getOrderDetail, getShopOrders } from "@/lib/orders/queries";
+import { createClient } from "@/lib/supabase/server";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { ChatPanel } from "@/components/order/ChatPanel";
 import { ShopOrderActions } from "@/components/order/ShopOrderActions";
@@ -65,6 +66,12 @@ export default async function ShopOrderDetailPage({ params }: Props) {
   const [order, queue] = await Promise.all([getOrderDetail(orderId), getShopOrders()]);
   if (!order) notFound();
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const chatClosed = order.status === "done" || order.status === "rejected";
+
   const shortId = order.id.slice(0, 8);
   // TODO(BE): uploaded files aren't persisted in order_items yet → no attachments.
   const files = order.lines.filter((l) => l.pdfName);
@@ -102,10 +109,14 @@ export default async function ShopOrderDetailPage({ params }: Props) {
       </Card>
 
       <ChatPanel
+        orderId={order.id}
+        currentUserId={user?.id ?? ""}
+        customerId={order.customerId}
         peerName={order.customerName}
         perspective="shop"
         initialMessages={order.messages}
         height={420}
+        disabled={chatClosed}
       />
     </Stack>
   );

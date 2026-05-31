@@ -12,6 +12,7 @@ import {
 } from "@mantine/core";
 import { ArrowLeft, Download, FileText } from "lucide-react";
 import { getOrderDetail } from "@/lib/orders/queries";
+import { createClient } from "@/lib/supabase/server";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { ChatPanel } from "@/components/order/ChatPanel";
@@ -27,6 +28,12 @@ export default async function OrderDetailPage({ params }: Props) {
   const { orderId } = await params;
   const order = await getOrderDetail(orderId);
   if (!order) notFound();
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const chatClosed = order.status === "done" || order.status === "rejected";
 
   const shortId = order.id.slice(0, 8);
 
@@ -119,13 +126,28 @@ export default async function OrderDetailPage({ params }: Props) {
 
         {/* Right: chat */}
         <Box w={380} visibleFrom="md" style={{ flexShrink: 0 }}>
-          <ChatPanel peerName={order.shopName} initialMessages={order.messages} />
+          <ChatPanel
+            orderId={order.id}
+            currentUserId={user?.id ?? ""}
+            customerId={order.customerId}
+            peerName={order.shopName}
+            initialMessages={order.messages}
+            disabled={chatClosed}
+          />
         </Box>
       </Group>
 
       {/* Chat on mobile (below) */}
       <Box hiddenFrom="md">
-        <ChatPanel peerName={order.shopName} initialMessages={order.messages} height={440} />
+        <ChatPanel
+          orderId={order.id}
+          currentUserId={user?.id ?? ""}
+          customerId={order.customerId}
+          peerName={order.shopName}
+          initialMessages={order.messages}
+          height={440}
+          disabled={chatClosed}
+        />
       </Box>
     </Stack>
   );
