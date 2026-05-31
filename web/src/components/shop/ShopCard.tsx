@@ -106,7 +106,7 @@ export function ShopCard({ shop }: { shop: SampleShop }) {
         </Group>
 
         <Group justify="space-between" mt="xs" wrap="nowrap">
-          <Group gap={4} c={open ? "dimmed" : "red.7"} wrap="nowrap" style={{ minWidth: 0 }}>
+          <Group gap={4} c={open ? "teal.4" : "red.7"} wrap="nowrap" style={{ minWidth: 0 }}>
             <Clock size={14} style={{ flexShrink: 0 }} />
             <Text fz="xs" fw={open ? 400 : 600} truncate>
               {status ? status.short : open ? shop.eta ?? "—" : "Închis"}

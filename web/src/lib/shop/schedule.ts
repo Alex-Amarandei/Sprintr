@@ -95,7 +95,7 @@ export type ScheduleStatus = {
   /** Full label, e.g. "Deschis · până la 20:00" / "Închis · deschide luni la 08:00". */
   label: string;
   /** Compact label for tight spots next to an open/closed badge: "până la 20:00" /
-   *  "deschide mâine 09:00" (no "Deschis/Închis" prefix — the badge already says it). */
+   *  "mâine la 09:00" (no "Deschis/Închis/deschide" prefix — the badge already says it). */
   short: string;
 };
 
@@ -147,15 +147,15 @@ export function getScheduleStatus(
           : `${DAY_LABELS[key].toLowerCase()} la ${hours.open}`;
     const whenShort =
       offset === 0
-        ? `la ${hours.open}`
+        ? `azi la ${hours.open}`
         : offset === 1
-          ? `mâine ${hours.open}`
-          : `${DAY_LABELS[key].toLowerCase()} ${hours.open}`;
+          ? `mâine la ${hours.open}`
+          : `${DAY_LABELS[key].toLowerCase()} la ${hours.open}`;
     return {
       open: false,
       today,
       label: `Închis · deschide ${whenLong}`,
-      short: `deschide ${whenShort}`,
+      short: whenShort,
     };
   }
 
