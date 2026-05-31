@@ -140,6 +140,40 @@ body {
   border-color: var(--mantine-color-brand-3);
 }
 
+/* Catalog card image thumb — scales + reveals a zoom overlay on hover so it reads as clickable
+   (opens the gallery lightbox). */
+.catalog-thumb {
+  position: relative;
+  overflow: hidden;
+  cursor: zoom-in;
+  flex-shrink: 0;
+}
+.catalog-thumb img {
+  transition: transform 0.2s ease;
+}
+.catalog-thumb:hover img,
+.catalog-thumb:focus-visible img {
+  transform: scale(1.08);
+}
+.catalog-thumb__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: rgba(0, 0, 0, 0);
+  opacity: 0;
+  transition:
+    opacity 0.16s ease,
+    background 0.16s ease;
+}
+.catalog-thumb:hover .catalog-thumb__overlay,
+.catalog-thumb:focus-visible .catalog-thumb__overlay {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.4);
+}
+
 /* Brief pulse when an order line deep-links to its product card (#item-<id>). */
 .hash-flash {
   animation: hash-flash 1.6s ease;

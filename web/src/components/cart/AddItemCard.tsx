@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import {
   Button,
@@ -13,7 +13,7 @@ import {
   ThemeIcon,
   Tooltip,
 } from "@mantine/core";
-import { FileText, Package, Plus, Settings2, ShoppingCart } from "lucide-react";
+import { FileText, Package, Plus, Settings2, ShoppingCart, ZoomIn } from "lucide-react";
 import { toast } from "sonner";
 import type { Item } from "@/lib/catalog/schema";
 import type { CartLine } from "@/lib/catalog/cart";
@@ -60,6 +60,19 @@ export function AddItemCard({
   const gallery = item.images.length ? item.images : item.image_path ? [item.image_path] : [];
   const [zoom, setZoom] = useState<number | null>(null);
 
+  // Show the description tooltip only when the 2-line clamp actually hides text.
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const [descTruncated, setDescTruncated] = useState(false);
+  useEffect(() => {
+    const el = descRef.current;
+    if (!el) return;
+    const check = () => setDescTruncated(el.scrollHeight > el.clientHeight + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [item.description]);
+
   const shop = { id: shopId, name: shopName, open: shopOpen, deliveryFee: shopDeliveryFee };
 
   /** Adds the line, unless the cart already holds items from a different shop. */
@@ -86,54 +99,79 @@ export function AddItemCard({
   return (
     <Paper withBorder radius="lg" p="lg" className="catalog-card">
       <Stack gap="sm" h="100%" justify="space-between">
-        {mainUrl && (
-          <Image
-            src={mainUrl}
-            h={140}
-            radius="md"
-            fit="cover"
-            alt={item.title}
-            onClick={() => setZoom(0)}
-            style={{ cursor: "zoom-in" }}
-          />
-        )}
         <div>
-          <Group gap="sm" wrap="nowrap" align="flex-start">
-            <Tooltip
-              label={item.kind === "service" ? "Serviciu" : "Produs"}
-              withArrow
-            >
-              <ThemeIcon
-                variant="light"
-                color={kindColor}
-                size={40}
-                radius="md"
-                // Real bg/color props (not the --ti-* vars, which Mantine sets
-                // inline itself) so the icon looks identical in dark and light mode.
-                styles={{
-                  root: {
-                    backgroundColor: `var(--mantine-color-${kindColor}-1)`,
-                    color: `var(--mantine-color-${kindColor}-7)`,
-                    flexShrink: 0,
-                  },
+          <Group gap="sm" wrap="nowrap" align="center">
+            {mainUrl ? (
+              // The main image stands in for the kind icon — hover lifts it (zoom + overlay),
+              // click opens the same gallery lightbox the shop sees while adding images.
+              <div
+                className="catalog-thumb"
+                role="button"
+                tabIndex={0}
+                aria-label="Vezi imaginile"
+                onClick={() => setZoom(0)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setZoom(0);
+                  }
                 }}
+                style={{ width: 52, height: 52, borderRadius: "var(--mantine-radius-md)" }}
               >
-                {item.kind === "service" ? (
-                  <FileText size={18} />
-                ) : (
-                  <Package size={18} />
-                )}
-              </ThemeIcon>
-            </Tooltip>
+                <Image src={mainUrl} w={52} h={52} fit="cover" radius="md" alt={item.title} />
+                <span className="catalog-thumb__overlay">
+                  <ZoomIn size={18} />
+                </span>
+              </div>
+            ) : (
+              <Tooltip label={item.kind === "service" ? "Serviciu" : "Produs"} withArrow>
+                <ThemeIcon
+                  variant="light"
+                  color={kindColor}
+                  size={52}
+                  radius="md"
+                  // Real bg/color props (not the --ti-* vars, which Mantine sets
+                  // inline itself) so the icon looks identical in dark and light mode.
+                  styles={{
+                    root: {
+                      backgroundColor: `var(--mantine-color-${kindColor}-1)`,
+                      color: `var(--mantine-color-${kindColor}-7)`,
+                      flexShrink: 0,
+                    },
+                  }}
+                >
+                  {item.kind === "service" ? <FileText size={22} /> : <Package size={22} />}
+                </ThemeIcon>
+              </Tooltip>
+            )}
             <Text fw={600} fz="sm" lh={1.3} lineClamp={2} style={{ flex: 1 }}>
               {item.title}
             </Text>
           </Group>
-          {item.description && (
-            <Text c="dimmed" fz="xs" lineClamp={2} mt="sm">
+
+          {/* Always rendered + a reserved 2-line height so every card is the same size; the
+              tooltip reveals the full text only when the clamp truncates it. */}
+          <Tooltip
+            label={item.description}
+            multiline
+            w={260}
+            withArrow
+            position="bottom"
+            disabled={!descTruncated || !item.description}
+            events={{ hover: true, focus: true, touch: true }}
+          >
+            <Text
+              ref={descRef}
+              c="dimmed"
+              fz="xs"
+              lh={1.4}
+              lineClamp={2}
+              mt="sm"
+              style={{ minHeight: "calc(1.4em * 2)", cursor: descTruncated ? "help" : "default" }}
+            >
               {item.description}
             </Text>
-          )}
+          </Tooltip>
         </div>
 
         <Group justify="space-between" align="flex-end" wrap="nowrap" mt="xs">
@@ -200,6 +238,34 @@ export function AddItemCard({
             },
           }}
         >
+          {gallery.length > 0 && (
+            // Preview the shop's product photos without leaving the configurator — opens the
+            // same gallery lightbox as the catalog card (raised above this modal).
+            <Group mb="lg" gap="sm" wrap="nowrap">
+              <div
+                className="catalog-thumb"
+                role="button"
+                tabIndex={0}
+                aria-label="Vezi imaginile"
+                onClick={() => setZoom(0)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setZoom(0);
+                  }
+                }}
+                style={{ width: 56, height: 56, borderRadius: "var(--mantine-radius-md)" }}
+              >
+                <Image src={mainUrl ?? undefined} w={56} h={56} fit="cover" radius="md" alt={item.title} />
+                <span className="catalog-thumb__overlay">
+                  <ZoomIn size={18} />
+                </span>
+              </div>
+              <Button variant="light" leftSection={<ZoomIn size={16} />} onClick={() => setZoom(0)}>
+                Previzualizează {gallery.length > 1 ? `imaginile (${gallery.length})` : "imaginea"}
+              </Button>
+            </Group>
+          )}
           <ItemOrderForm
             item={item}
             submitLabel="Adaugă în coș"
@@ -217,6 +283,8 @@ export function AddItemCard({
         opened={zoom !== null}
         onIndexChange={setZoom}
         onClose={() => setZoom(null)}
+        // Raise above the configurator modal (z-index 200) when opened from inside it.
+        zIndex={300}
       />
 
       {/* Cross-shop conflict confirmation */}
