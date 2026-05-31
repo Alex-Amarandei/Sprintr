@@ -9,9 +9,17 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { roCount } from "@/lib/utils/format";
 
 /** Client-side, debounced search over the shop list (name / description / address / tags). */
-export function ShopResults({ shops }: { shops: SampleShop[] }) {
+export function ShopResults({
+  shops,
+  favoriteIds,
+}: {
+  shops: SampleShop[];
+  /** Favourited shop ids, or null when signed out (→ hide hearts). */
+  favoriteIds?: string[] | null;
+}) {
   const { query } = useSearch();
   const q = query.trim().toLowerCase();
+  const favSet = favoriteIds ? new Set(favoriteIds) : null;
 
   const filtered = q
     ? shops.filter((s) =>
@@ -41,7 +49,12 @@ export function ShopResults({ shops }: { shops: SampleShop[] }) {
       ) : (
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">
           {filtered.map((shop) => (
-            <ShopCard key={shop.id} shop={shop} />
+            <ShopCard
+              key={shop.id}
+              shop={shop}
+              showFavorite={favSet !== null}
+              favorited={favSet?.has(shop.id) ?? false}
+            />
           ))}
         </SimpleGrid>
       )}

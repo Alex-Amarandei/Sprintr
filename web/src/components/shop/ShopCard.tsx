@@ -3,11 +3,20 @@ import { Avatar, Badge, Box, Card, Group, Stack, Text } from "@mantine/core";
 import { Clock, Star } from "lucide-react";
 import type { SampleShop } from "@/lib/catalog/samples";
 import { OpenBadge } from "@/components/ui/OpenBadge";
+import { FavoriteButton } from "@/components/shop/FavoriteButton";
 import { getScheduleStatus } from "@/lib/shop/schedule";
 import { roCount } from "@/lib/utils/format";
 import { SHOP_CATEGORY } from "./category";
 
-export function ShopCard({ shop }: { shop: SampleShop }) {
+export function ShopCard({
+  shop,
+  showFavorite = false,
+  favorited = false,
+}: {
+  shop: SampleShop;
+  showFavorite?: boolean;
+  favorited?: boolean;
+}) {
   const cat = SHOP_CATEGORY[shop.category ?? "print"];
   const Icon = cat.icon;
   // Real open/closed + label from the weekly schedule honouring date overrides (pause).
@@ -64,6 +73,11 @@ export function ShopCard({ shop }: { shop: SampleShop }) {
           )}
           <OpenBadge open={open} />
         </Group>
+        {showFavorite && (
+          <Box style={{ position: "absolute", right: 8, bottom: 8, zIndex: 1 }}>
+            <FavoriteButton shopId={shop.id} initial={favorited} size={16} />
+          </Box>
+        )}
         {!banner && (
           <Icon
             size={40}

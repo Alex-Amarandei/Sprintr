@@ -315,3 +315,6 @@ Captured here as they come up; not yet assigned to a lane.
   only; dashboard preview keeps its `limit`. True server-side paging deferred until volume needs it.)
 - [ ] **Refunds + cancel order** — `payment_status='refunded'` enum exists but no refund table,
   no `charge.refunded` webhook handler, no customer-cancel / shop-refund UI. (Parked.)
+- [ ] **Shop ops — deferred** (parked): bulk order actions (multi-select accept/advance),
+  printable packing slip, analytics date-range selector + MoM/YoY deltas, consumables inventory
+  (stock table + per-item consumption + decrement-on-order + low-stock).

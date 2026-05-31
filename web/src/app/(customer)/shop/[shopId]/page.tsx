@@ -16,6 +16,8 @@ import { ScrollToHash } from "@/components/ui/ScrollToHash";
 import { getShopView, getShopCatalog } from "@/lib/catalog/shops";
 import { getShopReviews } from "@/lib/reviews/queries";
 import { getActiveOffers } from "@/lib/offers/queries";
+import { getMyFavoriteShopIds } from "@/lib/favorites/queries";
+import { FavoriteButton } from "@/components/shop/FavoriteButton";
 import { SHOP_CATEGORY } from "@/components/shop/category";
 import { ShopReviews } from "@/components/shop/ShopReviews";
 import { ShopOffers } from "@/components/shop/ShopOffers";
@@ -48,11 +50,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ShopDetailPage({ params }: Props) {
   const { shopId } = await params;
 
-  const [shop, catalog, reviews, offers] = await Promise.all([
+  const [shop, catalog, reviews, offers, favoriteIds] = await Promise.all([
     getShopView(shopId),
     getShopCatalog(shopId),
     getShopReviews(shopId),
     getActiveOffers(shopId),
+    getMyFavoriteShopIds(),
   ]);
   if (!shop) notFound();
   const { items, categories } = catalog;
@@ -108,6 +111,9 @@ export default async function ShopDetailPage({ params }: Props) {
               <Group gap="sm" align="center">
                 <Title order={2}>{shop.name}</Title>
                 <OpenBadge open={open} label={open ? "Deschis acum" : undefined} />
+                {favoriteIds !== null && (
+                  <FavoriteButton shopId={shopId} initial={favoriteIds.includes(shopId)} />
+                )}
               </Group>
               <Text c="dimmed" mt={4}>
                 {shop.description}

@@ -4,6 +4,7 @@ import { getShops } from "@/lib/catalog/shops";
 import { createClient } from "@/lib/supabase/server";
 import { ShopResults } from "@/components/shop/ShopResults";
 import { MobileShopSearch } from "@/components/search/MobileShopSearch";
+import { getMyFavoriteShopIds } from "@/lib/favorites/queries";
 import { roCount } from "@/lib/utils/format";
 
 export const metadata: Metadata = { title: "Magazine" };
@@ -25,6 +26,7 @@ export default async function BrowsePage() {
   }
 
   const shops = await getShops();
+  const favoriteIds = await getMyFavoriteShopIds();
   const openCount = shops.filter((s) => s.isOpen ?? true).length;
 
   return (
@@ -52,7 +54,7 @@ export default async function BrowsePage() {
       <MobileShopSearch />
 
       {/* Shop grid — client-side, debounced search via the header input */}
-      <ShopResults shops={shops} />
+      <ShopResults shops={shops} favoriteIds={favoriteIds} />
     </Stack>
   );
 }
