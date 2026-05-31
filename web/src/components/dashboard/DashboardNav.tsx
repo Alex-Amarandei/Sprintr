@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Badge, Group, NavLink, Stack, Text } from "@mantine/core";
+import { Group, NavLink, Stack, Text } from "@mantine/core";
 import {
   BarChart3,
   LayoutDashboard,
@@ -89,22 +89,39 @@ export function DashboardNav({
             let rightSection: React.ReactNode;
             if (showUnread) {
               rightSection = (
-                <Badge size="sm" circle variant="filled" color="brand.5" c="white" aria-label="mesaje necitite">
+                <Text fz="sm" fw={700} c="brand.7" aria-label="mesaje necitite">
                   {badgeText(count)}
-                </Badge>
+                </Text>
               );
             } else if (isOrders && (pendingCount > 0 || inProgressCount > 0)) {
               rightSection = (
-                <Group gap={4} wrap="nowrap">
+                <Group gap={8} wrap="nowrap">
                   {pendingCount > 0 && (
-                    <Badge size="sm" circle variant="filled" color="brand.5" c="white" aria-label="comenzi noi">
+                    <Text
+                      fz="sm"
+                      fw={700}
+                      // Teal in light; light grey in dark so it stays visible on the dark sidebar.
+                      style={{
+                        color:
+                          "light-dark(var(--mantine-color-teal-7), var(--mantine-color-gray-4))",
+                      }}
+                      aria-label="comenzi noi"
+                    >
                       {badgeText(pendingCount)}
-                    </Badge>
+                    </Text>
                   )}
                   {inProgressCount > 0 && (
-                    <Badge size="sm" circle variant="filled" color="brand.7" aria-label="comenzi în lucru">
+                    <Text
+                      fz="sm"
+                      fw={600}
+                      style={{
+                        color:
+                          "light-dark(var(--mantine-color-teal-5), var(--mantine-color-gray-5))",
+                      }}
+                      aria-label="comenzi în lucru"
+                    >
                       {badgeText(inProgressCount)}
-                    </Badge>
+                    </Text>
                   )}
                 </Group>
               );

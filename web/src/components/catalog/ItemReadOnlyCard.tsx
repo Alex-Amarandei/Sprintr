@@ -5,6 +5,7 @@ import {
   Badge,
   Divider,
   Group,
+  Image,
   Paper,
   Stack,
   Text,
@@ -13,9 +14,10 @@ import {
 import { ChevronDown } from "lucide-react";
 import type { Category, Field, Item, PriceRule } from "@/lib/catalog/schema";
 import { acceptedLabel } from "@/lib/catalog/fileTypes";
-import { itemImageUrl, mainImage } from "@/lib/catalog/images";
+import { IMAGE_PLACEHOLDER, itemImageUrl, mainImage } from "@/lib/catalog/images";
 import { formatPrice } from "@/lib/utils/format";
 import { ItemThumb } from "./ItemThumb";
+import { ImageLightbox } from "./ImageLightbox";
 
 const FIELD_TYPE_LABEL: Record<Field["type"], string> = {
   single_select: "O alegere",
@@ -109,9 +111,11 @@ export function ItemReadOnlyCard({
   categories: Category[];
 }) {
   const [open, setOpen] = useState(false);
+  const [zoom, setZoom] = useState<number | null>(null);
   const categoryName = categories.find((c) => c.id === item.category_id)?.name;
   const hasDetails =
     item.fields.length > 0 ||
+    item.images.length > 0 ||
     !!item.description ||
     item.requires_upload ||
     !!categoryName;
@@ -165,6 +169,26 @@ export function ItemReadOnlyCard({
         <>
           <Divider my="sm" />
           <Stack gap="sm">
+            {item.images.length > 0 && (
+              <Group gap="xs">
+                {item.images.map((img, i) => (
+                  <Image
+                    key={i}
+                    src={itemImageUrl(img) ?? undefined}
+                    w={96}
+                    h={96}
+                    radius="sm"
+                    fit="cover"
+                    fallbackSrc={IMAGE_PLACEHOLDER}
+                    onClick={() => setZoom(i)}
+                    style={{
+                      cursor: "pointer",
+                      border: "1px solid var(--mantine-color-default-border)",
+                    }}
+                  />
+                ))}
+              </Group>
+            )}
             {item.description && (
               <Text fz="sm" c="dimmed">
                 {item.description}
@@ -190,6 +214,14 @@ export function ItemReadOnlyCard({
           </Stack>
         </>
       )}
+
+      <ImageLightbox
+        images={item.images}
+        index={zoom ?? 0}
+        onIndexChange={setZoom}
+        opened={zoom !== null}
+        onClose={() => setZoom(null)}
+      />
     </Paper>
   );
 }

@@ -105,7 +105,14 @@ export function DashboardTopbar({
       </Group>
       )}
 
-      <Menu position="bottom-end" width={240} withArrow shadow="md">
+      <Menu
+        position="bottom-end"
+        width={240}
+        withArrow
+        shadow="md"
+        // Smaller, semi-bold option labels.
+        styles={{ item: { fontSize: "var(--mantine-font-size-xs)", fontWeight: 600 } }}
+      >
         <Menu.Target>
           <UnstyledButton aria-label="Cont" style={{ display: "inline-flex", borderRadius: "50%" }}>
             <Avatar
@@ -130,7 +137,7 @@ export function DashboardTopbar({
           </div>
           <Menu.Divider />
           <Menu.Item component={Link} href="/browse" leftSection={<UserRound size={16} />}>
-            Vizualizare client
+            Vizualizare mod client
           </Menu.Item>
           <Menu.Divider />
           <Menu.Item color="red" leftSection={<LogOut size={16} />} onClick={signOut} disabled={signingOut}>

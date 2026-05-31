@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   ActionIcon,
   Avatar,
-  Badge,
   Box,
   Flex,
   Group,
@@ -21,6 +20,7 @@ import type { ShopConversation } from "@/lib/messages/queries";
 import type { OrderStatus } from "@/lib/design/status";
 import type { SampleMessage } from "@/lib/orders/sample";
 import { ChatPanel } from "@/components/order/ChatPanel";
+import { Dot } from "@/components/ui/Dot";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useUnread } from "./UnreadProvider";
@@ -166,15 +166,11 @@ export function MessagesInbox({
                             </Text>
                           </div>
                         </Group>
-                        <Stack gap={6} align="flex-end" style={{ flexShrink: 0 }}>
-                          <Text fz={10} c="dimmed">
+                        <Stack gap={8} align="flex-end" style={{ flexShrink: 0 }}>
+                          <Text fz={10} c={c.unread > 0 ? "brand.7" : "dimmed"} fw={c.unread > 0 ? 700 : 400}>
                             {timeOnly(c.lastAtIso)}
                           </Text>
-                          {c.unread > 0 && (
-                            <Badge size="sm" circle variant="filled" color="brand.5" c="white">
-                              {c.unread > 9 ? "9+" : c.unread}
-                            </Badge>
-                          )}
+                          {c.unread > 0 && <Dot color="brand" size={9} />}
                         </Stack>
                       </Group>
                     </Box>
