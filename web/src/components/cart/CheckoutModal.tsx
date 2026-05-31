@@ -12,11 +12,13 @@ import {
 import {
   Alert,
   Button,
+  Checkbox,
   Divider,
   Group,
   Loader,
   Modal,
   Radio,
+  Select,
   SimpleGrid,
   Stack,
   Text,
@@ -38,10 +40,13 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils/format";
 import { phoneError, sanitizePhoneInput } from "@/lib/utils/validation";
+import { addAddress } from "@/lib/addresses/actions";
 import { getCurrentPosition, reverseGeocode, type LatLng } from "@/lib/geo/geocode";
 import { useCart } from "./CartContext";
 import { createClient } from "@/lib/supabase/client";
 import { uploadOrderFiles } from "@/lib/storage/orderFiles";
+
+type SavedAddr = { id: string; label: string | null; address: string; lat: number | null; lng: number | null };
 import { confirmOrderPayment } from "@/lib/orders/payment";
 
 // The map picker is client-only (Leaflet touches `window`) → load it lazily, never on the server.
@@ -90,6 +95,8 @@ interface DeliveryFormValues {
   payment_method: "cash_in_store" | "cash_on_delivery" | "online";
   /** Optional promo code typed at checkout (validated server-side at placement). */
   code: string;
+  /** Persist this address to the customer's address book on submit. */
+  save_address: boolean;
 }
 
 // Fixed platform service fee per order (matches the server's SERVICE_FEE; not shop-configurable).
@@ -122,6 +129,7 @@ function DeliveryStep({
       contact_phone: "",
       notes: "",
       code: "",
+      save_address: false,
       // Delivery is the default fulfilment → must be paid online.
       payment_method: "online",
     },
@@ -135,6 +143,32 @@ function DeliveryStep({
   });
 
   const pickup = form.values.fulfilment === "pickup";
+
+  // Saved address book (own-RLS read). Picking one fills the address + coords; an opt-in
+  // checkbox persists a newly typed address on submit.
+  const [saved, setSaved] = useState<SavedAddr[]>([]);
+  useEffect(() => {
+    void (async () => {
+      const { data } = await createClient()
+        .from("addresses")
+        .select("id, label, address, lat, lng")
+        .order("is_default", { ascending: false });
+      if (data) setSaved(data);
+    })();
+  }, []);
+
+  // Save the typed address to the book (if opted in) before continuing.
+  const submit = async (values: DeliveryFormValues) => {
+    if (values.fulfilment === "delivery" && values.save_address && values.delivery_address.trim()) {
+      await addAddress({
+        address: values.delivery_address,
+        lat: values.delivery_lat,
+        lng: values.delivery_lng,
+        makeDefault: saved.length === 0,
+      });
+    }
+    onNext(values);
+  };
 
   // Live total preview, mirroring the server's authoritative reprice:
   //   total = (subtotal − discount) + shipping + service fee
@@ -181,7 +215,7 @@ function DeliveryStep({
   }, []);
 
   return (
-    <form onSubmit={form.onSubmit(onNext)}>
+    <form onSubmit={form.onSubmit(submit)}>
       <Stack gap="lg">
         {/* Fulfilment */}
         <Radio.Group
@@ -232,11 +266,30 @@ function DeliveryStep({
 
         {!pickup && (
           <Stack gap="xs">
+            {saved.length > 0 && (
+              <Select
+                label="Adresă salvată"
+                placeholder="Alege o adresă salvată…"
+                clearable
+                data={saved.map((a) => ({ value: a.id, label: a.label ? `${a.label} — ${a.address}` : a.address }))}
+                onChange={(id) => {
+                  const a = saved.find((s) => s.id === id);
+                  if (!a) return;
+                  form.setFieldValue("delivery_address", a.address);
+                  form.setFieldValue("delivery_lat", a.lat);
+                  form.setFieldValue("delivery_lng", a.lng);
+                }}
+              />
+            )}
             <TextInput
               label="Adresă de livrare"
               placeholder="Str. Lăpușneanu 12, Iași"
               required
               {...form.getInputProps("delivery_address")}
+            />
+            <Checkbox
+              label="Salvează această adresă pentru data viitoare"
+              {...form.getInputProps("save_address", { type: "checkbox" })}
             />
             <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
               <Text fz="xs" c="dimmed">

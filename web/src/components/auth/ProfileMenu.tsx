@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Avatar, Menu, Text, UnstyledButton } from "@mantine/core";
-import { LayoutDashboard, LogOut, ShoppingBag, User } from "lucide-react";
+import { LayoutDashboard, LogOut, MapPin, ShoppingBag, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { initials } from "@/lib/utils/format";
 
@@ -61,6 +61,9 @@ export function ProfileMenu({
         <Menu.Divider />
         <Menu.Item component={Link} href="/orders" leftSection={<ShoppingBag size={16} />}>
           Comenzile mele
+        </Menu.Item>
+        <Menu.Item component={Link} href="/addresses" leftSection={<MapPin size={16} />}>
+          Adresele mele
         </Menu.Item>
         {hasShopRole && (
           <Menu.Item component={Link} href="/dashboard" leftSection={<LayoutDashboard size={16} />}>

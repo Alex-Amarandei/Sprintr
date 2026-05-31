@@ -318,3 +318,14 @@ Captured here as they come up; not yet assigned to a lane.
 - [ ] **Shop ops — deferred** (parked): bulk order actions (multi-select accept/advance),
   printable packing slip, analytics date-range selector + MoM/YoY deltas, consumables inventory
   (stock table + per-item consumption + decrement-on-order + low-stock).
+- [ ] **Make the repo private** (it's a public fork now). GitHub can't flip a fork to private —
+  must detach + remirror into a fresh private repo:
+  1. Audit git history for committed secrets (`.env.local` is gitignored — verify no keys/PII landed
+     in any commit; if so, rotate them).
+  2. Create a new **empty private** repo (e.g. `Alex-Amarandei/sprintr`), no README.
+  3. Mirror history: `git clone --bare <current-url> tmp.git && cd tmp.git && git push --mirror <new-private-url>`
+     (or GitHub → "Import repository").
+  4. Re-point everyone's `origin`: `git remote set-url origin <new-private-url>`; re-invite the 3 collaborators.
+  5. Reconnect integrations: **Vercel** project → new repo (redeploy); GitHub secrets/Actions if any.
+     Supabase + the MCP are unaffected (DB is separate). Update any hardcoded repo URLs.
+  6. Archive/delete the old public fork. Note: stars/PRs/issues don't carry over.

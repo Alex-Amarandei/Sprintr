@@ -44,7 +44,7 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Browsing shops is public (login only at checkout/chat). Guard the rest.
-  const protectedRoutes = ["/order", "/orders", "/dashboard", "/courier"];
+  const protectedRoutes = ["/order", "/orders", "/addresses", "/dashboard", "/courier"];
   const authRoutes = ["/login", "/register"];
   // Segment-precise match: "/order" guards "/order" and "/order/123" but NOT "/order-demo".
   const matches = (r: string) => pathname === r || pathname.startsWith(r + "/");
