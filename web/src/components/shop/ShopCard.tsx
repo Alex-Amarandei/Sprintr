@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Badge, Box, Card, Group, Stack, Text } from "@mantine/core";
+import { Avatar, Badge, Box, Card, Group, Stack, Text } from "@mantine/core";
 import { Clock, Star } from "lucide-react";
 import type { SampleShop } from "@/lib/catalog/samples";
 import { OpenBadge } from "@/components/ui/OpenBadge";
@@ -10,6 +10,8 @@ export function ShopCard({ shop }: { shop: SampleShop }) {
   const cat = SHOP_CATEGORY[shop.category ?? "print"];
   const Icon = cat.icon;
   const open = shop.isOpen ?? true;
+  const banner = shop.bannerUrl ?? null;
+  const logo = shop.logoUrl ?? null;
 
   return (
     <Link
@@ -32,7 +34,10 @@ export function ShopCard({ shop }: { shop: SampleShop }) {
         h={132}
         p="sm"
         style={{
-          background: cat.gradient,
+          background: banner ? "var(--mantine-color-dark-6)" : cat.gradient,
+          backgroundImage: banner ? `url(${banner})` : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
           position: "relative",
           filter: open ? undefined : "grayscale(1)",
         }}
@@ -53,39 +58,46 @@ export function ShopCard({ shop }: { shop: SampleShop }) {
           )}
           <OpenBadge open={open} />
         </Group>
-        <Icon
-          size={40}
-          color="white"
-          strokeWidth={1.75}
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -30%)",
-            opacity: 0.95,
-          }}
-        />
+        {!banner && (
+          <Icon
+            size={40}
+            color="white"
+            strokeWidth={1.75}
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -30%)",
+              opacity: 0.95,
+            }}
+          />
+        )}
       </Box>
 
       {/* Body */}
       <Stack gap="xs" p="md" justify="space-between" style={{ flex: 1 }}>
-        <div>
-          <Text fw={700} c="var(--mantine-color-text)">
-            {shop.name}
-          </Text>
-          <Text fz="xs" c="dimmed" lineClamp={2} mt={2}>
-            {shop.description}
-          </Text>
-          {shop.tags && shop.tags.length > 0 && (
-            <Group gap={6} mt="sm">
-              {shop.tags.map((t) => (
-                <Badge key={t} variant="light" color="mist" size="sm">
-                  {t}
-                </Badge>
-              ))}
-            </Group>
+        <Group gap="sm" wrap="nowrap" align="flex-start">
+          {logo && (
+            <Avatar src={logo} size={38} radius="md" style={{ flexShrink: 0 }} />
           )}
-        </div>
+          <div style={{ minWidth: 0 }}>
+            <Text fw={700} c="var(--mantine-color-text)">
+              {shop.name}
+            </Text>
+            <Text fz="xs" c="dimmed" lineClamp={2} mt={2}>
+              {shop.description}
+            </Text>
+            {shop.tags && shop.tags.length > 0 && (
+              <Group gap={6} mt="sm">
+                {shop.tags.map((t) => (
+                  <Badge key={t} variant="light" color="mist" size="sm">
+                    {t}
+                  </Badge>
+                ))}
+              </Group>
+            )}
+          </div>
+        </Group>
 
         <Group justify="space-between" mt="xs" wrap="nowrap">
           <Group gap={4} c={open ? "dimmed" : "red.7"}>

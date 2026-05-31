@@ -16,6 +16,8 @@ export interface ShopProfileData {
   phone: string;
   address: string;
   schedule: WeeklySchedule | null;
+  logoPath: string | null;
+  bannerPath: string | null;
   hasLogo: boolean;
   hasBanner: boolean;
   /** Number of items in the live (published) catalog — drives the "≥ 5 produse" check. */
@@ -63,6 +65,8 @@ export async function loadShopProfile(): Promise<ShopProfileData | null> {
     phone: shop.phone ?? "",
     address: shop.address ?? "",
     schedule: (shop.schedule as WeeklySchedule | null) ?? null,
+    logoPath: shop.logo_path ?? null,
+    bannerPath: shop.banner_path ?? null,
     hasLogo: Boolean(shop.logo_path),
     hasBanner: Boolean(shop.banner_path),
     itemCount,

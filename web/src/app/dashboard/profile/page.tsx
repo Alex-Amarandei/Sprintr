@@ -16,11 +16,9 @@ export default async function ShopProfilePage() {
         address: shop?.address ?? "",
       }}
       schedule={shop?.schedule ?? null}
-      meta={{
-        hasLogo: shop?.hasLogo ?? false,
-        hasBanner: shop?.hasBanner ?? false,
-        itemCount: shop?.itemCount ?? 0,
-      }}
+      logoPath={shop?.logoPath ?? null}
+      bannerPath={shop?.bannerPath ?? null}
+      meta={{ itemCount: shop?.itemCount ?? 0 }}
     />
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import {
+  Avatar,
   Badge,
   Box,
   Button,
@@ -20,8 +21,10 @@ import {
 } from "@mantine/core";
 import { Check, Circle, Image as ImageIcon, Printer } from "lucide-react";
 import { toast } from "sonner";
-import { updateShopProfile } from "@/lib/shop/actions";
+import { setShopImage, updateShopProfile } from "@/lib/shop/actions";
 import type { ShopProfileInput } from "@/lib/shop/types";
+import { shopAssetUrl, uploadShopAsset } from "@/lib/storage/shopAssets";
+import { MAX_IMAGE_MB } from "@/lib/catalog/images";
 import {
   emailError,
   phoneError,
@@ -50,12 +53,16 @@ export function ProfileEditor({
   shopId,
   initial,
   schedule: initialSchedule,
+  logoPath: initialLogo,
+  bannerPath: initialBanner,
   meta,
 }: {
   shopId: string | null;
   initial: ProfileText;
   schedule: WeeklySchedule | null;
-  meta: { hasLogo: boolean; hasBanner: boolean; itemCount: number };
+  logoPath: string | null;
+  bannerPath: string | null;
+  meta: { itemCount: number };
 }) {
   const [form, setForm] = useState<ProfileText>(initial);
   // Email has no `shops` column yet → local state, validated but not persisted.
@@ -64,6 +71,45 @@ export function ProfileEditor({
     normalizeWeek(initialSchedule)
   );
   const [pending, startTransition] = useTransition();
+
+  const [logoPath, setLogoPath] = useState<string | null>(initialLogo);
+  const [bannerPath, setBannerPath] = useState<string | null>(initialBanner);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const logoUrl = shopAssetUrl(logoPath);
+  const bannerUrl = shopAssetUrl(bannerPath);
+
+  async function handleUpload(kind: "logo" | "banner", file: File | null) {
+    if (!file) return;
+    if (!shopId) {
+      toast.error("Niciun magazin asociat contului tău");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      toast.error("Alege o imagine.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+      toast.error(`Imaginea depășește ${MAX_IMAGE_MB} MB.`);
+      return;
+    }
+    const setUploading = kind === "logo" ? setUploadingLogo : setUploadingBanner;
+    setUploading(true);
+    try {
+      const path = await uploadShopAsset(file, shopId, kind);
+      const res = await setShopImage(shopId, kind, path);
+      if (!res.ok) throw new Error(res.error);
+      if (kind === "logo") setLogoPath(path);
+      else setBannerPath(path);
+      toast.success(kind === "logo" ? "Logo actualizat" : "Banner actualizat");
+    } catch (e) {
+      toast.error((e as Error).message || "Încărcarea a eșuat");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   const field = (k: keyof ProfileText) => ({
     value: form[k],
@@ -82,14 +128,14 @@ export function ProfileEditor({
   // Profile-completeness status — computed from real data + live edits.
   const checklist = useMemo(() => {
     const items = [
-      { label: "Logo & banner", done: meta.hasLogo && meta.hasBanner },
+      { label: "Logo & banner", done: Boolean(logoPath) && Boolean(bannerPath) },
       { label: "Descriere completă", done: form.description.trim().length >= 30 },
       { label: "Program setat", done: DAY_ORDER.some((k) => schedule[k] !== null) },
       { label: "Cel puțin 5 produse în catalog", done: meta.itemCount >= 5 },
       { label: "Telefon de contact", done: form.phone.trim().length >= 6 },
     ];
     return items;
-  }, [meta, form.description, form.phone, schedule]);
+  }, [meta, form.description, form.phone, schedule, logoPath, bannerPath]);
 
   const doneCount = checklist.filter((c) => c.done).length;
   const percent = Math.round((doneCount / checklist.length) * 100);
@@ -139,41 +185,81 @@ export function ProfileEditor({
               p="md"
               style={{
                 position: "relative",
-                background:
-                  "linear-gradient(120deg, var(--mantine-color-ink-9), var(--mantine-color-slate-6))",
+                backgroundColor: "var(--mantine-color-ink-9)",
+                backgroundImage: bannerUrl
+                  ? `url(${bannerUrl})`
+                  : "linear-gradient(120deg, var(--mantine-color-ink-9), var(--mantine-color-slate-6))",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
               }}
             >
-              <Tooltip label="Încărcarea imaginilor vine în curând">
-                <Button
-                  variant="white"
-                  size="xs"
-                  leftSection={<ImageIcon size={14} />}
-                  style={{ position: "absolute", right: 16, bottom: 16 }}
-                  data-disabled
-                  onClick={(e) => e.preventDefault()}
-                >
-                  Schimbă banner
-                </Button>
-              </Tooltip>
+              <Button
+                variant="white"
+                size="xs"
+                leftSection={<ImageIcon size={14} />}
+                // Top-right: the logo Group below uses mt={-40}, overlapping the banner's
+                // bottom strip and stacking above it — a bottom-anchored button there would
+                // be covered and unclickable.
+                style={{ position: "absolute", right: 16, top: 16, zIndex: 1 }}
+                loading={uploadingBanner}
+                disabled={!shopId}
+                onClick={() => bannerInputRef.current?.click()}
+              >
+                Schimbă banner
+              </Button>
+              <input
+                ref={bannerInputRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => {
+                  handleUpload("banner", e.currentTarget.files?.[0] ?? null);
+                  e.currentTarget.value = "";
+                }}
+              />
             </Box>
             <Group p="md" gap="md" mt={-40} style={{ position: "relative" }}>
-              <ThemeIcon
-                size={72}
-                radius="lg"
-                variant="filled"
-                style={{
-                  background:
-                    "linear-gradient(135deg, var(--mantine-color-slate-8), var(--mantine-color-slate-5))",
-                  border: "3px solid var(--mantine-color-body)",
-                }}
+              {logoUrl ? (
+                <Avatar
+                  src={logoUrl}
+                  size={72}
+                  radius="lg"
+                  style={{ border: "3px solid var(--mantine-color-body)" }}
+                />
+              ) : (
+                <ThemeIcon
+                  size={72}
+                  radius="lg"
+                  variant="filled"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, var(--mantine-color-slate-8), var(--mantine-color-slate-5))",
+                    border: "3px solid var(--mantine-color-body)",
+                  }}
+                >
+                  <Printer size={32} color="white" />
+                </ThemeIcon>
+              )}
+              <Button
+                variant="default"
+                size="xs"
+                mt={32}
+                loading={uploadingLogo}
+                disabled={!shopId}
+                onClick={() => logoInputRef.current?.click()}
               >
-                <Printer size={32} color="white" />
-              </ThemeIcon>
-              <Tooltip label="Încărcarea imaginilor vine în curând">
-                <Button variant="default" size="xs" mt={32} data-disabled onClick={(e) => e.preventDefault()}>
-                  Schimbă logo
-                </Button>
-              </Tooltip>
+                Schimbă logo
+              </Button>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => {
+                  handleUpload("logo", e.currentTarget.files?.[0] ?? null);
+                  e.currentTarget.value = "";
+                }}
+              />
             </Group>
           </Card>
 

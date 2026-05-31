@@ -23,4 +23,7 @@ export interface SampleShop {
   phone?: string;
   /** Real weekly hours from `shops.schedule` (null when the shop hasn't set any). */
   schedule?: WeeklySchedule | null;
+  /** Public URLs for the shop's logo + banner (shop-assets storage), when uploaded. */
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
 }

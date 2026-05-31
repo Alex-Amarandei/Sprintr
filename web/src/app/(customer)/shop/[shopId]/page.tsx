@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   Anchor,
+  Avatar,
   Box,
   Card,
   Group,
@@ -49,7 +50,13 @@ export default async function ShopDetailPage({ params }: Props) {
         h={180}
         style={{
           borderRadius: "var(--mantine-radius-lg)",
-          background: `radial-gradient(circle, rgba(255,255,255,0.10) 1px, transparent 1px) 0 0 / 18px 18px, ${cat.gradient}`,
+          background: shop.bannerUrl
+            ? undefined
+            : `radial-gradient(circle, rgba(255,255,255,0.10) 1px, transparent 1px) 0 0 / 18px 18px, ${cat.gradient}`,
+          backgroundColor: shop.bannerUrl ? "var(--mantine-color-dark-6)" : undefined,
+          backgroundImage: shop.bannerUrl ? `url(${shop.bannerUrl})` : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       />
 
@@ -57,14 +64,23 @@ export default async function ShopDetailPage({ params }: Props) {
       <Card mt={-72} mx="md" style={{ position: "relative", padding: "8px" }}>
         <Group justify="space-between" align="flex-start" wrap="nowrap">
           <Group align="flex-start" wrap="nowrap" gap="md">
-            <ThemeIcon
-              size={72}
-              radius="lg"
-              variant="filled"
-              style={{ background: cat.gradient }}
-            >
-              <Icon size={34} color="white" strokeWidth={1.75} />
-            </ThemeIcon>
+            {shop.logoUrl ? (
+              <Avatar
+                src={shop.logoUrl}
+                size={72}
+                radius="lg"
+                style={{ border: "3px solid var(--mantine-color-body)" }}
+              />
+            ) : (
+              <ThemeIcon
+                size={72}
+                radius="lg"
+                variant="filled"
+                style={{ background: cat.gradient }}
+              >
+                <Icon size={34} color="white" strokeWidth={1.75} />
+              </ThemeIcon>
+            )}
             <div style={{ flex: 1, minWidth: 0 }}>
               <Group gap="sm" align="center">
                 <Title order={2}>{shop.name}</Title>
