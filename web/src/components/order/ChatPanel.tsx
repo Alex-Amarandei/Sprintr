@@ -5,6 +5,7 @@ import {
   ActionIcon,
   Avatar,
   Box,
+  Button,
   Group,
   Paper,
   SegmentedControl,
@@ -13,6 +14,14 @@ import {
   TextInput,
   Tooltip,
 } from "@mantine/core";
+
+// Shop-side quick replies — one tap fills the input (editable before sending).
+const CANNED_REPLIES = [
+  "Bună ziua! Comanda ta este în lucru. 👍",
+  "Comanda este gata de ridicare.",
+  "Întârziem puțin, revenim imediat cu un update.",
+  "Mulțumim pentru comandă! 🙌",
+];
 import { Paperclip, Receipt, Send } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -313,6 +322,23 @@ export function ChatPanel({
           );
         })}
       </Stack>
+
+      {/* Canned replies — shop only, while the thread is writable. */}
+      {perspective === "shop" && !inputDisabled && (
+        <Group gap={6} px="sm" pt="xs" wrap="wrap">
+          {CANNED_REPLIES.map((c) => (
+            <Button
+              key={c}
+              variant="default"
+              size="compact-xs"
+              onClick={() => setText(c)}
+              styles={{ root: { fontWeight: 500 } }}
+            >
+              {c.length > 26 ? `${c.slice(0, 24)}…` : c}
+            </Button>
+          ))}
+        </Group>
+      )}
 
       {/* Input */}
       <Group

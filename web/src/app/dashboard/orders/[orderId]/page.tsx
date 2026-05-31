@@ -28,6 +28,7 @@ import { createClient } from "@/lib/supabase/server";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { ChatPanel } from "@/components/order/ChatPanel";
 import { ShopOrderActions } from "@/components/order/ShopOrderActions";
+import { OrderEtaEditor } from "@/components/order/OrderEtaEditor";
 import { DownloadButton } from "@/components/order/DownloadButton";
 import { LinkAnchor, LinkActionIcon } from "@/components/ui/links";
 import { TintIcon } from "@/components/ui/TintIcon";
@@ -155,6 +156,12 @@ export default async function ShopOrderDetailPage({ params }: Props) {
               }
             />
           )}
+          {order.status !== "done" && order.status !== "rejected" && (
+            <>
+              <Divider my="xs" />
+              <OrderEtaEditor orderId={order.id} initial={order.etaMinutes ?? null} />
+            </>
+          )}
         </Stack>
       </Card>
 
@@ -220,7 +227,7 @@ export default async function ShopOrderDetailPage({ params }: Props) {
             {order.eta ? ` · ETA ${order.eta}` : ""}
           </Text>
         </div>
-        <ShopOrderActions id={order.id} initialStatus={order.status} />
+        <ShopOrderActions id={order.id} initialStatus={order.status} fulfilment={order.fulfilment} />
       </Group>
 
       <Flex direction={{ base: "column", md: "row" }} align="flex-start" gap="lg">

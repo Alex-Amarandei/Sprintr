@@ -126,7 +126,7 @@ export function ShopOrderQueue({
     });
   }
 
-  const isPrep = (s: OrderStatus) => s === "accepted" || s === "in_progress";
+  const isPrep = (s: OrderStatus) => s === "accepted" || s === "in_progress" || s === "in_delivery";
   const q = query.trim().toLowerCase();
   const matchesQuery = (o: SampleOrder) =>
     !q ||
@@ -206,7 +206,17 @@ export function ShopOrderQueue({
       );
     }
     if (o.status === "in_progress") {
-      return (
+      return o.fulfilment === "delivery" ? (
+        <Button
+          variant="light"
+          color="grape"
+          size="xs"
+          disabled={pending}
+          onClick={() => setStatus(o.id, "in_delivery", `#${short(o.id)} trimisă la livrare`)}
+        >
+          Trimite la livrare
+        </Button>
+      ) : (
         <Button
           variant="light"
           color="teal"
@@ -215,6 +225,19 @@ export function ShopOrderQueue({
           onClick={() => setStatus(o.id, "done", `#${short(o.id)} finalizată`)}
         >
           Marchează gata
+        </Button>
+      );
+    }
+    if (o.status === "in_delivery") {
+      return (
+        <Button
+          variant="light"
+          color="teal"
+          size="xs"
+          disabled={pending}
+          onClick={() => setStatus(o.id, "done", `#${short(o.id)} livrată`)}
+        >
+          Marchează livrată
         </Button>
       );
     }

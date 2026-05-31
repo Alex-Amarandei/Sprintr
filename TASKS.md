@@ -313,3 +313,5 @@ Captured here as they come up; not yet assigned to a lane.
   revealing the already-loaded list to keep the DOM light + an "X din Y" counter. No user knob:
   data is fetched server-side in one go, so a "load N" control would be misleading. (Full page
   only; dashboard preview keeps its `limit`. True server-side paging deferred until volume needs it.)
+- [ ] **Refunds + cancel order** — `payment_status='refunded'` enum exists but no refund table,
+  no `charge.refunded` webhook handler, no customer-cancel / shop-refund UI. (Parked.)

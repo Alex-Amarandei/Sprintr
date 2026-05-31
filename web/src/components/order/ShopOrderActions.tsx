@@ -17,9 +17,11 @@ const short = (id: string) => id.slice(0, 8);
 export function ShopOrderActions({
   id,
   initialStatus,
+  fulfilment = "pickup",
 }: {
   id: string;
   initialStatus: OrderStatus;
+  fulfilment?: "delivery" | "pickup";
 }) {
   const [status, setStatus] = useState<OrderStatus>(initialStatus);
   const [pending, startTransition] = useTransition();
@@ -70,9 +72,19 @@ export function ShopOrderActions({
           Începe pregătirea
         </Button>
       )}
-      {status === "in_progress" && (
-        <Button color="teal" loading={pending} onClick={() => set("done", `#${short(id)} finalizată`)}>
-          Marchează gata
+      {status === "in_progress" &&
+        (fulfilment === "delivery" ? (
+          <Button color="grape" loading={pending} onClick={() => set("in_delivery", `#${short(id)} trimisă la livrare`)}>
+            Trimite la livrare
+          </Button>
+        ) : (
+          <Button color="teal" loading={pending} onClick={() => set("done", `#${short(id)} finalizată`)}>
+            Marchează gata
+          </Button>
+        ))}
+      {status === "in_delivery" && (
+        <Button color="teal" loading={pending} onClick={() => set("done", `#${short(id)} livrată`)}>
+          Marchează livrată
         </Button>
       )}
     </Group>
