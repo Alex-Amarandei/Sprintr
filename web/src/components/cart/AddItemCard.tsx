@@ -31,11 +31,13 @@ export function AddItemCard({
   shopId,
   shopName,
   shopOpen,
+  shopDeliveryFee,
 }: {
   item: Item;
   shopId: string;
   shopName: string;
   shopOpen: boolean;
+  shopDeliveryFee: number;
 }) {
   const {
     addLine,
@@ -58,7 +60,7 @@ export function AddItemCard({
   const gallery = item.images.length ? item.images : item.image_path ? [item.image_path] : [];
   const [zoom, setZoom] = useState<number | null>(null);
 
-  const shop = { id: shopId, name: shopName, open: shopOpen };
+  const shop = { id: shopId, name: shopName, open: shopOpen, deliveryFee: shopDeliveryFee };
 
   /** Adds the line, unless the cart already holds items from a different shop. */
   function tryAdd(line: CartLine) {

@@ -16,6 +16,7 @@ export default async function ShopProfilePage() {
         email: shop?.email ?? "",
         address: shop?.address ?? "",
         defaultEtaMinutes: shop?.defaultEtaMinutes ?? null,
+        deliveryFee: shop?.deliveryFee ?? 0,
       }}
       schedule={shop?.schedule ?? null}
       logoPath={shop?.logoPath ?? null}

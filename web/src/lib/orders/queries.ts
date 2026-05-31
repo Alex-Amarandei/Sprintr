@@ -75,7 +75,7 @@ export function summarize(answers: Record<string, unknown> | null, item?: Item):
 }
 
 const ORDER_SELECT =
-  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, contact_phone, notes, subtotal, total, commission, payout, eta_minutes, payment_method, payment_status, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
+  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, contact_phone, notes, subtotal, discount, shipping_fee, service_fee, total, commission, payout, eta_minutes, payment_method, payment_status, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
 
 /** Format an ETA in minutes as a short label (e.g. "~30 min", "~1 h 20 min"). */
 function etaLabel(min: number | null | undefined): string | undefined {
@@ -105,6 +105,9 @@ function toListOrder(o: any): SampleOrder {
     etaMinutes: o.eta_minutes ?? null,
     subtotal,
     delivery: round2(total - subtotal),
+    shippingFee: Number(o.shipping_fee ?? 0),
+    serviceFee: Number(o.service_fee ?? 0),
+    discount: Number(o.discount ?? 0),
     commission: Number(o.commission ?? 0),
     payout: Number(o.payout ?? 0),
     paymentMethod: PAYMENT_LABEL[o.payment_method] ?? o.payment_method,
@@ -390,6 +393,9 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
     etaMinutes: order.eta_minutes ?? null,
     subtotal,
     delivery: round2(total - subtotal),
+    shippingFee: Number(order.shipping_fee ?? 0),
+    serviceFee: Number(order.service_fee ?? 0),
+    discount: Number(order.discount ?? 0),
     commission: Number(order.commission ?? 0),
     payout: Number(order.payout ?? 0),
     lines,

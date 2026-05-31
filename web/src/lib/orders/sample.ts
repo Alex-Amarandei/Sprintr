@@ -49,7 +49,12 @@ export interface SampleOrder {
   etaMinutes?: number | null;
   lines: SampleOrderLine[];
   subtotal: number;
+  /** Legacy single line (total − subtotal); prefer the explicit fields below. */
   delivery: number;
+  /** Frozen money-breakdown lines for the order lifecycle. */
+  shippingFee?: number;
+  serviceFee?: number;
+  discount?: number;
   /** Shop-facing payout breakdown (platform keeps `commission`; shop receives `payout`). */
   commission?: number;
   payout?: number;

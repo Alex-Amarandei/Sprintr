@@ -242,9 +242,21 @@ export default async function ShopOrderDetailPage({ params }: Props) {
                 <Text fz="sm" c="dimmed">Subtotal</Text>
                 <Text fz="sm">{order.subtotal.toFixed(2)} lei</Text>
               </Group>
+              {(order.discount ?? 0) > 0 && (
+                <Group justify="space-between">
+                  <Text fz="sm" c="dimmed">Reducere</Text>
+                  <Text fz="sm" c="teal.7">−{(order.discount ?? 0).toFixed(2)} lei</Text>
+                </Group>
+              )}
+              {(order.shippingFee ?? 0) > 0 && (
+                <Group justify="space-between">
+                  <Text fz="sm" c="dimmed">Livrare</Text>
+                  <Text fz="sm">{(order.shippingFee ?? 0).toFixed(2)} lei</Text>
+                </Group>
+              )}
               <Group justify="space-between">
-                <Text fz="sm" c="dimmed">Livrare</Text>
-                <Text fz="sm">{order.delivery.toFixed(2)} lei</Text>
+                <Text fz="sm" c="dimmed">Taxă serviciu</Text>
+                <Text fz="sm">{(order.serviceFee ?? 0).toFixed(2)} lei</Text>
               </Group>
               <Group justify="space-between" mt={4}>
                 <Text fw={700}>Total client</Text>

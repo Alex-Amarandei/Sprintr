@@ -162,7 +162,9 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
       (`lib/utils/validation.ts`); checkout + profile phone strip non-numeric chars + validate (≥10 digits, `inputMode="tel"`)_
 - [x] Email field: regexp validation — _shared `emailError`; applied to the shop profile email
       (only reachable editable email — customer flow is Google-only). Reusable for future email fields._
-- [ ] Service-fee / delivery-tax line display ⬅BE
+- [x] Service-fee / delivery-tax line display ⬅BE — shop storefront shows the delivery fee;
+      checkout + order detail break out Subtotal / Reducere / Livrare / Taxă serviciu (2 lei fixed) /
+      Total. Delivery fee is per-shop (`shops.delivery_fee`, editable in the profile editor).
 - [ ] Retrieve client order history + "My orders" analytics check
 - [ ] Customer-side chat lifecycle UI — active vs. complaint thread ⬅BE 🔗
 

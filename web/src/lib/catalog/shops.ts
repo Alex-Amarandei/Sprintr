@@ -48,6 +48,7 @@ function toView(row: {
   phone: string | null;
   logo_path: string | null;
   banner_path: string | null;
+  delivery_fee?: number | null;
   schedule: unknown;
   schedule_overrides: unknown;
 }): SampleShop {
@@ -57,6 +58,7 @@ function toView(row: {
     description: row.description ?? "",
     address: row.address ?? "Iași",
     phone: row.phone ?? undefined,
+    deliveryFee: Number(row.delivery_fee ?? 0),
     category: deriveCategory(row.name),
     isOpen: isOpenNow(
       row.schedule as Schedule | null,
@@ -72,7 +74,7 @@ export async function getShops(): Promise<SampleShop[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("shops")
-    .select("id, name, description, address, phone, logo_path, banner_path, schedule, schedule_overrides")
+    .select("id, name, description, address, phone, logo_path, banner_path, delivery_fee, schedule, schedule_overrides")
     .order("created_at", { ascending: true });
   if (error || !data) return [];
 
@@ -95,7 +97,7 @@ export async function getShopView(id: string): Promise<SampleShop | null> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("shops")
-    .select("id, name, description, address, phone, logo_path, banner_path, schedule, schedule_overrides")
+    .select("id, name, description, address, phone, logo_path, banner_path, delivery_fee, schedule, schedule_overrides")
     .eq("id", id)
     .maybeSingle();
   if (!data) return null;

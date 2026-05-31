@@ -64,12 +64,17 @@ interface DeliveryFormValues {
   payment_method: "cash_in_store" | "cash_on_delivery" | "online";
 }
 
+// Fixed platform service fee per order (matches the server's SERVICE_FEE; not shop-configurable).
+const SERVICE_FEE = 2;
+
 function DeliveryStep({
   total,
+  deliveryFee,
   onNext,
   loading,
 }: {
   total: number;
+  deliveryFee: number;
   onNext: (values: DeliveryFormValues) => void;
   loading: boolean;
 }) {
@@ -206,13 +211,33 @@ function DeliveryStep({
 
         <Divider />
 
+        {/* Money breakdown — delivery fee only applies to delivery; service fee is flat. */}
+        <Stack gap={4}>
+          <Group justify="space-between">
+            <Text fz="sm" c="dimmed">Subtotal</Text>
+            <Text fz="sm">{formatPrice(total)}</Text>
+          </Group>
+          {!pickup && (
+            <Group justify="space-between">
+              <Text fz="sm" c="dimmed">Livrare</Text>
+              <Text fz="sm">
+                {deliveryFee > 0 ? formatPrice(deliveryFee) : "Gratuit"}
+              </Text>
+            </Group>
+          )}
+          <Group justify="space-between">
+            <Text fz="sm" c="dimmed">Taxă serviciu</Text>
+            <Text fz="sm">{formatPrice(SERVICE_FEE)}</Text>
+          </Group>
+        </Stack>
+
         <Group justify="space-between" align="center">
           <div>
             <Text tt="uppercase" fz={10} fw={700} c="dimmed">
               Total
             </Text>
             <Text fz={22} fw={800} c="var(--mantine-color-text)" lh={1}>
-              {formatPrice(total)}
+              {formatPrice(total + (pickup ? 0 : deliveryFee) + SERVICE_FEE)}
             </Text>
           </div>
           <Button type="submit" size="md" loading={loading}>
@@ -329,7 +354,7 @@ interface CheckoutModalProps {
 type Step = "delivery" | "payment" | "success";
 
 export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
-  const { lines, shopId, total, clear } = useCart();
+  const { lines, shopId, total, deliveryFee, clear } = useCart();
   const [step, setStep] = useState<Step>("delivery");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -448,6 +473,7 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
       {step === "delivery" && (
         <DeliveryStep
           total={total}
+          deliveryFee={deliveryFee}
           onNext={handleDeliverySubmit}
           loading={loading}
         />

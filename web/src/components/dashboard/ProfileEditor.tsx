@@ -306,20 +306,37 @@ export function ProfileEditor({
                 <TextInput label="Adresă" {...field("address")} />
                 <TextInput label="Oraș" defaultValue="Iași" disabled />
               </SimpleGrid>
-              <NumberInput
-                label="Timp estimat de pregătire (minute)"
-                description="Implicit pentru comenzi noi; îl poți ajusta pe fiecare comandă. Vizibil clientului."
-                placeholder="ex. 30"
-                min={0}
-                step={5}
-                value={form.defaultEtaMinutes ?? ""}
-                onChange={(v) =>
-                  setForm((f) => ({
-                    ...f,
-                    defaultEtaMinutes: v === "" || v == null ? null : Number(v),
-                  }))
-                }
-              />
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+                <NumberInput
+                  label="Taxă de livrare (lei)"
+                  description="Per comandă cu livrare. Taxa de serviciu (2 lei) e fixă și nu poate fi modificată."
+                  placeholder="ex. 10"
+                  min={0}
+                  step={1}
+                  decimalScale={2}
+                  value={form.deliveryFee ?? 0}
+                  onChange={(v) =>
+                    setForm((f) => ({
+                      ...f,
+                      deliveryFee: v === "" || v == null ? 0 : Number(v),
+                    }))
+                  }
+                />
+                <NumberInput
+                  label="Timp estimat de pregătire (minute)"
+                  description="Implicit pentru comenzi noi; îl poți ajusta pe fiecare comandă. Vizibil clientului."
+                  placeholder="ex. 30"
+                  min={0}
+                  step={5}
+                  value={form.defaultEtaMinutes ?? ""}
+                  onChange={(v) =>
+                    setForm((f) => ({
+                      ...f,
+                      defaultEtaMinutes: v === "" || v == null ? null : Number(v),
+                    }))
+                  }
+                />
+              </SimpleGrid>
             </Stack>
           </Card>
 

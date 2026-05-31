@@ -39,6 +39,8 @@ export interface CartShop {
   name: string;
   /** Whether the shop was open when the line was added (drives checkout gating). */
   open: boolean;
+  /** The shop's per-order delivery fee in lei (shown in checkout when delivery is chosen). */
+  deliveryFee: number;
 }
 
 interface CartContextValue {
@@ -47,6 +49,8 @@ interface CartContextValue {
   shopName: string | null;
   /** Is the cart's shop currently open? `true` when the cart is empty. */
   shopOpen: boolean;
+  /** The cart shop's delivery fee in lei (0 when empty). */
+  deliveryFee: number;
   count: number;
   total: number;
   addLine: (line: CartLine, shop: CartShop) => void;
@@ -87,6 +91,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       shopId: shop?.id ?? null,
       shopName: shop?.name ?? null,
       shopOpen: shop?.open ?? true,
+      deliveryFee: shop?.deliveryFee ?? 0,
       count: lines.length,
       total,
       // Cross-shop conflicts are resolved by the UI (confirm + clear) BEFORE calling

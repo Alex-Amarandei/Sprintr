@@ -21,6 +21,8 @@ export interface SampleShop {
   /** When closed, the next opening time, e.g. "09:00". */
   opensAt?: string;
   phone?: string;
+  /** Per-order delivery fee in lei (0 = free). */
+  deliveryFee?: number;
   /** Real weekly hours from `shops.schedule` (null when the shop hasn't set any). */
   schedule?: WeeklySchedule | null;
   /** Public URLs for the shop's logo + banner (shop-assets storage), when uploaded. */

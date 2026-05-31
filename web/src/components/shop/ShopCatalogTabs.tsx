@@ -14,12 +14,14 @@ export function ShopCatalogTabs({
   shopId,
   shopName,
   shopOpen,
+  shopDeliveryFee,
 }: {
   items: Item[];
   categories: Category[];
   shopId: string;
   shopName: string;
   shopOpen: boolean;
+  shopDeliveryFee: number;
 }) {
   const grid = (list: Item[]) => (
     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
@@ -30,6 +32,7 @@ export function ShopCatalogTabs({
           shopId={shopId}
           shopName={shopName}
           shopOpen={shopOpen}
+          shopDeliveryFee={shopDeliveryFee}
         />
       ))}
     </SimpleGrid>

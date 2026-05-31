@@ -11,7 +11,7 @@ import {
   ThemeIcon,
   Title,
 } from "@mantine/core";
-import { Clock, MapPin, Phone, Star } from "lucide-react";
+import { Clock, MapPin, Phone, Star, Truck } from "lucide-react";
 import { getShopView, getShopCatalog } from "@/lib/catalog/shops";
 import { getShopReviews } from "@/lib/reviews/queries";
 import { SHOP_CATEGORY } from "@/components/shop/category";
@@ -111,6 +111,14 @@ export default async function ShopDetailPage({ params }: Props) {
                   </Group>
                 )}
                 <Group gap={4}>
+                  <Truck size={15} />
+                  <Text fz="sm">
+                    {shop.deliveryFee && shop.deliveryFee > 0
+                      ? `Livrare ${shop.deliveryFee.toFixed(2)} lei`
+                      : "Livrare gratuită"}
+                  </Text>
+                </Group>
+                <Group gap={4}>
                   <MapPin size={15} />
                   <Text fz="sm">{shop.address}</Text>
                 </Group>
@@ -165,6 +173,7 @@ export default async function ShopDetailPage({ params }: Props) {
           shopId={shopId}
           shopName={shop.name}
           shopOpen={open}
+          shopDeliveryFee={shop.deliveryFee ?? 0}
         />
       </Box>
 
