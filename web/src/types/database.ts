@@ -109,6 +109,78 @@ export type Database = {
           },
         ]
       }
+      offers: {
+        Row: {
+          active: boolean
+          code: string | null
+          config: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string | null
+          id: string
+          name: string
+          scope: Database["public"]["Enums"]["offer_scope"]
+          shop_id: string
+          stackable: boolean
+          starts_at: string | null
+          target_id: string | null
+          trigger: Database["public"]["Enums"]["offer_trigger"]
+          type: Database["public"]["Enums"]["offer_type"]
+        }
+        Insert: {
+          active?: boolean
+          code?: string | null
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          name: string
+          scope: Database["public"]["Enums"]["offer_scope"]
+          shop_id: string
+          stackable?: boolean
+          starts_at?: string | null
+          target_id?: string | null
+          trigger?: Database["public"]["Enums"]["offer_trigger"]
+          type: Database["public"]["Enums"]["offer_type"]
+        }
+        Update: {
+          active?: boolean
+          code?: string | null
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          name?: string
+          scope?: Database["public"]["Enums"]["offer_scope"]
+          shop_id?: string
+          stackable?: boolean
+          starts_at?: string | null
+          target_id?: string | null
+          trigger?: Database["public"]["Enums"]["offer_trigger"]
+          type?: Database["public"]["Enums"]["offer_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           answers: Json
@@ -158,6 +230,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          applied_offers: Json
           archived_at: string | null
           catalog_version_id: string | null
           completed_at: string | null
@@ -165,6 +238,7 @@ export type Database = {
           created_at: string
           customer_id: string
           delivery_address: string | null
+          discount: number
           fulfilment: Database["public"]["Enums"]["fulfilment_type"]
           handled_by: string | null
           id: string
@@ -173,6 +247,8 @@ export type Database = {
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_ref: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
+          service_fee: number
+          shipping_fee: number
           shop_id: string
           status: Database["public"]["Enums"]["order_status"]
           subtotal: number
@@ -181,6 +257,7 @@ export type Database = {
           whatsapp_sent: boolean
         }
         Insert: {
+          applied_offers?: Json
           archived_at?: string | null
           catalog_version_id?: string | null
           completed_at?: string | null
@@ -188,6 +265,7 @@ export type Database = {
           created_at?: string
           customer_id: string
           delivery_address?: string | null
+          discount?: number
           fulfilment?: Database["public"]["Enums"]["fulfilment_type"]
           handled_by?: string | null
           id?: string
@@ -196,6 +274,8 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_ref?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          service_fee?: number
+          shipping_fee?: number
           shop_id: string
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
@@ -204,6 +284,7 @@ export type Database = {
           whatsapp_sent?: boolean
         }
         Update: {
+          applied_offers?: Json
           archived_at?: string | null
           catalog_version_id?: string | null
           completed_at?: string | null
@@ -211,6 +292,7 @@ export type Database = {
           created_at?: string
           customer_id?: string
           delivery_address?: string | null
+          discount?: number
           fulfilment?: Database["public"]["Enums"]["fulfilment_type"]
           handled_by?: string | null
           id?: string
@@ -219,6 +301,8 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_ref?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          service_fee?: number
+          shipping_fee?: number
           shop_id?: string
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
@@ -473,6 +557,7 @@ export type Database = {
           address: string | null
           banner_path: string | null
           created_at: string
+          delivery_fee: number
           description: string | null
           id: string
           logo_path: string | null
@@ -486,6 +571,7 @@ export type Database = {
           address?: string | null
           banner_path?: string | null
           created_at?: string
+          delivery_fee?: number
           description?: string | null
           id?: string
           logo_path?: string | null
@@ -499,6 +585,7 @@ export type Database = {
           address?: string | null
           banner_path?: string | null
           created_at?: string
+          delivery_fee?: number
           description?: string | null
           id?: string
           logo_path?: string | null
@@ -542,10 +629,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
       is_shop_member: {
         Args: {
           p_min_role?: Database["public"]["Enums"]["shop_role"]
@@ -553,15 +637,49 @@ export type Database = {
         }
         Returns: boolean
       }
+      offer_is_live: {
+        Args: { o: Database["public"]["Tables"]["offers"]["Row"] }
+        Returns: boolean
+      }
       set_active_catalog_version: {
         Args: { p_version_id: string }
         Returns: undefined
+      }
+      validate_offer_code: {
+        Args: { p_code: string; p_shop_id: string }
+        Returns: {
+          active: boolean
+          code: string | null
+          config: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string | null
+          id: string
+          name: string
+          scope: Database["public"]["Enums"]["offer_scope"]
+          shop_id: string
+          stackable: boolean
+          starts_at: string | null
+          target_id: string | null
+          trigger: Database["public"]["Enums"]["offer_trigger"]
+          type: Database["public"]["Enums"]["offer_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "offers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
       catalog_version_status: "draft" | "published" | "archived"
       fulfilment_type: "delivery" | "pickup"
       item_kind: "service" | "product"
+      offer_scope: "product" | "category" | "cart"
+      offer_trigger: "automatic" | "code"
+      offer_type: "percent" | "fixed" | "bxgy" | "free_shipping"
       order_status: "pending" | "accepted" | "rejected" | "in_progress" | "done"
       payment_method: "cash_in_store" | "cash_on_delivery" | "online"
       payment_status: "pending" | "paid" | "failed" | "refunded"
@@ -698,6 +816,9 @@ export const Constants = {
       catalog_version_status: ["draft", "published", "archived"],
       fulfilment_type: ["delivery", "pickup"],
       item_kind: ["service", "product"],
+      offer_scope: ["product", "category", "cart"],
+      offer_trigger: ["automatic", "code"],
+      offer_type: ["percent", "fixed", "bxgy", "free_shipping"],
       order_status: ["pending", "accepted", "rejected", "in_progress", "done"],
       payment_method: ["cash_in_store", "cash_on_delivery", "online"],
       payment_status: ["pending", "paid", "failed", "refunded"],

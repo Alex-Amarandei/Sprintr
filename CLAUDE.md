@@ -1128,3 +1128,54 @@ per-order chat is now real (was presentational, local-state only).
 - `getOrderDetail()` now also returns `customerId`; `SampleOrder` gained `customerId?`.
 - Verified: `tsc --noEmit` clean + production build compiles both order routes. Full
   2-party live delivery needs a logged-in customer+shop session to exercise end-to-end.
+
+## Offers + money model — SCHEMA DEPLOYED (migration `offers_and_money`, 2026-05-31)
+
+Applied ledger: `…004033 offers_and_money`, `…004114 offers_offer_is_live_search_path`.
+This is the **contract** the customer (C2) and shop (C3) lanes build against. The discount
+**engine** (`lib/catalog/offers.ts`) + API + place-order rewrite land next — schema first.
+
+### `offers` table (one table, two faces — banner is DERIVED, not stored)
+An offer = a **function applied to the cart**. Columns:
+`id, shop_id, name (shown by the strikethrough), description (advert copy), type, scope,
+target_id, trigger, code, config jsonb, stackable, starts_at, ends_at, active, created_by`.
+- **Enums:** `offer_type` = `percent | fixed | bxgy | free_shipping` · `offer_scope` =
+  `product | category | cart` · `offer_trigger` = `automatic | code`.
+- **`config` jsonb by type:** percent `{ "percent": 10 }` · fixed `{ "amount": 10 }` ·
+  bxgy `{ "buy": 2, "get": 1 }` · free_shipping `{}`.
+- **`target_id`** = a product (item) id or category id **from the active catalog `document`**
+  (not an FK — same frozen-id spirit as orders). `cart` scope → `target_id` null.
+- **CHECK guards (DB-enforced):** free_shipping ⇒ scope=cart; bxgy ⇒ scope∈(product,category);
+  target_id present iff scope∈(product,category); code required when trigger=code. Unique
+  **live code per shop** (case-insensitive).
+- **Banner is not a row type** — it's how the UI renders **active automatic** offers:
+  exactly 1 ⇒ banner; many ⇒ carousel of cards. (`name`/`description` are the advert text.)
+
+### RLS + code privacy
+- **Public** reads ONLY **live automatic** offers (`offer_is_live(o)` = active ∧ within window).
+  Typed **codes are never exposed** to the client.
+- Members read **all** their shop's offers (manage); **`catalog`+** insert/update/delete.
+- **`validate_offer_code(shop_id, code)`** SECURITY DEFINER → returns the single live code
+  offer (or none) so the client can preview a typed code without seeing the code list.
+  Granted to `anon`+`authenticated` (cart is pre-login) — an accepted advisor WARN, like
+  `is_shop_member`.
+
+### Engine contract (`lib/catalog/offers.ts`, pure TS — client preview AND server reprice)
+- **Order of application:** `product → category → cart`. Percents apply on the **running
+  (already-discounted)** amount, so stackable percents **compound**. Fixed subtracts (capped at
+  the remaining base); bxgy free units = `floor(qty/(buy+get)) × get × unitPrice`;
+  free_shipping zeroes the shipping line.
+- **Stacking / best-pick:** `stackable=false` ⇒ **exclusive** (if chosen, nothing else applies).
+  Evaluate two candidate worlds and keep the one with the **larger total discount**:
+  (A) all *stackable* offers combined; (B) each single *exclusive* offer alone. A typed code is
+  just another offer in this set (joins A if stackable, competes as B if exclusive).
+- UI shows **strikethrough original + new price** with the **offer `name`** beside it.
+
+### Money model (orders gained `discount, shipping_fee, service_fee, applied_offers jsonb`)
+- **`shops.delivery_fee`** numeric (shop-configured shipping/"shipping tax", default 0). A
+  `free_shipping` offer zeroes `shipping_fee` at checkout.
+- **`total = subtotal − discount + shipping_fee + service_fee` (+ platform fee).**
+  `applied_offers` jsonb freezes which offers applied + their amounts on the order.
+- **`service_fee`** = flat **2 lei** on every order, shown **only at checkout** (not in cart).
+- **Platform fee (6%)** is **left untouched** here — it moves into the Stripe flow (redirect a
+  % to us) as a separate task; do NOT rework it under the offers work.
