@@ -91,7 +91,7 @@ export function CartBar() {
                             {l.title}
                           </Text>
                           <Text fz="xs" c="dimmed" truncate>
-                            {l.files.length
+                            {l.files?.length
                               ? l.files.length === 1
                                 ? l.files[0].name
                                 : `${l.files.length} fișiere`

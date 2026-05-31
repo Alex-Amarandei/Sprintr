@@ -268,7 +268,7 @@ export default async function ShopOrderDetailPage({ params }: Props) {
                         </Text>
                       </div>
                     </Group>
-                    <DownloadButton orderId={order.id} fileName={f.name} />
+                    <DownloadButton orderId={order.id} fileName={f.name} label="" />
                   </Group>
                 ))}
               </Stack>

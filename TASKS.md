@@ -4,11 +4,11 @@ Work is divided along the codebase's existing folder boundaries so the three of 
 in parallel with minimal merge conflicts. Lanes match the team: 1 backend + 2 frontend
 (customer side + shop side).
 
-| Lane | Owns these paths |
-|------|------------------|
-| **C1 — Backend & Infra** | `supabase/migrations/*`, `app/api/*`, `lib/orders/{actions,queries}.ts`, `lib/catalog/{pricing,answers,schema,shops}.ts`, storage |
-| **C2 — Customer App** | `app/(customer)/*`, `app/page.tsx`, `app/(auth)/*`, `components/cart/*`, `components/shop/*`, customer-side `components/order/*`, global header/footer |
-| **C3 — Shop Dashboard** | `app/dashboard/*`, `components/dashboard/*`, `components/catalog/*`, shop-side `components/order/*` |
+| Lane                     | Owns these paths                                                                                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **C1 — Backend & Infra** | `supabase/migrations/*`, `app/api/*`, `lib/orders/{actions,queries}.ts`, `lib/catalog/{pricing,answers,schema,shops}.ts`, storage                      |
+| **C2 — Customer App**    | `app/(customer)/*`, `app/page.tsx`, `app/(auth)/*`, `components/cart/*`, `components/shop/*`, customer-side `components/order/*`, global header/footer |
+| **C3 — Shop Dashboard**  | `app/dashboard/*`, `components/dashboard/*`, `components/catalog/*`, shop-side `components/order/*`                                                    |
 
 **Legend:** 🔗 = cross-cutting, agree the contract first (see bottom) · ⬅BE = consumes
 something C1 builds (build against a stub until it lands).
@@ -18,6 +18,7 @@ something C1 builds (build against a stub until it lands).
 ## 🖥️ C1 — Backend, Data & Infra
 
 ### Offers system (foundation) 🔗
+
 - [x] Add offer banners + **general offers system** — `offers` table + API/repricing
       (table + place-order repricing + `lib/offers/{api,queries,types}.ts`; dashboard/banner UI wiring = C2/C3)
 - [x] Promos per product / category / cart — discount engine in the pricing module
@@ -26,6 +27,7 @@ something C1 builds (build against a stub until it lands).
       (fixed the `is_quantity` multiplier mismatch; added `is_quantity` to the number-field schema)
 
 ### Money & orders
+
 - [x] Fix internal server error when placing order
       (root cause: missing `SUPABASE_SERVICE_ROLE_KEY` in local `.env.local` — env gap, not code)
 - [ ] Update 6% tax logic — deferred to the Stripe flow (redirect % to us); untouched for now
@@ -43,6 +45,7 @@ something C1 builds (build against a stub until it lands).
       `lib/invoice/*`. On-demand from frozen order; storage-caching deferred. FE download buttons = C2/C3.)
 
 ### Storage & data
+
 - [x] Store PDFs in S3 🔗 — uses **Supabase Storage** (S3-compatible), private `order-files` bucket
 - [x] Allow multiple PDFs upload — `FileInput multiple` → `order_items.files jsonb` + own-folder
       security; client type-check via `accepted_file_types`. (Deep server-side §8 type/size = partial.)
@@ -60,7 +63,9 @@ something C1 builds (build against a stub until it lands).
       `list_shop_invitations`/`cancel_shop_invitation`. (No invite *email* — pre-auth only.)
 
 ### Gaps from CLAUDE.md audit (added 2026-05-31)
+
 Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the split above.
+
 - [ ] **WhatsApp courier ping on accept** 🔗 — CORE scope, currently only an `orders.whatsapp_sent`
       column exists (migration 5); no send code. Server-side send to the courier group on shop
       accept, then set `whatsapp_sent` (creds server-only; real API vs `wa.me` fallback TBD).
@@ -86,53 +91,66 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 ## 🖥️ C2 — Customer App
 
 ### Homepage / branding / auth
-- [x] Modify logo + SprintR homepage — *animated aurora gradient bg (shared `PageBackground`),
-      fancy floating logo hero, scroll-reveal step cards, header logo + theme toggle*
+
+- [x] Modify logo + SprintR homepage — _animated aurora gradient bg (shared `PageBackground`),
+      fancy floating logo hero, scroll-reveal step cards, header logo + theme toggle_
 - [x] Remove order-configuration box → replace with logo
-- [x] Remove fake/mock data from homepage — *dropped "12+ magazine / <60 min / 4.9★" stats*
-- [ ] "From the app in a few minutes" text change
+- [x] Remove fake/mock data from homepage — _dropped "12+ magazine / <60 min / 4.9★" stats_
+- [x] "From the app in a few minutes" text change
 - [x] Remove "Order now" button from navbar
 - [ ] Footer legal section / Terms & Conditions (+ `/terms` page)
-- [x] Redesign login page — *branded split layout (brand panel + aurora bg), polished
-      login/register cards; consistent header logo/theme toggle*
+- [x] Redesign login page — _branded split layout (brand panel + aurora bg), polished
+      login/register cards; consistent header logo/theme toggle_
 - [ ] **Role badge** in header — show the role you logged in as (customer/shop/admin).
       Shared component, owned here; C3 imports it into the dashboard header
 - [ ] Adjust toast colors based on theme (global Toaster)
 - [ ] Recheck homepage at the end (QA pass)
 
 ### Browse
-- [x] Make search bar functional — *client-side debounced (250ms) search over
-      name/description/address/category/tags via a `SearchProvider` + `ShopResults`*
+
+- [x] Make search bar functional — _client-side debounced (250ms) search over
+      name/description/address/category/tags via a `SearchProvider` + `ShopResults`_
 - [x] Remove filter bar
-- [x] Grey out closed stores — *closed `ShopCard`s dim + desaturate the gradient header*
-- [x] Check store opening/closing time logic (`isOpenNow`) — *now reads the real DB
+- [x] Grey out closed stores — _closed `ShopCard`s dim + desaturate the gradient header_
+- [x] Check store opening/closing time logic (`isOpenNow`) — _now reads the real DB
       `shops.schedule` on the store page; closed shops gate ordering (add-to-cart allowed,
-      checkout blocked with a notice)*
+      checkout blocked with a notice)_
 
 ### Store page (`/shop/[id]`)
+
 - [ ] Remove button from stores header
 - [x] Remove share & favorite buttons
 - [ ] Make address clickable → Google Maps
-- [x] Make phone number clickable → native dial — *`tel:` links on store page + order detail*
-- [x] Move promotion above schedule; fill freed space with services/products — *promo + schedule
-      now full-width stacked; catalog spans full width (3-col grid)*
-- [x] Replace service/product pills with icon + tooltip — *kind shown as a tinted icon
-      (FileText/Package) with a tooltip on each catalog card*
-- [x] Display products per category on each store — *catalog grouped into `document.categories`
-      sections (count badge + divider); degrades to one grid when a shop has no categories*
+- [x] Make phone number clickable → native dial — _`tel:` links on store page + order detail_
+- [x] Move promotion above schedule; fill freed space with services/products — _promo + schedule
+      now full-width stacked; catalog spans full width (3-col grid)_
+- [x] Replace service/product pills with icon + tooltip — _kind shown as a tinted icon
+      (FileText/Package) with a tooltip on each catalog card_
+- [x] Display products per category on each store — _catalog grouped into `document.categories`
+      sections (count badge + divider); degrades to one grid when a shop has no categories_
 - [ ] Active offers per store in banner ⬅BE 🔗
 - [ ] Offers: strikethrough old price, render the new one beside it ⬅BE 🔗
-- [ ] Rating & Reviews per store — customer display + post-purchase review
+- [x] Rating & Reviews per store — customer display + post-purchase review — *BE already had
+      the `reviews` table (verified-purchase RLS, public read). Added `lib/reviews/queries.ts`:
+      `getShopRatings` (avg+count from `shop`-target reviews → wired into `getShops`/`getShopView`,
+      shows on the card + store header), `getShopReviews` (store-page "Recenzii" section via
+      `ShopReviews`), `getMyShopReview`. Post-purchase `ReviewForm` (Rating + comment) on a `done`
+      customer order inserts client-side under RLS; one review/shop (23505 handled). No migration
+      needed. NOTE: reviewers render as "Client verificat" — real names need the `profiles` RLS
+      gap (shop→customer identity) on C1.*
 
 ### Cart / checkout / orders
-- [x] Persist cart in localStorage — *cart (lines + shop) saved to `localStorage`
-      (`sprintr.cart.v1`), rehydrated after mount (empty SSR → no hydration mismatch)*
+
+- [x] Persist cart in localStorage — _cart (lines + shop) saved to `localStorage`
+      (`sprintr.cart.v1`), rehydrated after mount (empty SSR → no hydration mismatch).
+      Attached `files` are in-memory File objects → stripped on persist + normalized to `[]`
+      on load (they can't survive a reload; re-attach at checkout)._
 - [x] ~~Multi-vendor cart UX~~ — **DESCOPED** (not building): the cart stays single-shop (clears on shop switch)
 - [ ] Checkout: address pin selection
-- [x] Phone field: numeric-only + validation — *shared `sanitizePhoneInput`/`phoneError`
-      (`lib/utils/validation.ts`); checkout + profile phone strip non-numeric chars + validate (≥10 digits, `inputMode="tel"`)*
-- [x] Email field: regexp validation — *shared `emailError`; applied to the shop profile email
-      (only reachable editable email — customer flow is Google-only). Reusable for future email fields.*
+- [x] Phone field: numeric-only + validation — _shared `sanitizePhoneInput`/`phoneError`
+      (`lib/utils/validation.ts`); checkout + profile phone strip non-numeric chars + validate (≥10 digits, `inputMode="tel"`)_
+- [x] Email field: regexp validation — _shared `emailError`; applied to the shop profile email
+      (only reachable editable email — customer flow is Google-only). Reusable for future email fields._
 - [ ] Service-fee / delivery-tax line display ⬅BE
 - [ ] Retrieve client order history + "My orders" analytics check
 - [ ] Customer-side chat lifecycle UI — active vs. complaint thread ⬅BE 🔗
@@ -142,33 +160,37 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 ## 🖥️ C3 — Shop Dashboard
 
 ### Catalog builder
+
 - [x] Split services vs products — **remove the `kind`/type field**; services-only in
-      Services, products-only in Products — *CatalogBuilder is now kind-scoped; mounted on
-      both pages; Tip select removed; the old non-persisting ProductEditor flow deleted*
-- [x] Add categories on products — *shared category manager now applies to the Produse page*
-- [x] "Add product on top" from catalog — *new items prepend to the top of their section*
+      Services, products-only in Products — _CatalogBuilder is now kind-scoped; mounted on
+      both pages; Tip select removed; the old non-persisting ProductEditor flow deleted_
+- [x] Add categories on products — _shared category manager now applies to the Produse page_
+- [x] "Add product on top" from catalog — _new items prepend to the top of their section_
 - [x] Fix: field collapses on key change
-- [x] View-only mode on catalog when in read role (`staff`) — *role threaded via
-      loadCatalogEditor → canEdit; staff see read-only, no edit/publish/switch actions*
+- [x] View-only mode on catalog when in read role (`staff`) — _role threaded via
+      loadCatalogEditor → canEdit; staff see read-only, no edit/publish/switch actions_
 - [~] Add product/service images (multiple; first = main, shown to customers + builder) —
-      *UI + data model + storage seam DONE: `images[]` on items, `ItemImages` manager in both
-      cards, main image on `AddItemCard` (customer) + builder cards. **Picking = instant local
-      preview (blob URLs, "nou" badge); upload happens only on Save/Publish** via
-      `persistLocalImage` → so the "storage not configured" error only appears on save. Just
-      needs the public **`shop-assets`** bucket to go live (⬅BE)*
+  _UI + data model + storage seam DONE: `images[]` on items, `ItemImages` manager in both
+  cards, main image on `AddItemCard` (customer) + builder cards. **Picking = instant local
+  preview (blob URLs, "nou" badge); upload happens only on Save/Publish** via
+  `persistLocalImage` → so the "storage not configured" error only appears on save. Just
+  needs the public **`shop-assets`** bucket to go live (⬅BE)_
 
 ### Products / services editors
-- [x] Wire product/service editors to the kind split + category select — *unified into the
-      kind-scoped CatalogBuilder (ItemCard already has the category select)*
+
+- [x] Wire product/service editors to the kind split + category select — _unified into the
+      kind-scoped CatalogBuilder (ItemCard already has the category select)_
 
 ### Offers admin (shop side) ⬅BE 🔗
+
 - [ ] Banner color configuration on promos
 - [ ] Promo config UI (per product/category/cart) — admin face of C1's engine
 
 ### Profile & store
-- [x] Profile status with real data — *loadShopProfile() drives a live completeness % +
+
+- [x] Profile status with real data — _loadShopProfile() drives a live completeness % +
       checklist (logo/banner/description/schedule/products/phone). Also wired the weekly
-      **schedule editor to load + persist** to `shops.schedule` (was hardcoded)*
+      **schedule editor to load + persist** to `shops.schedule` (was hardcoded)_
 - [ ] "Deactivate store temporarily" button logic (needs `shops.is_active` ⬅BE)
 - [ ] Make the Change-Logo button work (upload ⬅BE)
 - [ ] Select shop when a user owns multiple shops
@@ -177,16 +199,19 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 - [ ] Generate/export invoices & receipts — shop-side view ⬅BE
 
 ### Dashboard & orders
-- [~] Shop analytics — *StatCards + Top services already aggregate from REAL orders. Only
-      the 7-day revenue chart is a placeholder: needs raw order timestamps (C1's getShopOrders
-      formats `created_at` → relative string, so it can't be bucketed by day)*
+
+- [~] Shop analytics — _StatCards + Top services already aggregate from REAL orders. Only
+  the 7-day revenue chart is a placeholder: needs raw order timestamps (C1's getShopOrders
+  formats `created_at` → relative string, so it can't be bucketed by day)_
 - [ ] Shop-side "in delivery" status + order actions ⬅BE 🔗
 - [ ] Shop-side chat lifecycle + review replies / complaint handling ⬅BE 🔗
 
 ### ⛔ Remaining C3 work is blocked on C1 — exact unblock asks
+
 Everything left needs a schema/bucket/RPC I can't create on the shared DB without C1. Precise asks:
+
 - **Item images** + **Change-Logo/banner** → a **public Storage bucket** (e.g. `shop-assets`)
-  + RLS (shop members write own `shops/<id>/…`, public read). Then ItemCard/ProfileEditor get upload UI.
+  - RLS (shop members write own `shops/<id>/…`, public read). Then ItemCard/ProfileEditor get upload UI.
 - **Deactivate store** → `shops.is_active boolean default true` column (+ have customer reads honor it).
 - **Offers admin** (banner color + promo config) → the `offers` table + `config jsonb` shape (contract #1).
 - **Owner: add employees** → an RPC `add_shop_member(shop_id, email, role)` (owner-only; resolves
@@ -221,18 +246,21 @@ real thing.
 ---
 
 ## Notes
-- **C2 (Customer) is the heaviest lane.** If we want to balance load, move *Footer/Terms*,
-  *toast colors*, and *reviews-display* to whoever frees up first.
+
+- **C2 (Customer) is the heaviest lane.** If we want to balance load, move _Footer/Terms_,
+  _toast colors_, and _reviews-display_ to whoever frees up first.
 - Already done: **live chat (base)** is wired to Supabase Realtime — the lifecycle/complaint
   split above builds on top of it.
 
 ---
 
 ## 🔮 Future tasks (to distribute)
+
 Captured here as they come up; not yet assigned to a lane.
+
 - [~] Warn before cart loss — the cart is single-shop client state that's wiped on a full
-      reload and cleared when switching shops. Warn the user before they lose it: a
-      `beforeunload` prompt on refresh/back-navigation + a confirm dialog when switching shops.
-      *DONE: cross-shop confirm dialog ("Există deja produse în coș de la {magazin}" →
-      Anulează / Golește coșul) before adding from another shop. TODO: `beforeunload` prompt
-      on refresh/back; persist cart in localStorage (see Cart/checkout above).*
+  reload and cleared when switching shops. Warn the user before they lose it: a
+  `beforeunload` prompt on refresh/back-navigation + a confirm dialog when switching shops.
+  _DONE: cross-shop confirm dialog ("Există deja produse în coș de la {magazin}" →
+  Anulează / Golește coșul) before adding from another shop. TODO: `beforeunload` prompt
+  on refresh/back; persist cart in localStorage (see Cart/checkout above)._
