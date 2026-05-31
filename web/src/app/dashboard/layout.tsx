@@ -10,6 +10,7 @@ import { MobileNav } from "@/components/dashboard/MobileNav";
 import { UnreadProvider } from "@/components/dashboard/UnreadProvider";
 import { createClient } from "@/lib/supabase/server";
 import { getShopUnreadCount } from "@/lib/messages/queries";
+import { getShopPendingCount } from "@/lib/orders/queries";
 import { getViewerIdentity } from "@/lib/auth/identity";
 
 const SIDEBAR_WIDTH = 260;
@@ -34,6 +35,7 @@ export default async function ShopLayout({
   if (profile?.role !== "shop" && profile?.role !== "admin") redirect("/browse");
 
   const unread = await getShopUnreadCount();
+  const pending = await getShopPendingCount();
   const viewer = await getViewerIdentity();
 
   return (
@@ -67,11 +69,11 @@ export default async function ShopLayout({
             <ThemeToggle />
           </Group>
         </Box>
-        <DashboardNav />
+        <DashboardNav pendingCount={pending} />
       </Box>
 
       {/* Mobile top bar + nav (hamburger → Drawer) */}
-      <MobileNav />
+      <MobileNav pendingCount={pending} />
 
       <Box
         component="main"

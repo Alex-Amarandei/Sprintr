@@ -48,7 +48,13 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
   },
 ];
 
-export function DashboardNav({ onNavigate }: { onNavigate?: () => void }) {
+export function DashboardNav({
+  onNavigate,
+  pendingCount = 0,
+}: {
+  onNavigate?: () => void;
+  pendingCount?: number;
+}) {
   const pathname = usePathname();
   const { count } = useUnread();
 
@@ -75,6 +81,8 @@ export function DashboardNav({ onNavigate }: { onNavigate?: () => void }) {
                 ? pathname === "/dashboard"
                 : pathname.startsWith(href);
             const showUnread = href === "/dashboard/messages" && count > 0;
+            const showPending = href === "/dashboard/orders" && pendingCount > 0;
+            const badgeValue = showUnread ? count : showPending ? pendingCount : 0;
             return (
               <NavLink
                 key={href}
@@ -87,14 +95,14 @@ export function DashboardNav({ onNavigate }: { onNavigate?: () => void }) {
                 onClick={onNavigate}
                 leftSection={<Icon size={18} />}
                 rightSection={
-                  showUnread ? (
+                  showUnread || showPending ? (
                     <Badge
                       size="sm"
                       variant="filled"
                       color="brand"
-                      aria-label="mesaje necitite"
+                      aria-label={showUnread ? "mesaje necitite" : "comenzi în așteptare"}
                     >
-                      {count > 9 ? "9+" : count}
+                      {badgeValue > 9 ? "9+" : badgeValue}
                     </Badge>
                   ) : undefined
                 }

@@ -297,5 +297,5 @@ Captured here as they come up; not yet assigned to a lane.
   your role (Angajat/Catalog/Proprietar) on every dashboard page.
 - [x] **Account/avatar** — Google OAuth picture (`user_metadata.avatar_url`) with an initials
   fallback; no schema/upload (chosen over a custom `avatar_path` for now).
-- [ ] **Pending-orders badge** — show a badge with the count of "În așteptare" (pending) orders
-  for the shop (e.g. on the Comenzi nav item, like the Mesaje unread badge).
+- [x] **Pending-orders badge** — `getShopPendingCount` → badge on the Comenzi nav item (sidebar +
+  mobile drawer), mirroring the Mesaje unread badge.

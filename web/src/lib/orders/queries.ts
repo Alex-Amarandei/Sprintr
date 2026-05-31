@@ -264,6 +264,19 @@ export async function getMyShop(): Promise<{
   return shop ?? null;
 }
 
+/** Count of pending ("în așteptare") orders for the active shop — drives the nav badge. */
+export async function getShopPendingCount(): Promise<number> {
+  const supabase = await createClient();
+  const shopId = await getActiveShopId();
+  if (!shopId) return 0;
+  const { count } = await supabase
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("shop_id", shopId)
+    .eq("status", "pending");
+  return count ?? 0;
+}
+
 /** Orders for the shop the current user belongs to (dashboard queue). */
 export async function getShopOrders(): Promise<SampleOrder[]> {
   const supabase = await createClient();

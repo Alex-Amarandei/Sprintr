@@ -10,7 +10,7 @@ import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 /** Mobile-only sticky top bar with a hamburger that opens the nav in a Drawer. */
-export function MobileNav() {
+export function MobileNav({ pendingCount = 0 }: { pendingCount?: number }) {
   const [opened, { open, close }] = useDisclosure(false);
   const pathname = usePathname();
 
@@ -47,7 +47,7 @@ export function MobileNav() {
         padding="md"
         title={<Logo />}
       >
-        <DashboardNav onNavigate={close} />
+        <DashboardNav onNavigate={close} pendingCount={pendingCount} />
       </Drawer>
     </Box>
   );
