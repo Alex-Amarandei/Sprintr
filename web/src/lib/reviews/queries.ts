@@ -12,6 +12,8 @@ export interface ShopReview {
   createdAt: string;
   /** True when the review belongs to the current viewer. */
   isOwn: boolean;
+  /** The shop's public reply, if posted (shown on the storefront). */
+  reply: { body: string; createdAt: string } | null;
 }
 
 /**
@@ -64,12 +66,30 @@ export async function getShopReviews(shopId: string): Promise<ShopReview[]> {
     .order("created_at", { ascending: false });
   if (!data) return [];
 
+  // Attach the shop's public reply (review_replies are public-read).
+  const replyByReview = new Map<string, { body: string; createdAt: string }>();
+  if (data.length) {
+    const { data: replies } = await supabase
+      .from("review_replies")
+      .select("review_id, body, created_at")
+      .in(
+        "review_id",
+        data.map((r) => r.id)
+      )
+      .order("created_at", { ascending: true });
+    for (const rep of replies ?? []) {
+      if (!replyByReview.has(rep.review_id))
+        replyByReview.set(rep.review_id, { body: rep.body, createdAt: formatDate(rep.created_at) });
+    }
+  }
+
   return data.map((r) => ({
     id: r.id,
     rating: r.rating,
     comment: r.comment,
     createdAt: formatDate(r.created_at),
     isOwn: !!user && r.author_id === user.id,
+    reply: replyByReview.get(r.id) ?? null,
   }));
 }
 

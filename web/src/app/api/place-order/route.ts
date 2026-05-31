@@ -301,19 +301,31 @@ export async function POST(req: NextRequest) {
       return err("Failed to save order items", 500);
     }
 
-    // Stripe PaymentIntent (online only)
+    // Stripe PaymentIntent (online only). If creation fails we roll the order back (cascade
+    // deletes its items) instead of leaving an orphaned, unpayable `pending` order behind.
     let clientSecret: string | null = null;
 
     if (payment_method === "online") {
-      const pi = await getStripe().paymentIntents.create({
-        amount: Math.round(total * 100), // RON → bani
-        currency: "ron",
-        metadata: { order_id: order.id, shop_id },
-        automatic_payment_methods: { enabled: true },
-      });
+      try {
+        const pi = await getStripe().paymentIntents.create(
+          {
+            amount: Math.round(total * 100), // RON → bani
+            currency: "ron",
+            metadata: { order_id: order.id, shop_id },
+            automatic_payment_methods: { enabled: true },
+          },
+          // Idempotency: a client retry for the same order reuses the same PaymentIntent
+          // rather than creating duplicates.
+          { idempotencyKey: `pi_${order.id}` }
+        );
 
-      await db.from("orders").update({ payment_ref: pi.id }).eq("id", order.id);
-      clientSecret = pi.client_secret;
+        await db.from("orders").update({ payment_ref: pi.id }).eq("id", order.id);
+        clientSecret = pi.client_secret;
+      } catch (e) {
+        console.error("Stripe PaymentIntent failed, rolling back order:", order.id, e);
+        await db.from("orders").delete().eq("id", order.id);
+        return err("Plata nu a putut fi inițializată. Încearcă din nou.", 502);
+      }
     }
 
     return NextResponse.json({

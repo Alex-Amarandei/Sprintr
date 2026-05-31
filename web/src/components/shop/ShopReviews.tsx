@@ -61,6 +61,22 @@ export function ShopReviews({
                   {r.comment}
                 </Text>
               )}
+              {r.reply && (
+                <Paper
+                  mt="sm"
+                  radius="md"
+                  p="sm"
+                  bg="var(--mantine-color-default-hover)"
+                  withBorder
+                >
+                  <Text fz="xs" fw={700} c="brand.7">
+                    Răspunsul magazinului · {r.reply.createdAt}
+                  </Text>
+                  <Text fz="sm" mt={2}>
+                    {r.reply.body}
+                  </Text>
+                </Paper>
+              )}
             </Paper>
           ))}
         </Stack>

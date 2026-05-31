@@ -61,8 +61,24 @@ export async function advanceOrderStatus(
   const patch: { status: OrderStatus; handled_by?: string } = { status };
   if (status === "accepted") patch.handled_by = user.id;
 
-  const { error } = await supabase.from("orders").update(patch).eq("id", orderId);
+  // Concurrency guard: only advance from a valid predecessor, so two staff acting at once
+  // can't both apply (and overwrite `handled_by`). The update no-ops if someone already moved it.
+  const VALID_PREV: Record<OrderStatus, OrderStatus[]> = {
+    pending: [],
+    accepted: ["pending"],
+    rejected: ["pending"],
+    in_progress: ["accepted"],
+    in_delivery: ["in_progress"],
+    done: ["in_progress", "in_delivery"],
+  };
+  const prevs = VALID_PREV[status] ?? [];
+
+  let q = supabase.from("orders").update(patch).eq("id", orderId);
+  if (prevs.length) q = q.in("status", prevs);
+  const { data, error } = await q.select("id");
   if (error) return { ok: false, error: error.message };
+  if (!data || data.length === 0)
+    return { ok: false, error: "Comanda a fost deja actualizată de altcineva." };
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/orders");

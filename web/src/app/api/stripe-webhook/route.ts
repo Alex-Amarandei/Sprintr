@@ -36,6 +36,16 @@ export async function POST(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
+  // Idempotency: record the event id first. A unique-violation means Stripe re-delivered an
+  // event we already handled → ack and skip so we never double-apply.
+  const { error: dupErr } = await db
+    .from("stripe_events")
+    .insert({ id: event.id, type: event.type });
+  if (dupErr) {
+    if (dupErr.code === "23505") return NextResponse.json({ received: true, duplicate: true });
+    console.error("stripe_events insert failed (continuing):", dupErr);
+  }
+
   if (event.type === "payment_intent.succeeded") {
     const pi = event.data.object as Stripe.PaymentIntent;
     const orderId = pi.metadata?.order_id;
