@@ -19,6 +19,7 @@ export default async function ShopProfilePage() {
         deliveryFee: shop?.deliveryFee ?? 0,
       }}
       schedule={shop?.schedule ?? null}
+      scheduleOverrides={shop?.scheduleOverrides ?? {}}
       logoPath={shop?.logoPath ?? null}
       bannerPath={shop?.bannerPath ?? null}
       meta={{ itemCount: shop?.itemCount ?? 0 }}

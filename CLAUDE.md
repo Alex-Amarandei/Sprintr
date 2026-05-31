@@ -63,7 +63,9 @@ self-contained record — it never changes when the catalog is later edited.
   email, address, schedule (jsonb), schedule_overrides (jsonb), delivery_fee, commission_rate,
   default_eta_minutes, active_version_id, created_at`. Storage **paths** not URLs. No `owner_id`,
   no `city`. `commission_rate` owner-immutable (admin-only, trigger `shops_guard_commission`);
-  `default_eta_minutes` seeds new orders' ETA.
+  `default_eta_minutes` seeds new orders' ETA. **No `is_active` column** — "temporary pause" =
+  `schedule_overrides` day-entries set to `null` (closed) via the `setShopPause` action;
+  `isOpenNow` honours overrides over the weekly `schedule`, flipping the open badge + checkout gate.
 - **`shop_permissions`** `(shop_id, profile_id, role)`, `shop_role` enum ordered `staff < catalog <
   owner`. staff=orders+chat; catalog=+catalog/offers; owner=+members/legal/finance. RLS via
   `is_shop_member(shop_id, min_role)` SECURITY DEFINER helper.
