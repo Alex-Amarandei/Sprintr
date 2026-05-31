@@ -191,7 +191,14 @@ export function AddItemCard({
           size="lg"
           padding="xl"
           centered
-          styles={{ header: { alignItems: "flex-start" } }}
+          styles={{
+            // Solid surface — the modal was reading semi-transparent over the page.
+            content: { backgroundColor: "light-dark(#ffffff, var(--mantine-color-dark-7))" },
+            header: {
+              alignItems: "flex-start",
+              backgroundColor: "light-dark(#ffffff, var(--mantine-color-dark-7))",
+            },
+          }}
         >
           <ItemOrderForm
             item={item}

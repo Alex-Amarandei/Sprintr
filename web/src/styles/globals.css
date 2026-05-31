@@ -84,6 +84,25 @@ body {
   background: radial-gradient(circle, rgba(231, 112, 35, 0.4), transparent 70%);
   animation: hero-drift-b 24s ease-in-out infinite;
 }
+/* Light theme: a lighter, softer orange for the ember blobs — lower peak + a mid stop +
+   a far transparent stop so the falloff is gradual and blends smoothly into the canvas
+   (dark theme keeps the punchier original above). */
+[data-mantine-color-scheme="light"] .hero-blob--ember {
+  background: radial-gradient(
+    circle,
+    rgba(241, 169, 123, 0.3) 0%,
+    rgba(241, 169, 123, 0.13) 45%,
+    transparent 80%
+  );
+}
+[data-mantine-color-scheme="light"] .hero-blob--ember2 {
+  background: radial-gradient(
+    circle,
+    rgba(241, 169, 123, 0.22) 0%,
+    rgba(241, 169, 123, 0.09) 45%,
+    transparent 80%
+  );
+}
 @keyframes hero-drift-a {
   0%,
   100% {
