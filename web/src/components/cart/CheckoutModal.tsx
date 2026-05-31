@@ -79,7 +79,8 @@ function DeliveryStep({
       delivery_address: "",
       contact_phone: "",
       notes: "",
-      payment_method: "cash_on_delivery",
+      // Delivery is the default fulfilment → must be paid online.
+      payment_method: "online",
     },
     validate: {
       delivery_address: (v, values) =>
@@ -100,13 +101,10 @@ function DeliveryStep({
           label="Cum vrei să primești comanda?"
           value={form.values.fulfilment}
           onChange={(v) => {
-            form.setFieldValue("fulfilment", v as DeliveryFormValues["fulfilment"]);
-            // Keep the payment method valid for the chosen fulfilment.
-            if (v === "pickup" && form.values.payment_method === "cash_on_delivery") {
-              form.setFieldValue("payment_method", "cash_in_store");
-            } else if (v === "delivery" && form.values.payment_method === "cash_in_store") {
-              form.setFieldValue("payment_method", "cash_on_delivery");
-            }
+            const f = v as DeliveryFormValues["fulfilment"];
+            form.setFieldValue("fulfilment", f);
+            // Delivery must be paid online; pickup defaults to paying at the store.
+            form.setFieldValue("payment_method", f === "delivery" ? "online" : "cash_in_store");
           }}
         >
           <SimpleGrid cols={2} spacing="sm" mt="xs">
@@ -175,25 +173,14 @@ function DeliveryStep({
 
         <Divider />
 
-        {/* Payment */}
+        {/* Payment — delivery must be paid online; pickup can pay at the store. */}
         <Radio.Group label="Metodă de plată" {...form.getInputProps("payment_method")}>
           <Stack mt="xs" gap="sm">
-            {!pickup && (
-              <Radio.Card value="cash_on_delivery" radius="md" p="sm">
-                <Group gap="sm" wrap="nowrap">
-                  <Radio.Indicator />
-                  <Banknote size={18} />
-                  <Text fw={600} fz="sm">
-                    Numerar la livrare
-                  </Text>
-                </Group>
-              </Radio.Card>
-            )}
             {pickup && (
               <Radio.Card value="cash_in_store" radius="md" p="sm">
                 <Group gap="sm" wrap="nowrap">
                   <Radio.Indicator />
-                  <Store size={18} />
+                  <Banknote size={18} />
                   <Text fw={600} fz="sm">
                     Numerar la magazin
                   </Text>
@@ -210,6 +197,11 @@ function DeliveryStep({
               </Group>
             </Radio.Card>
           </Stack>
+          {!pickup && (
+            <Text fz="xs" c="dimmed" mt="xs">
+              Comenzile cu livrare se plătesc online.
+            </Text>
+          )}
         </Radio.Group>
 
         <Divider />

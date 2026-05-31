@@ -128,6 +128,11 @@ export async function POST(req: NextRequest) {
 
     if (!shop_id || !lines?.length) return err("shop_id and lines are required", 400);
     if (fulfilment === "delivery" && !delivery_address) return err("delivery_address required", 400);
+    // Delivery must be prepaid online; cash is only for in-store pickup.
+    if (fulfilment === "delivery" && payment_method !== "online")
+      return err("Comenzile cu livrare se plătesc online", 422);
+    if (fulfilment === "pickup" && payment_method === "cash_on_delivery")
+      return err("Plata la livrare nu este disponibilă pentru ridicare", 422);
 
     const db = serviceSupabase();
 

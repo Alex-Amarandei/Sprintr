@@ -2,20 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NavLink, Stack } from "@mantine/core";
+import { Badge, NavLink, Stack } from "@mantine/core";
 import {
   LayoutDashboard,
   type LucideIcon,
+  MessageSquare,
   Package,
   ShoppingBag,
   Tag,
   User,
   Wrench,
 } from "lucide-react";
+import { useUnread } from "./UnreadProvider";
 
 const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/orders", label: "Comenzi", icon: ShoppingBag },
+  { href: "/dashboard/messages", label: "Mesaje", icon: MessageSquare },
   { href: "/dashboard/products", label: "Produse", icon: Package },
   { href: "/dashboard/services", label: "Servicii", icon: Wrench },
   { href: "/dashboard/offers", label: "Oferte", icon: Tag },
@@ -24,12 +27,14 @@ const NAV: { href: string; label: string; icon: LucideIcon }[] = [
 
 export function DashboardNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const { count } = useUnread();
 
   return (
     <Stack gap={4} p="sm">
       {NAV.map(({ href, label, icon: Icon }) => {
         const active =
           href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
+        const showUnread = href === "/dashboard/messages" && count > 0;
         return (
           <NavLink
             key={href}
@@ -39,6 +44,13 @@ export function DashboardNav({ onNavigate }: { onNavigate?: () => void }) {
             active={active}
             onClick={onNavigate}
             leftSection={<Icon size={18} />}
+            rightSection={
+              showUnread ? (
+                <Badge size="sm" variant="filled" color="brand" aria-label="mesaje necitite">
+                  {count > 9 ? "9+" : count}
+                </Badge>
+              ) : undefined
+            }
             styles={{
               root: {
                 color: "var(--mantine-color-text)",

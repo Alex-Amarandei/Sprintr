@@ -7,7 +7,9 @@ import { SignOutButton } from "@/components/auth/SignOutButton";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { MobileNav } from "@/components/dashboard/MobileNav";
+import { UnreadProvider } from "@/components/dashboard/UnreadProvider";
 import { createClient } from "@/lib/supabase/server";
+import { getShopUnreadCount } from "@/lib/messages/queries";
 
 const SIDEBAR_WIDTH = 260;
 
@@ -30,7 +32,10 @@ export default async function ShopLayout({
     .maybeSingle();
   if (profile?.role !== "shop" && profile?.role !== "admin") redirect("/browse");
 
+  const unread = await getShopUnreadCount();
+
   return (
+    <UnreadProvider initialCount={unread} currentUserId={user.id}>
     <Box mih="100vh" bg="var(--mantine-color-body)" style={{ isolation: "isolate" }}>
       <PageBackground />
       {/* Desktop fixed sidebar */}
@@ -71,5 +76,6 @@ export default async function ShopLayout({
         {children}
       </Box>
     </Box>
+    </UnreadProvider>
   );
 }

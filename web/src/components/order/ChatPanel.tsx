@@ -10,12 +10,14 @@ import {
   Stack,
   Text,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
-import { Paperclip, Send } from "lucide-react";
+import { Paperclip, Receipt, Send } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import type { SampleMessage } from "@/lib/orders/sample";
 import { Dot } from "@/components/ui/Dot";
+import { LinkActionIcon } from "@/components/ui/links";
 
 type ChatMsg = {
   /** DB id once known (null for server-rendered history) — used to dedup the realtime echo. */
@@ -44,6 +46,7 @@ export function ChatPanel({
   height = 520,
   perspective = "customer",
   disabled = false,
+  onMessage,
 }: {
   orderId: string;
   /** Logged-in user's profile id (= sender_id on insert). */
@@ -57,6 +60,8 @@ export function ChatPanel({
   perspective?: "customer" | "shop";
   /** Order is closed (done/rejected/archived) → posting is blocked by RLS, so disable input. */
   disabled?: boolean;
+  /** Called when an incoming (non-own) message arrives via Realtime — e.g. to mark read. */
+  onMessage?: () => void;
 }) {
   const supabase = useMemo(() => createClient(), []);
   const mySide = perspective === "shop" ? "shop" : "customer";
@@ -101,6 +106,7 @@ export function ChatPanel({
               at: timeOnly(row.created_at),
             },
           ]);
+          onMessage?.();
         }
       )
       .subscribe();
@@ -108,7 +114,7 @@ export function ChatPanel({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, orderId, customerId, channelKey]);
+  }, [supabase, orderId, customerId, channelKey, onMessage]);
 
   // Keep the newest message in view.
   useEffect(() => {
@@ -152,6 +158,10 @@ export function ChatPanel({
     .join("")
     .toUpperCase();
 
+  // Link to the order being discussed (shop → dashboard view, customer → their view).
+  const orderHref =
+    perspective === "shop" ? `/dashboard/orders/${orderId}` : `/order/${orderId}`;
+
   return (
     <Paper
       withBorder
@@ -164,30 +174,46 @@ export function ChatPanel({
         p="md"
         gap="sm"
         wrap="nowrap"
+        justify="space-between"
         style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
       >
-        <Avatar
-          radius="xl"
-          style={
-            {
-              "--avatar-bg": "var(--mantine-color-brand-1)",
-              "--avatar-color": "var(--mantine-color-brand-7)",
-            } as React.CSSProperties
-          }
-        >
-          {initials}
-        </Avatar>
-        <div>
-          <Text fw={600} fz="sm">
-            {peerName}
-          </Text>
-          <Group gap={6}>
-            <Dot color="teal" />
-            <Text fz="xs" c="dimmed">
-              Online · răspunde rapid
+        <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+          <Avatar
+            radius="xl"
+            style={
+              {
+                "--avatar-bg": "var(--mantine-color-brand-1)",
+                "--avatar-color": "var(--mantine-color-brand-7)",
+              } as React.CSSProperties
+            }
+          >
+            {initials}
+          </Avatar>
+          <div style={{ minWidth: 0 }}>
+            <Text fw={600} fz="sm" truncate>
+              {peerName}
             </Text>
-          </Group>
-        </div>
+            <Group gap={6}>
+              <Dot color="teal" />
+              <Text fz="xs" c="dimmed">
+                Online · răspunde rapid
+              </Text>
+            </Group>
+          </div>
+        </Group>
+
+        <Tooltip label="Vezi comanda" withinPortal>
+          <LinkActionIcon
+            href={orderHref}
+            variant="subtle"
+            color="gray"
+            size="lg"
+            aria-label="Vezi comanda"
+            style={{ flexShrink: 0 }}
+          >
+            <Receipt size={18} />
+          </LinkActionIcon>
+        </Tooltip>
       </Group>
 
       {/* Messages */}
