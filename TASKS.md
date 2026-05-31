@@ -43,8 +43,9 @@ something C1 builds (build against a stub until it lands).
       `lib/invoice/*`. On-demand from frozen order; storage-caching deferred. FE download buttons = C2/C3.)
 
 ### Storage & data
-- [ ] Store PDFs in S3 🔗
-- [ ] Allow multiple PDFs upload — schema (`file` field → multi) + §8 validation + storage 🔗
+- [x] Store PDFs in S3 🔗 — uses **Supabase Storage** (S3-compatible), private `order-files` bucket
+- [x] Allow multiple PDFs upload — `FileInput multiple` → `order_items.files jsonb` + own-folder
+      security; client type-check via `accepted_file_types`. (Deep server-side §8 type/size = partial.)
 - [ ] Analytics table for stats (shops, ratings, etc.) — source for both dashboards
 - [ ] Filter out-of-stock products/services — needs stock data (inventory, Phase 2) → unblocks C3
 - [ ] Chat lifecycle backend 🔗 — gate chat to active orders; on `done`/`rejected` close it
@@ -61,10 +62,9 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
       schema extensions or it rejects valid carts: option `swatch`, `categories` + item
       `category_id`, item `accepted_file_types`, and multi-file `file` answers. **Likely the cause
       of "Fix internal server error when placing order" above** — check first.
-- [ ] **Uploaded files end-to-end** 🔗 — upload at checkout → persist the storage path into
-      `order_items.answers` `file` fields → signed-URL endpoint (service role) for the shop's
-      `DownloadButton`. Today the `order-files` bucket is own-folder only (shops can't read; path
-      isn't stored). Pairs with "Store PDFs in S3" / "Allow multiple PDFs upload".
+- [x] **Uploaded files end-to-end** 🔗 — upload at checkout (`lib/storage/orderFiles.ts`) → freeze
+      `{path,name}[]` into `order_items.files` → signed-URL endpoint `GET /api/orders/[id]/files`
+      (service role) wired to the shop's `DownloadButton`. (Customer-side re-download still TODO.)
 - [ ] **Shop → customer identity (RLS)** — `profiles` only has `profiles_select_own`; add a policy
       so shop members can read `full_name`/`phone` of customers who placed an order at their shop
       (queue/detail currently fall back to "Client").

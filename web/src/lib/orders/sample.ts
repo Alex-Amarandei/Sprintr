@@ -6,7 +6,10 @@ export interface SampleOrderLine {
   title: string;
   summary: string;
   lineTotal: number;
+  /** First attached file's name (legacy single-file chip). */
   pdfName?: string;
+  /** All attached files for this line. */
+  files?: { name: string }[];
 }
 export interface SampleMessage {
   from: "shop" | "customer";

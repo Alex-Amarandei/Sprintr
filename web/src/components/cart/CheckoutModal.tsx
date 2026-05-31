@@ -35,6 +35,7 @@ import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/utils/format";
 import { useCart } from "./CartContext";
 import { createClient } from "@/lib/supabase/client";
+import { uploadOrderFiles } from "@/lib/storage/orderFiles";
 
 // Only initialise Stripe when the publishable key is actually configured —
 // `loadStripe(undefined)` throws, and the key is absent in local/dev without Stripe.
@@ -359,15 +360,19 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
 
+      // Upload each line's attached files to storage (user is authenticated here), then
+      // freeze the { path, name } refs onto the order.
+      const lineFiles = await Promise.all(lines.map((l) => uploadOrderFiles(l.files)));
+
       const payload = {
         shop_id: shopId,
-        lines: lines.map((l) => ({
+        lines: lines.map((l, i) => ({
           itemId: l.itemId,
           title: l.title,
           kind: l.kind,
           answers: l.answers,
           clientTotal: l.total,
-          fileName: l.fileName,
+          files: lineFiles[i],
         })),
         fulfilment: values.fulfilment,
         delivery_address: values.delivery_address || undefined,

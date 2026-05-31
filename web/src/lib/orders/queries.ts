@@ -44,6 +44,7 @@ type RawItem = {
   answers: Record<string, unknown> | null;
   price_breakdown: Record<string, number> | null;
   line_total: number;
+  files: { path: string; name: string }[] | null;
 };
 
 /** Build a readable config summary from answers using the catalog item's labels. */
@@ -74,7 +75,7 @@ export function summarize(answers: Record<string, unknown> | null, item?: Item):
 }
 
 const ORDER_SELECT =
-  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, contact_phone, notes, subtotal, total, payment_method, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total)";
+  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, contact_phone, notes, subtotal, total, payment_method, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function toListOrder(o: any): SampleOrder {
@@ -225,6 +226,8 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
     title: it.item_title,
     summary: summarize(it.answers, catalogItems.find((ci) => ci.id === it.item_id)),
     lineTotal: Number(it.line_total),
+    pdfName: it.files?.[0]?.name,
+    files: (it.files ?? []).map((f) => ({ name: f.name })),
   }));
 
   const subtotal = Number(order.subtotal ?? 0);

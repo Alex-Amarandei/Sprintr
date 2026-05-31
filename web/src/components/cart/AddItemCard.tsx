@@ -144,7 +144,7 @@ export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
                   kind: item.kind,
                   answers: p.answers,
                   total: p.total,
-                  fileName: p.fileName,
+                  files: p.files,
                 },
                 shopId
               );

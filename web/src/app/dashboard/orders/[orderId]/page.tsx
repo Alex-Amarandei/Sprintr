@@ -74,8 +74,10 @@ export default async function ShopOrderDetailPage({ params }: Props) {
   const chatClosed = order.status === "done" || order.status === "rejected";
 
   const shortId = order.id.slice(0, 8);
-  // TODO(BE): uploaded files aren't persisted in order_items yet → no attachments.
-  const files = order.lines.filter((l) => l.pdfName);
+  // Flatten every line's attached files into one list (a line may carry several).
+  const files = order.lines.flatMap((l) =>
+    (l.files ?? []).map((f) => ({ name: f.name, title: l.title })),
+  );
 
   // Prev/next order navigation (by position in the queue).
   const idx = queue.findIndex((o) => o.id === order.id);
@@ -231,7 +233,7 @@ export default async function ShopOrderDetailPage({ params }: Props) {
             <Card>
               <Group justify="space-between" mb="md">
                 <Text fw={700}>Fișiere atașate</Text>
-                <DownloadButton label="Descarcă toate" />
+                <DownloadButton orderId={order.id} label="Descarcă toate" />
               </Group>
               <Stack gap="sm">
                 {files.map((f, i) => (
@@ -242,14 +244,14 @@ export default async function ShopOrderDetailPage({ params }: Props) {
                       </TintIcon>
                       <div style={{ minWidth: 0 }}>
                         <Text fz="sm" fw={500} truncate>
-                          {f.pdfName}
+                          {f.name}
                         </Text>
                         <Text fz="xs" c="dimmed" truncate>
                           {f.title}
                         </Text>
                       </div>
                     </Group>
-                    <DownloadButton fileName={f.pdfName} />
+                    <DownloadButton orderId={order.id} fileName={f.name} />
                   </Group>
                 ))}
               </Stack>

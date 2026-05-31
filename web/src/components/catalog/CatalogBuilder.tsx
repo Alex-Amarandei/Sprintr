@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ActionIcon,
@@ -381,6 +381,9 @@ export function CatalogBuilder({
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
   );
+  // Stable, hydration-safe id so dnd-kit's a11y `aria-describedby` matches server↔client
+  // (the builder mounts on both /dashboard/services and /products → counter drift otherwise).
+  const dndId = useId();
   /** Cross-container drag: move an item into a category section and reorder. */
   function onDragEnd(e: DragEndEvent) {
     const { active, over } = e;
@@ -635,6 +638,7 @@ export function CatalogBuilder({
           </Group>
 
           <DndContext
+            id={dndId}
             sensors={sensors}
             collisionDetection={closestCorners}
             onDragEnd={onDragEnd}

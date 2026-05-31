@@ -133,7 +133,7 @@ interface Props {
     itemId: string;
     answers: Answers;
     total: number;
-    fileName: string | null;
+    files: File[];
   }) => void;
 }
 
@@ -143,7 +143,7 @@ export function ItemOrderForm({
   onPlaceOrder,
 }: Props) {
   const [answers, setAnswers] = useState<Answers>(() => defaultAnswers(item));
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   // Only surface validation errors after the first submit attempt.
   const [attempted, setAttempted] = useState(false);
 
@@ -153,7 +153,7 @@ export function ItemOrderForm({
   const errors = useMemo(() => validateAnswers(item, answers), [item, answers]);
   const price = useMemo(() => computeItemPrice(item, answers), [item, answers]);
 
-  const uploadMissing = item.requires_upload && !file;
+  const uploadMissing = item.requires_upload && files.length === 0;
   const canOrder = Object.keys(errors).length === 0 && !uploadMissing;
 
   function placeOrder() {
@@ -165,7 +165,7 @@ export function ItemOrderForm({
       itemId: item.id,
       answers,
       total: price.total,
-      fileName: file?.name ?? null,
+      files,
     };
     if (onPlaceOrder) return onPlaceOrder(payload);
     console.log("[order preview]", payload);
@@ -187,25 +187,27 @@ export function ItemOrderForm({
         <Stack gap="lg" pb="md">
         {item.requires_upload && (
           <FileInput
-            label="Atașează fișierul"
+            multiple
+            clearable
+            label="Atașează fișiere"
             description={`Tipuri acceptate: ${acceptedLabel(item.accepted_file_types)}`}
-            placeholder="Alege un fișier"
+            placeholder="Alege unul sau mai multe fișiere"
             accept={acceptAttr(item.accepted_file_types)}
             leftSection={<FileUp size={16} />}
-            value={file}
-            onChange={(f) => {
-              // Don't clear an already-picked file when the OS dialog is cancelled.
-              if (!f) return;
-              if (!fileAllowed(f, item.accepted_file_types)) {
+            value={files}
+            onChange={(picked) => {
+              const arr = Array.isArray(picked) ? picked : [];
+              const bad = arr.find((f) => !fileAllowed(f, item.accepted_file_types));
+              if (bad) {
                 toast.error(
-                  `Tip de fișier neacceptat. Permise: ${acceptedLabel(item.accepted_file_types)}.`
+                  `Tip de fișier neacceptat: ${bad.name}. Permise: ${acceptedLabel(item.accepted_file_types)}.`
                 );
                 return;
               }
-              setFile(f);
+              setFiles(arr);
             }}
             error={
-              attempted && uploadMissing ? "Fișierul este obligatoriu" : undefined
+              attempted && uploadMissing ? "Cel puțin un fișier este obligatoriu" : undefined
             }
             required
           />

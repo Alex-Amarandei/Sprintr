@@ -45,7 +45,14 @@ type CatalogField = {
   price?: PriceRule;
   options?: Array<{ value: string; price?: PriceRule }>;
 };
-type CatalogItem = { id: string; base_price: number; category_id?: string | null; fields: CatalogField[] };
+type CatalogItem = {
+  id: string;
+  base_price: number;
+  category_id?: string | null;
+  requires_upload?: boolean;
+  fields: CatalogField[];
+};
+type OrderFileRef = { path: string; name: string };
 
 function resolvePrice(rule: PriceRule | undefined, answers: Answers): number {
   if (!rule) return 0;
@@ -107,7 +114,7 @@ export async function POST(req: NextRequest) {
         kind: "service" | "product";
         answers: Answers;
         clientTotal: number;
-        fileName: string | null;
+        files?: OrderFileRef[];
       }>;
       fulfilment: "delivery" | "pickup";
       delivery_address?: string;
@@ -157,6 +164,16 @@ export async function POST(req: NextRequest) {
         return err(`Price mismatch on "${line.title}": server=${total} client=${line.clientTotal}`, 422);
       }
 
+      // Files: must belong to the caller's own storage folder (`{uid}/…`); required uploads
+      // must have at least one. We trust the path (RLS gated its upload) but enforce ownership.
+      const files = (line.files ?? []).filter((f) => f && typeof f.path === "string");
+      if (files.some((f) => !f.path.startsWith(`${user.id}/`))) {
+        return err(`Invalid file path on "${line.title}"`, 422);
+      }
+      if (catalogItem.requires_upload && files.length === 0) {
+        return err(`"${line.title}" requires a file upload`, 422);
+      }
+
       orderItems.push({
         kind: line.kind,
         item_id: line.itemId,
@@ -165,6 +182,7 @@ export async function POST(req: NextRequest) {
         answers: line.answers as Database["public"]["Tables"]["order_items"]["Insert"]["answers"],
         price_breakdown: breakdown as Database["public"]["Tables"]["order_items"]["Insert"]["price_breakdown"],
         line_total: total,
+        files: files as unknown as Database["public"]["Tables"]["order_items"]["Insert"]["files"],
       });
       cartLines.push({
         lineId: String(i),

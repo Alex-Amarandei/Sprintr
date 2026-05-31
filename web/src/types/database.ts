@@ -185,6 +185,7 @@ export type Database = {
         Row: {
           answers: Json
           created_at: string
+          files: Json
           id: string
           item_id: string
           item_title: string
@@ -197,6 +198,7 @@ export type Database = {
         Insert: {
           answers?: Json
           created_at?: string
+          files?: Json
           id?: string
           item_id: string
           item_title: string
@@ -209,6 +211,7 @@ export type Database = {
         Update: {
           answers?: Json
           created_at?: string
+          files?: Json
           id?: string
           item_id?: string
           item_title?: string

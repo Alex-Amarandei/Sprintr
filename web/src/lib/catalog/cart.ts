@@ -10,7 +10,8 @@ export interface CartLine {
   kind: "service" | "product";
   answers: Answers;
   total: number;
-  fileName: string | null;
+  /** Attached files, held in memory until checkout (uploaded to storage there). */
+  files: File[];
 }
 
 /** An item needs the config modal if it has fields or requires a file upload. */
@@ -22,7 +23,7 @@ export function needsConfiguration(item: Item): boolean {
 export function buildCartLine(
   item: Item,
   answers: Answers = defaultAnswers(item),
-  fileName: string | null = null
+  files: File[] = []
 ): CartLine {
   return {
     lineId: crypto.randomUUID(),
@@ -31,6 +32,6 @@ export function buildCartLine(
     kind: item.kind,
     answers,
     total: computeItemPrice(item, answers).total,
-    fileName,
+    files,
   };
 }

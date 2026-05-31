@@ -1218,3 +1218,22 @@ label **"În livrare"**, colour `grape`, and it's in `ORDER_FLOW` between `in_pr
   fee / total + payment method & status.
 - **FE hook (C2/C3):** just link to it — `<a href={`/api/orders/${id}/invoice`} target="_blank">`.
   Shop-side + customer-side download buttons are the FE tasks.
+
+## Order file uploads — WIRED end-to-end (migration `order_items_files`, 2026-05-31)
+
+Customers attach file(s) to an order line; the shop downloads them. **Storage = Supabase Storage**
+(S3-compatible) — no separate AWS S3; "Store PDFs in S3" is this.
+- **Model:** item-level `requires_upload` + `accepted_file_types` (not a `file` *field*). A line can
+  now carry **multiple** files (`FileInput multiple`).
+- **Upload (client, at checkout):** `lib/storage/orderFiles.ts → uploadOrderFiles(File[])` uploads to
+  the private `order-files` bucket under the caller's own folder `{uid}/{uuid}.{ext}` (RLS
+  `order_files_insert_own`) and returns `{path,name}[]`. Cart lines hold `File[]` **in memory** until
+  checkout — respects login-at-checkout (the cart resets on the OAuth redirect anyway).
+- **Persist:** `place-order` checks each path is under `{uid}/` (ownership) and requires ≥1 file when
+  the item `requires_upload`, then freezes `{path,name}[]` into the new **`order_items.files jsonb`**.
+- **Download:** `GET /api/orders/[orderId]/files` — auth-gated via `getOrderDetail`; the **service role**
+  mints short-lived **signed URLs** (bucket is own-folder-only, so shops can't read directly).
+  `DownloadButton` (shop order detail) calls it; `getOrderDetail` sets `line.pdfName` from `files[0]`.
+- **Follow-ups:** deep server-side §8 validation (type/size/existence) is partial (client checks type
+  via `accepted_file_types`; server checks ownership + required); orphaned pre-placement uploads
+  aren't garbage-collected; customer-side re-download isn't surfaced yet.
