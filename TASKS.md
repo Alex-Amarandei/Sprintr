@@ -299,5 +299,7 @@ Captured here as they come up; not yet assigned to a lane.
   fallback; no schema/upload (chosen over a custom `avatar_path` for now).
 - [x] **Pending-orders badge** — `getShopOrderCounts` → two badges on the Comenzi nav item (new
   =brand, in-progress=cyan; sidebar + mobile drawer), mirroring the Mesaje unread badge.
-- [ ] **Comenzi search** — search box on `/dashboard/orders` (by order #, customer, item).
-- [ ] **Comenzi pagination** — configurable page size (20 / 50 / 100) on `/dashboard/orders`.
+- [x] **Comenzi search** — search box on `/dashboard/orders` (matches #order, customer
+  name/email/phone, item titles) in `ShopOrderQueue` (full page only).
+- [x] **Comenzi pagination** — configurable page size (20 / 50 / 100) + `Pagination` footer in
+  `ShopOrderQueue` (full page only; dashboard preview keeps its `limit`).
