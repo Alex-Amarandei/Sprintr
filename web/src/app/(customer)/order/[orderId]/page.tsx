@@ -20,6 +20,7 @@ import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { ChatPanel } from "@/components/order/ChatPanel";
 import { ReviewForm } from "@/components/order/ReviewForm";
 import { DownloadReceiptButton } from "@/components/order/DownloadReceiptButton";
+import { ReorderButton } from "@/components/order/ReorderButton";
 import { DownloadButton } from "@/components/order/DownloadButton";
 import { LinkAnchor } from "@/components/ui/links";
 
@@ -74,10 +75,13 @@ export default async function OrderDetailPage({ params }: Props) {
             {order.eta ? ` · ETA ${order.eta}` : ""}
           </Text>
         </div>
-        <DownloadReceiptButton
-          orderId={order.id}
-          enabled={isTerminalStatus(order.status)}
-        />
+        <Group gap="sm" wrap="wrap">
+          <ReorderButton orderId={order.id} />
+          <DownloadReceiptButton
+            orderId={order.id}
+            enabled={isTerminalStatus(order.status)}
+          />
+        </Group>
       </Group>
 
       <Flex direction={{ base: "column", md: "row" }} align="flex-start" gap="lg">

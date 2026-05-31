@@ -3,8 +3,62 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveShopId } from "@/lib/shop/active";
+import { getShopView } from "@/lib/catalog/shops";
 import type { OrderStatus } from "@/lib/design/status";
 import type { ExportRow } from "./sample";
+
+export interface ReorderPayload {
+  shopId: string;
+  shopName: string;
+  shopOpen: boolean;
+  deliveryFee: number;
+  lines: {
+    itemId: string;
+    title: string;
+    kind: "service" | "product";
+    answers: Record<string, unknown>;
+    total: number;
+  }[];
+}
+
+/**
+ * Rebuild a cart from a past order (frozen `order_items`) so the customer can re-order in one
+ * tap. RLS scopes the order to the caller. Files aren't restored (in-memory only) — the
+ * customer re-attaches if the item requires an upload.
+ */
+export async function getReorderPayload(orderId: string): Promise<ReorderPayload | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: order } = await supabase
+    .from("orders")
+    .select("shop_id, order_items(item_id, item_title, kind, answers, line_total)")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (!order) return null;
+
+  const shop = await getShopView(order.shop_id);
+  if (!shop) return null;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const items = (order.order_items ?? []) as any[];
+  return {
+    shopId: order.shop_id,
+    shopName: shop.name,
+    shopOpen: shop.isOpen ?? true,
+    deliveryFee: shop.deliveryFee ?? 0,
+    lines: items.map((it) => ({
+      itemId: it.item_id,
+      title: it.item_title,
+      kind: it.kind,
+      answers: (it.answers ?? {}) as Record<string, unknown>,
+      total: Number(it.line_total),
+    })),
+  };
+}
 
 /**
  * Shop-side report export: orders matching a date range + status filter (RLS scopes to the
