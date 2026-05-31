@@ -10,7 +10,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { getOrderDetail } from "@/lib/orders/queries";
 import { getMyShopReview } from "@/lib/reviews/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -20,6 +20,7 @@ import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { ChatPanel } from "@/components/order/ChatPanel";
 import { ReviewForm } from "@/components/order/ReviewForm";
 import { DownloadReceiptButton } from "@/components/order/DownloadReceiptButton";
+import { DownloadButton } from "@/components/order/DownloadButton";
 import { LinkAnchor } from "@/components/ui/links";
 
 export const metadata: Metadata = { title: "Detalii comandă" };
@@ -95,13 +96,20 @@ export default async function OrderDetailPage({ params }: Props) {
                       <Text fz="xs" c="dimmed" mt={2}>
                         {line.summary}
                       </Text>
-                      {line.pdfName && (
-                        <Group gap={4} mt={4} c="brand.7">
-                          <FileText size={13} />
-                          <Text fz="xs" fw={500}>
-                            {line.pdfName}
-                          </Text>
-                        </Group>
+                      {line.files && line.files.length > 0 && (
+                        <Stack gap={4} mt={6} align="flex-start">
+                          {line.files.map((f, fi) => (
+                            <DownloadButton
+                              key={fi}
+                              orderId={order.id}
+                              fileName={f.name}
+                              label={f.name}
+                              variant="light"
+                              color="brand"
+                              size="compact-xs"
+                            />
+                          ))}
+                        </Stack>
                       )}
                     </div>
                     <Text fw={700} fz="sm" style={{ whiteSpace: "nowrap" }}>

@@ -70,7 +70,7 @@ something C1 builds (build against a stub until it lands).
       no account → pending invite auto-claimed on first Google login via `handle_new_user`),
       promote/demote, remove; last-owner guard; becoming a member grants `role='shop'`. RPCs:
       `add_shop_member`/`list_shop_members`/`set_shop_member_role`/`remove_shop_member`/
-      `list_shop_invitations`/`cancel_shop_invitation`. (No invite *email* — pre-auth only.)
+      `list_shop_invitations`/`cancel_shop_invitation`. (No invite _email_ — pre-auth only.)
 
 ### Gaps from CLAUDE.md audit (added 2026-05-31)
 
@@ -130,7 +130,7 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 
 - [ ] Remove button from stores header
 - [x] Remove share & favorite buttons
-- [ ] Make address clickable → Google Maps
+- [x] Make address clickable → Google Maps
 - [x] Make phone number clickable → native dial — _`tel:` links on store page + order detail_
 - [x] Move promotion above schedule; fill freed space with services/products — _promo + schedule
       now full-width stacked; catalog spans full width (3-col grid)_
@@ -140,14 +140,14 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
       sections (count badge + divider); degrades to one grid when a shop has no categories_
 - [ ] Active offers per store in banner ⬅BE 🔗
 - [ ] Offers: strikethrough old price, render the new one beside it ⬅BE 🔗
-- [x] Rating & Reviews per store — customer display + post-purchase review — *BE already had
+- [x] Rating & Reviews per store — customer display + post-purchase review — _BE already had
       the `reviews` table (verified-purchase RLS, public read). Added `lib/reviews/queries.ts`:
       `getShopRatings` (avg+count from `shop`-target reviews → wired into `getShops`/`getShopView`,
       shows on the card + store header), `getShopReviews` (store-page "Recenzii" section via
       `ShopReviews`), `getMyShopReview`. Post-purchase `ReviewForm` (Rating + comment) on a `done`
       customer order inserts client-side under RLS; one review/shop (23505 handled). No migration
       needed. NOTE: reviewers render as "Client verificat" — real names need the `profiles` RLS
-      gap (shop→customer identity) on C1.*
+      gap (shop→customer identity) on C1._
 
 ### Cart / checkout / orders
 
