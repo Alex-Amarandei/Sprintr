@@ -14,8 +14,9 @@ export function ThemeToggle() {
   const { colorScheme, setColorScheme } = useMantineColorScheme();
   const computed = useComputedColorScheme("light");
 
-  // The resolved scheme is only known on the client (localStorage / OS). Render a
-  // stable icon during SSR + first paint so hydration matches, then swap in the real one.
+  // The resolved scheme is only known on the client (localStorage / OS). Render a stable
+  // icon during SSR + first paint so hydration matches, then swap in the real one —
+  // otherwise the server/client icons differ and React crashes (parentNode of null).
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const Icon = !mounted

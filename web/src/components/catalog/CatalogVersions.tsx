@@ -41,11 +41,14 @@ export function CatalogVersions({
   shopId,
   activeVersionId,
   onActivate,
+  canManage = true,
 }: {
   shopId: string;
   activeVersionId: string | null;
   /** Called after a version goes live, with its parsed document. */
   onActivate: (versionId: string, doc: CatalogDocument) => void;
+  /** Whether the caller may publish/switch/archive (catalog/owner). Else view-only. */
+  canManage?: boolean;
 }) {
   const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -172,7 +175,7 @@ export function CatalogVersions({
                       {fmtDate(v.created_at)}
                     </Text>
                   </div>
-                  {!isLive && (
+                  {!isLive && canManage && (
                     <Group gap="xs" wrap="nowrap">
                       <Button
                         size="xs"

@@ -45,12 +45,14 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   catalogDocumentSchema,
   parseDocument,
+  TEXT_MAX,
   type CatalogDocument,
   type Category,
   type Item,
   type ItemKind,
 } from "@/lib/catalog/schema";
 import { newCategory, newItem } from "@/lib/catalog/factories";
+import { isLocalImage, persistLocalImage } from "@/lib/catalog/images";
 import {
   createDraft,
   publishVersion,
@@ -58,6 +60,7 @@ import {
 } from "@/lib/catalog/api";
 import { roCount } from "@/lib/utils/format";
 import { ItemCard } from "./ItemCard";
+import { ProductItemCard } from "./ProductItemCard";
 import { CatalogVersions } from "./CatalogVersions";
 
 /** An ItemCard wrapped as a dnd-kit sortable, with its own drag handle. */
@@ -99,9 +102,12 @@ function SortableItemCard({
       <GripVertical size={18} />
     </ActionIcon>
   );
+  // Products are standalone (not configurable) → a compact card; services get the
+  // full field configurator.
+  const Card = item.kind === "product" ? ProductItemCard : ItemCard;
   return (
     <div ref={setNodeRef} style={style}>
-      <ItemCard
+      <Card
         item={item}
         categories={categories}
         onChange={onChange}
@@ -121,6 +127,7 @@ function CategorySection({
   name,
   items,
   categories,
+  kind,
   onRename,
   onDelete,
   onAddItem,
@@ -131,6 +138,8 @@ function CategorySection({
   name: string;
   items: Item[];
   categories: Category[];
+  /** When set, the section adds only this kind (single button instead of a menu). */
+  kind?: ItemKind;
   onRename?: (name: string) => void;
   onDelete?: () => void;
   onAddItem?: (kind: ItemKind) => void;
@@ -140,6 +149,7 @@ function CategorySection({
   const droppableId = `cat:${categoryId ?? "none"}`;
   const { setNodeRef, isOver } = useDroppable({ id: droppableId });
   const isUncat = categoryId === null;
+  const copy = KIND_COPY[kind ?? "both"];
 
   return (
     <Paper
@@ -162,6 +172,7 @@ function CategorySection({
           <TextInput
             variant="unstyled"
             placeholder="Nume categorie"
+            maxLength={TEXT_MAX}
             value={name}
             onChange={(e) => onRename?.(e.currentTarget.value)}
             styles={{
@@ -175,29 +186,39 @@ function CategorySection({
         )}
         <Group gap="xs" wrap="nowrap">
           <Text fz="xs" c="dimmed" style={{ whiteSpace: "nowrap" }}>
-            {roCount(items.length, "produs", "produse")}
+            {roCount(items.length, copy.one, copy.many)}
           </Text>
-          {!isUncat && (
-            <Menu shadow="md" position="bottom-end">
-              <Menu.Target>
-                <Button
-                  variant="light"
-                  size="xs"
-                  leftSection={<Plus size={14} />}
-                >
-                  Adaugă
-                </Button>
-              </Menu.Target>
-              <Menu.Dropdown>
-                <Menu.Item onClick={() => onAddItem?.("service")}>
-                  Serviciu
-                </Menu.Item>
-                <Menu.Item onClick={() => onAddItem?.("product")}>
-                  Produs
-                </Menu.Item>
-              </Menu.Dropdown>
-            </Menu>
-          )}
+          {!isUncat &&
+            (kind ? (
+              <Button
+                variant="light"
+                size="xs"
+                leftSection={<Plus size={14} />}
+                onClick={() => onAddItem?.(kind)}
+              >
+                Adaugă
+              </Button>
+            ) : (
+              <Menu shadow="md" position="bottom-end">
+                <Menu.Target>
+                  <Button
+                    variant="light"
+                    size="xs"
+                    leftSection={<Plus size={14} />}
+                  >
+                    Adaugă
+                  </Button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item onClick={() => onAddItem?.("service")}>
+                    Serviciu
+                  </Menu.Item>
+                  <Menu.Item onClick={() => onAddItem?.("product")}>
+                    Produs
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            ))}
           {!isUncat && (
             <ActionIcon
               variant="subtle"
@@ -228,7 +249,7 @@ function CategorySection({
             ))}
             {items.length === 0 && (
               <Text fz="sm" c="dimmed" ta="center" py="md">
-                Trage produse aici
+                {copy.drop}
               </Text>
             )}
           </Stack>
@@ -254,17 +275,35 @@ interface Props {
   activeDocument: CatalogDocument;
   /** The shop's live version pointer — drives the "Live" marker in the history. */
   activeVersionId?: string | null;
+  /**
+   * Restrict the builder to a single kind (Servicii page vs Produse page). The full
+   * document is still held + saved (so the other kind is preserved); only the views,
+   * the add action, and the counts are scoped. Omit to manage both kinds at once.
+   */
+  kind?: ItemKind;
+  /** Whether the caller may edit (role catalog/owner). `staff` → view-only. */
+  canEdit?: boolean;
   /** Test mode: no Supabase calls — "save" just validates and shows the JSON. */
   localMode?: boolean;
 }
+
+const KIND_COPY = {
+  service: { heading: "Servicii", add: "Adaugă serviciu", one: "serviciu", many: "servicii", drop: "Trage servicii aici", empty: "Niciun serviciu încă." },
+  product: { heading: "Produse", add: "Adaugă produs", one: "produs", many: "produse", drop: "Trage produse aici", empty: "Niciun produs încă." },
+  both: { heading: "Catalog", add: "Adaugă item", one: "element", many: "elemente", drop: "Trage produse aici", empty: "Catalogul este gol." },
+} as const;
 
 export function CatalogBuilder({
   shopId,
   initialDraft,
   activeDocument,
   activeVersionId = null,
+  kind,
+  canEdit = true,
   localMode = false,
 }: Props) {
+  const copy = KIND_COPY[kind ?? "both"];
+  const inScope = (it: Item) => !kind || it.kind === kind;
   const router = useRouter();
   const [draftId, setDraftId] = useState<string | null>(
     initialDraft?.id ?? (localMode ? "local" : null),
@@ -279,7 +318,7 @@ export function CatalogBuilder({
   const [busy, setBusy] = useState(false);
   const [liveId, setLiveId] = useState<string | null>(activeVersionId);
 
-  const editing = draftId !== null;
+  const editing = canEdit && draftId !== null;
 
   function updateDoc(items: Item[]) {
     setDoc({ ...doc, items });
@@ -303,9 +342,11 @@ export function CatalogBuilder({
   }
 
   function addItem(kind: ItemKind, categoryId: string | null = null) {
+    // Prepend so the new (empty, auto-expanded) card lands at the top of its section
+    // instead of off-screen at the bottom. sort_order is re-normalized on save.
     updateDoc([
+      { ...newItem(kind, 0), category_id: categoryId },
       ...doc.items,
-      { ...newItem(kind, doc.items.length), category_id: categoryId },
     ]);
   }
   const updateItemById = (id: string, item: Item) =>
@@ -333,8 +374,9 @@ export function CatalogBuilder({
   const deleteCategory = (id: string) =>
     setCategories(doc.categories.filter((c) => c.id !== id));
 
+  const visibleItems = doc.items.filter(inScope);
   const itemsOf = (categoryId: string | null) =>
-    doc.items.filter((it) => (it.category_id ?? null) === categoryId);
+    doc.items.filter((it) => (it.category_id ?? null) === categoryId && inScope(it));
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -404,6 +446,29 @@ export function CatalogBuilder({
     return parsed.data;
   }
 
+  /**
+   * Upload any locally-previewed images (blob: URLs held since the user picked them)
+   * and swap them for their stored paths. Runs at save/publish time only — so picking
+   * images never touches storage. Throws (→ caller toasts) if storage isn't ready.
+   */
+  async function persistImages(d: CatalogDocument): Promise<CatalogDocument> {
+    const items = await Promise.all(
+      d.items.map(async (it) => {
+        if (!it.images.some(isLocalImage)) return it;
+        const images = await Promise.all(
+          it.images.map((img) =>
+            isLocalImage(img) ? persistLocalImage(img, shopId) : Promise.resolve(img)
+          )
+        );
+        it.images.forEach((img) => {
+          if (img.startsWith("blob:")) URL.revokeObjectURL(img);
+        });
+        return { ...it, images };
+      })
+    );
+    return { ...d, items };
+  }
+
   async function save() {
     if (!draftId) return;
     const valid = buildValidDoc();
@@ -419,8 +484,9 @@ export function CatalogBuilder({
 
     setBusy(true);
     try {
-      await saveDraftDocument(draftId, valid);
-      setDoc(valid);
+      const persisted = await persistImages(valid);
+      await saveDraftDocument(draftId, persisted);
+      setDoc(persisted);
       setDirty(false);
       toast.success("Catalog salvat în schiță");
     } catch (e) {
@@ -443,11 +509,12 @@ export function CatalogBuilder({
 
     setBusy(true);
     try {
-      await saveDraftDocument(draftId, valid);
+      const persisted = await persistImages(valid);
+      await saveDraftDocument(draftId, persisted);
       await publishVersion(draftId);
       // The draft is now the live version → drop back to read-only view of it.
       setLiveId(draftId);
-      setDoc(valid);
+      setDoc(persisted);
       setDraftId(null);
       setVersion(null);
       setDirty(false);
@@ -474,7 +541,7 @@ export function CatalogBuilder({
     <Stack gap="lg">
       <Group justify="space-between" align="flex-start">
         <div>
-          <Title order={2}>Catalog</Title>
+          <Title order={2}>{copy.heading}</Title>
           <Group gap="xs" mt={4}>
             {editing ? (
               <Badge color="yellow" variant="light">
@@ -486,7 +553,7 @@ export function CatalogBuilder({
               </Badge>
             )}
             <Text size="sm" c="dimmed">
-              {roCount(doc.items.length, "element", "elemente")}
+              {roCount(visibleItems.length, copy.one, copy.many)}
             </Text>
           </Group>
         </div>
@@ -496,51 +563,68 @@ export function CatalogBuilder({
               shopId={shopId}
               activeVersionId={liveId}
               onActivate={onActivate}
+              canManage={canEdit}
             />
           )}
-          {editing ? (
-            <>
+          {canEdit &&
+            (editing ? (
+              <>
+                <Button
+                  variant="default"
+                  leftSection={<Save size={16} />}
+                  onClick={save}
+                  loading={busy}
+                  disabled={!dirty}
+                >
+                  Salvează
+                </Button>
+                <Button
+                  leftSection={<Rocket size={16} />}
+                  onClick={publishDraft}
+                  loading={busy}
+                >
+                  Publică
+                </Button>
+              </>
+            ) : (
               <Button
+                leftSection={<Pencil size={16} />}
+                onClick={startEditing}
+                loading={busy}
                 variant="default"
-                leftSection={<Save size={16} />}
-                onClick={save}
-                loading={busy}
-                disabled={!dirty}
               >
-                Salvează
+                Editează catalogul
               </Button>
-              <Button
-                leftSection={<Rocket size={16} />}
-                onClick={publishDraft}
-                loading={busy}
-              >
-                Publică
-              </Button>
-            </>
-          ) : (
-            <Button
-              leftSection={<Pencil size={16} />}
-              onClick={startEditing}
-              loading={busy}
-              variant="default"
-            >
-              Editează catalogul
-            </Button>
-          )}
+            ))}
         </Group>
       </Group>
 
       {!editing && (
         <Alert color="brand" variant="light">
-          Vezi catalogul live. Apasă „Editează catalogul" pentru a crea o schiță
-          pe care o modifici, o salvezi și apoi o publici. Din „Versiuni" poți
-          comuta între versiuni sau reveni la una anterioară.
+          {canEdit
+            ? `Vezi catalogul live. Apasă „Editează catalogul" pentru a crea o schiță pe care o modifici, o salvezi și apoi o publici. Din „Versiuni" poți comuta între versiuni sau reveni la una anterioară.`
+            : `Ai acces doar de vizualizare. Doar membrii cu rol „catalog" sau „owner" pot edita și publica catalogul.`}
         </Alert>
       )}
 
       {editing ? (
         <>
           <Group>
+            {kind ? (
+              <Button leftSection={<Plus size={16} />} onClick={() => addItem(kind)}>
+                {copy.add}
+              </Button>
+            ) : (
+              <Menu shadow="md" position="bottom-start">
+                <Menu.Target>
+                  <Button leftSection={<Plus size={16} />}>Adaugă item</Button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item onClick={() => addItem("service")}>Serviciu</Menu.Item>
+                  <Menu.Item onClick={() => addItem("product")}>Produs</Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            )}
             <Button
               variant="default"
               leftSection={<Plus size={16} />}
@@ -563,9 +647,10 @@ export function CatalogBuilder({
                   name={cat.name}
                   items={itemsOf(cat.id)}
                   categories={doc.categories}
+                  kind={kind}
                   onRename={(name) => renameCategory(cat.id, name)}
                   onDelete={() => deleteCategory(cat.id)}
-                  onAddItem={(kind) => addItem(kind, cat.id)}
+                  onAddItem={(k) => addItem(k, cat.id)}
                   onItemChange={updateItemById}
                   onItemRemove={removeItemById}
                 />
@@ -575,19 +660,20 @@ export function CatalogBuilder({
                 name=""
                 items={itemsOf(null)}
                 categories={doc.categories}
+                kind={kind}
                 onItemChange={updateItemById}
                 onItemRemove={removeItemById}
               />
             </Stack>
           </DndContext>
         </>
-      ) : doc.items.length === 0 ? (
+      ) : visibleItems.length === 0 ? (
         <Paper withBorder radius="lg" p={48} ta="center" c="dimmed">
-          Catalogul este gol.
+          {copy.empty}
         </Paper>
       ) : (
         <Stack gap="md">
-          {doc.items.map((item) => (
+          {visibleItems.map((item) => (
             <Paper key={item.id} withBorder radius="lg" p="md">
               <Group justify="space-between">
                 <Title order={4}>{item.title}</Title>
@@ -602,20 +688,6 @@ export function CatalogBuilder({
             </Paper>
           ))}
         </Stack>
-      )}
-
-      {editing && (
-        <Menu shadow="md" position="bottom-start">
-          <Menu.Target>
-            <Button leftSection={<Plus size={16} />} w="fit-content">
-              Adaugă item
-            </Button>
-          </Menu.Target>
-          <Menu.Dropdown>
-            <Menu.Item onClick={() => addItem("service")}>Serviciu</Menu.Item>
-            <Menu.Item onClick={() => addItem("product")}>Produs</Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
       )}
 
       {localMode && (

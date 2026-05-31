@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import {
   Badge,
   Button,
   Group,
+  Image,
   Modal,
   Paper,
   Stack,
@@ -17,8 +19,10 @@ import type { Item } from "@/lib/catalog/schema";
 import { buildCartLine, needsConfiguration } from "@/lib/catalog/cart";
 import { computeItemPrice } from "@/lib/catalog/pricing";
 import { defaultAnswers } from "@/lib/catalog/answers";
+import { itemImageUrl, mainImage } from "@/lib/catalog/images";
 import { formatPrice } from "@/lib/utils/format";
 import { ItemOrderForm } from "@/components/catalog/ItemOrderForm";
+import { ImageLightbox } from "@/components/catalog/ImageLightbox";
 import { useCart } from "./CartContext";
 
 export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
@@ -30,6 +34,9 @@ export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
   const fromPrice = computeItemPrice(item, defaultAnswers(item)).total;
 
   const kindColor = item.kind === "service" ? "brand" : "blue";
+  const mainUrl = itemImageUrl(mainImage(item));
+  const gallery = item.images.length ? item.images : item.image_path ? [item.image_path] : [];
+  const [zoom, setZoom] = useState<number | null>(null);
 
   function quickAdd() {
     addLine(buildCartLine(item), shopId);
@@ -39,6 +46,17 @@ export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
   return (
     <Paper withBorder radius="lg" p="lg" shadow="xs">
       <Stack gap="sm" h="100%" justify="space-between">
+        {mainUrl && (
+          <Image
+            src={mainUrl}
+            h={140}
+            radius="md"
+            fit="cover"
+            alt={item.title}
+            onClick={() => setZoom(0)}
+            style={{ cursor: "zoom-in" }}
+          />
+        )}
         <div>
           <Group justify="space-between" wrap="nowrap" align="flex-start">
             <Title order={4}>{item.title}</Title>
@@ -136,6 +154,14 @@ export function AddItemCard({ item, shopId }: { item: Item; shopId: string }) {
           />
         </Modal>
       )}
+
+      <ImageLightbox
+        images={gallery}
+        index={zoom ?? 0}
+        opened={zoom !== null}
+        onIndexChange={setZoom}
+        onClose={() => setZoom(null)}
+      />
     </Paper>
   );
 }

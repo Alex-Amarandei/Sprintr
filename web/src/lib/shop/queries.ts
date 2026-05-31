@@ -1,0 +1,70 @@
+import "server-only";
+import { createClient } from "@/lib/supabase/server";
+import { parseDocument } from "@/lib/catalog/schema";
+import type { WeeklySchedule } from "./schedule";
+
+/**
+ * Full storefront profile for the current user's shop (dashboard Profil page).
+ * Carries the real fields needed to compute the profile-completeness status:
+ * logo/banner presence, description, weekly schedule, and the live catalog size.
+ * Returns null when the user belongs to no shop.
+ */
+export interface ShopProfileData {
+  shopId: string;
+  name: string;
+  description: string;
+  phone: string;
+  address: string;
+  schedule: WeeklySchedule | null;
+  hasLogo: boolean;
+  hasBanner: boolean;
+  /** Number of items in the live (published) catalog — drives the "≥ 5 produse" check. */
+  itemCount: number;
+}
+
+export async function loadShopProfile(): Promise<ShopProfileData | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: membership } = await supabase
+    .from("shop_permissions")
+    .select("shop_id")
+    .eq("profile_id", user.id)
+    .limit(1)
+    .maybeSingle();
+  if (!membership) return null;
+
+  const { data: shop } = await supabase
+    .from("shops")
+    .select(
+      "id, name, description, phone, address, logo_path, banner_path, schedule, active_version_id"
+    )
+    .eq("id", membership.shop_id)
+    .maybeSingle();
+  if (!shop) return null;
+
+  let itemCount = 0;
+  if (shop.active_version_id) {
+    const { data: ver } = await supabase
+      .from("catalog_versions")
+      .select("document")
+      .eq("id", shop.active_version_id)
+      .maybeSingle();
+    itemCount = parseDocument(ver?.document).items.length;
+  }
+
+  return {
+    shopId: shop.id,
+    name: shop.name ?? "",
+    description: shop.description ?? "",
+    phone: shop.phone ?? "",
+    address: shop.address ?? "",
+    schedule: (shop.schedule as WeeklySchedule | null) ?? null,
+    hasLogo: Boolean(shop.logo_path),
+    hasBanner: Boolean(shop.banner_path),
+    itemCount,
+  };
+}

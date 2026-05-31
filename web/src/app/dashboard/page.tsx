@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import {
-  Button,
   Card,
   Group,
   SimpleGrid,
@@ -11,6 +10,7 @@ import {
 import { Check, Clock, Package, Plus, TrendingUp } from "lucide-react";
 import { getMyShop, getShopOrders } from "@/lib/orders/queries";
 import { roCount } from "@/lib/utils/format";
+import { LinkButton } from "@/components/ui/links";
 import { StatCard } from "@/components/ui/StatCard";
 import { DashboardGreeting } from "@/components/dashboard/DashboardGreeting";
 import { ExportReportButton } from "@/components/dashboard/ExportReportButton";
@@ -61,7 +61,9 @@ export default async function ShopDashboardPage() {
         </div>
         <Group>
           <ExportReportButton orders={orders} />
-          <Button leftSection={<Plus size={16} />}>Adaugă produs</Button>
+          <LinkButton href="/dashboard/products" leftSection={<Plus size={16} />}>
+            Adaugă produs
+          </LinkButton>
         </Group>
       </Group>
 

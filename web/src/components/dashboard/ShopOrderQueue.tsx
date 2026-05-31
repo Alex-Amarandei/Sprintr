@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useId, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Avatar,
   Badge,
@@ -18,6 +19,7 @@ import { toast } from "sonner";
 import type { SampleOrder } from "@/lib/orders/sample";
 import type { OrderStatus } from "@/lib/design/status";
 import { advanceOrderStatus } from "@/lib/orders/actions";
+import { createClient } from "@/lib/supabase/client";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
 type Filter = "all" | "new" | "prep";
@@ -42,6 +44,35 @@ export function ShopOrderQueue({
   const [orders, setOrders] = useState<SampleOrder[]>(initialOrders);
   const [filter, setFilter] = useState<Filter>("all");
   const [pending, startTransition] = useTransition();
+
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
+  const channelKey = useId();
+
+  // Adopt fresh server data whenever the page re-fetches (after a realtime refresh or a
+  // status action's revalidation), so the queue reflects the database.
+  useEffect(() => {
+    setOrders(initialOrders);
+  }, [initialOrders]);
+
+  // Live queue: when an order is inserted/updated, re-fetch. RLS scopes Realtime delivery
+  // to this shop's own orders, so no shop_id filter is needed. Push-based — no polling.
+  useEffect(() => {
+    const channel = supabase
+      .channel(`shop-orders-${channelKey}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        (payload) => {
+          if (payload.eventType === "INSERT") toast.success("Comandă nouă primită 🛎️");
+          router.refresh();
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, router, channelKey]);
 
   function setStatus(id: string, status: OrderStatus, msg: string) {
     const prev = orders;

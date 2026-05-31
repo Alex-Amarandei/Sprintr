@@ -53,6 +53,7 @@ export function newItem(kind: ItemKind = "service", sortOrder = 0): Item {
     title: kind === "service" ? "Serviciu nou" : "Produs nou",
     description: null,
     image_path: null,
+    images: [],
     is_active: true,
     sort_order: sortOrder,
     base_price: 0,

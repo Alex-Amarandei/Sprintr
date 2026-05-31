@@ -5,8 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import type { ShopProfileInput } from "./types";
 
 /**
- * Update the shop's storefront profile. RLS authorizes (owner-only).
- * `schedule` editing is a separate concern (jsonb) — TODO(BE) wire the per-day hours.
+ * Update the shop's storefront profile, including the recurring weekly `schedule`
+ * (jsonb). RLS authorizes (owner-only).
  */
 export async function updateShopProfile(
   shopId: string,
@@ -20,6 +20,7 @@ export async function updateShopProfile(
       description: input.description || null,
       phone: input.phone || null,
       address: input.address || null,
+      schedule: input.schedule,
       // Only touch delivery_fee when provided, so saves that omit it don't reset it to 0.
       ...(input.deliveryFee !== undefined
         ? { delivery_fee: Math.max(0, Math.round(input.deliveryFee * 100) / 100) }
@@ -29,5 +30,7 @@ export async function updateShopProfile(
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/dashboard/profile");
+  // The storefront reads this shop's schedule/contact — refresh it too.
+  revalidatePath(`/shop/${shopId}`);
   return { ok: true };
 }

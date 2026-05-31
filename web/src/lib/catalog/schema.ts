@@ -6,6 +6,11 @@ import { z } from "zod";
  * client-side mirror of the Edge Function's validation/pricing. Keep in sync with the spec.
  */
 
+/** Max length for any user-entered text field (titles, labels, descriptions…). */
+export const TEXT_MAX = 256;
+/** Max images per item (× MAX_IMAGE_MB in images.ts ≈ storage budget per item). */
+export const MAX_IMAGES = 6;
+
 // ---- PriceRule (§5) -------------------------------------------------------
 export const priceRuleSchema = z.discriminatedUnion("mode", [
   z.object({ mode: z.literal("additive"), amount: z.number() }),
@@ -20,8 +25,8 @@ export type PriceRule = z.infer<typeof priceRuleSchema>;
 
 // ---- Field options (single_select / multi_select) -------------------------
 export const fieldOptionSchema = z.object({
-  value: z.string().min(1),
-  label: z.string().min(1),
+  value: z.string().min(1).max(TEXT_MAX),
+  label: z.string().min(1).max(TEXT_MAX),
   price: priceRuleSchema.optional(),
   // Optional hex color (e.g. "#f5f5dc") → render this option as a visible swatch
   // instead of plain text. Display-only; never affects pricing/validation.
@@ -48,10 +53,11 @@ const fieldBase = {
   key: z
     .string()
     .min(1)
+    .max(TEXT_MAX)
     .regex(/^[a-z0-9_]+$/, "doar litere mici, cifre și _"),
-  label: z.string().min(1),
+  label: z.string().min(1).max(TEXT_MAX),
   required: z.boolean().default(false),
-  help: z.string().nullable().default(null),
+  help: z.string().max(TEXT_MAX).nullable().default(null),
 };
 
 export const fieldSchema = z.discriminatedUnion("type", [
@@ -82,7 +88,7 @@ export const fieldSchema = z.discriminatedUnion("type", [
     min: z.number().default(1),
     max: z.number().nullable().default(null),
     step: z.number().positive().default(1),
-    unit: z.string().nullable().default(null),
+    unit: z.string().max(TEXT_MAX).nullable().default(null),
     price: priceRuleSchema.optional(),
     // At most one per item: this field's value multiplies the whole line (CLAUDE.md §7).
     is_quantity: z.boolean().optional(),
@@ -108,9 +114,13 @@ export type FileTypeKey = (typeof fileTypeValues)[number];
 export const itemSchema = z.object({
   id: z.string().min(1),
   kind: z.enum(itemKinds),
-  title: z.string().min(1),
-  description: z.string().nullable().default(null),
-  image_path: z.string().nullable().default(null),
+  title: z.string().min(1).max(TEXT_MAX),
+  description: z.string().max(TEXT_MAX).nullable().default(null),
+  image_path: z.string().nullable().default(null), // legacy single image — superseded by `images`
+  // Ordered list of image storage paths; `images[0]` is the main/displayed image
+  // (shown to customers and in the builder). Additive + backward-compatible: old
+  // documents without it parse to []. TODO(BE): mirror in the server doc validator.
+  images: z.array(z.string()).max(MAX_IMAGES).default([]),
   is_active: z.boolean().default(true),
   sort_order: z.number().int().default(0),
   base_price: z.number().min(0).default(0),
@@ -129,7 +139,7 @@ export type Item = z.infer<typeof itemSchema>;
 // ---- Categories (§2) — per-shop, flat list (parent_id reserved for nesting) ----
 export const categorySchema = z.object({
   id: z.string().min(1),
-  name: z.string().min(1),
+  name: z.string().min(1).max(TEXT_MAX),
   parent_id: z.string().nullable().default(null),
   sort_order: z.number().int().default(0),
 });
