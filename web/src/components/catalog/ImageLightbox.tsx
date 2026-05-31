@@ -16,12 +16,15 @@ export function ImageLightbox({
   onIndexChange,
   opened,
   onClose,
+  zIndex,
 }: {
   images: string[];
   index: number;
   onIndexChange: (i: number) => void;
   opened: boolean;
   onClose: () => void;
+  /** Raise above another open modal (e.g. the configurator). Defaults to Mantine's modal z-index. */
+  zIndex?: number;
 }) {
   const count = images.length;
 
@@ -45,6 +48,7 @@ export function ImageLightbox({
       centered
       size="xl"
       padding="md"
+      zIndex={zIndex}
       title={count > 1 ? `Imagine ${safe + 1} din ${count}` : "Imagine"}
       styles={{ title: { fontWeight: 600 } }}
     >
