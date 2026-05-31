@@ -2,10 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
+import {
+  applyOffers,
+  isOfferLive,
+  toEngineOffer,
+  type CartLineInput,
+  type OfferRow,
+} from "@/lib/catalog/offers";
 
 export const dynamic = "force-dynamic";
 
 const PLATFORM_FEE_PERCENT = 0.06;
+// Flat platform charge on every order; shown at checkout only (not in the cart).
+const SERVICE_FEE = 2;
+const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 
 // Lazily initialized so the module can be imported at build time without env vars
 let _stripe: Stripe | null = null;
@@ -35,7 +45,7 @@ type CatalogField = {
   price?: PriceRule;
   options?: Array<{ value: string; price?: PriceRule }>;
 };
-type CatalogItem = { id: string; base_price: number; fields: CatalogField[] };
+type CatalogItem = { id: string; base_price: number; category_id?: string | null; fields: CatalogField[] };
 
 function resolvePrice(rule: PriceRule | undefined, answers: Answers): number {
   if (!rule) return 0;
@@ -104,17 +114,22 @@ export async function POST(req: NextRequest) {
       contact_phone?: string;
       notes?: string;
       payment_method: "cash_in_store" | "cash_on_delivery" | "online";
+      code?: string; // optional promo code typed at checkout
     };
 
-    const { shop_id, lines, fulfilment, delivery_address, contact_phone, notes, payment_method } = body;
+    const { shop_id, lines, fulfilment, delivery_address, contact_phone, notes, payment_method, code } = body;
 
     if (!shop_id || !lines?.length) return err("shop_id and lines are required", 400);
     if (fulfilment === "delivery" && !delivery_address) return err("delivery_address required", 400);
 
     const db = serviceSupabase();
 
-    // Load active catalog
-    const { data: shop } = await db.from("shops").select("active_version_id").eq("id", shop_id).single();
+    // Load active catalog + shipping fee
+    const { data: shop } = await db
+      .from("shops")
+      .select("active_version_id, delivery_fee")
+      .eq("id", shop_id)
+      .single();
     if (!shop?.active_version_id) return err("Shop has no active catalog", 422);
 
     const { data: version } = await db
@@ -129,9 +144,11 @@ export async function POST(req: NextRequest) {
     // Reprice server-side
     let subtotal = 0;
     const orderItems = [];
+    const cartLines: CartLineInput[] = [];
 
-    for (const line of lines) {
-      const catalogItem = doc.items.find((i) => i.id === line.itemId);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const catalogItem = doc.items.find((it) => it.id === line.itemId);
       if (!catalogItem) return err(`Item ${line.itemId} not in catalog`, 422);
 
       const { total, breakdown, quantity } = computeItemPrice(catalogItem, line.answers);
@@ -149,12 +166,36 @@ export async function POST(req: NextRequest) {
         price_breakdown: breakdown as Database["public"]["Tables"]["order_items"]["Insert"]["price_breakdown"],
         line_total: total,
       });
+      cartLines.push({
+        lineId: String(i),
+        itemId: line.itemId,
+        categoryId: catalogItem.category_id ?? null,
+        quantity,
+        lineTotal: total,
+      });
       subtotal += total;
     }
 
-    subtotal = Math.round(subtotal * 100) / 100;
-    const platformFee = Math.round(subtotal * PLATFORM_FEE_PERCENT * 100) / 100;
-    const total = Math.round((subtotal + platformFee) * 100) / 100;
+    subtotal = round2(subtotal);
+
+    // Apply offers: all live AUTOMATIC offers + an optional typed code (validated here).
+    // Service role bypasses RLS, so we filter live/automatic ourselves.
+    const { data: rawOffers } = await db.from("offers").select("*").eq("shop_id", shop_id);
+    const live = ((rawOffers ?? []) as OfferRow[]).filter((o) => isOfferLive(o));
+    const autos = live.filter((o) => o.trigger === "automatic");
+    const codeOffer = code
+      ? live.find((o) => o.trigger === "code" && o.code?.toLowerCase() === code.toLowerCase())
+      : undefined;
+    const engineOffers = [...autos, ...(codeOffer ? [codeOffer] : [])].map(toEngineOffer);
+
+    const offers = applyOffers(cartLines, engineOffers, shop.delivery_fee ?? 0);
+    const discount = offers.discount;
+    const shippingFee = offers.shippingFee;
+    const serviceFee = SERVICE_FEE;
+
+    // Platform fee (6%) is unchanged here — it moves into the Stripe flow as a separate task.
+    const platformFee = round2(subtotal * PLATFORM_FEE_PERCENT);
+    const total = round2(subtotal - discount + shippingFee + serviceFee + platformFee);
 
     // Insert order
     const { data: order, error: orderErr } = await db
@@ -168,6 +209,10 @@ export async function POST(req: NextRequest) {
         contact_phone: contact_phone ?? null,
         notes: notes ?? null,
         subtotal,
+        discount,
+        shipping_fee: shippingFee,
+        service_fee: serviceFee,
+        applied_offers: offers.appliedOffers as unknown as Database["public"]["Tables"]["orders"]["Insert"]["applied_offers"],
         total,
         payment_method,
         payment_status: "pending",
@@ -205,7 +250,17 @@ export async function POST(req: NextRequest) {
       clientSecret = pi.client_secret;
     }
 
-    return NextResponse.json({ order_id: order.id, total, platform_fee: platformFee, client_secret: clientSecret });
+    return NextResponse.json({
+      order_id: order.id,
+      subtotal,
+      discount,
+      shipping_fee: shippingFee,
+      service_fee: serviceFee,
+      platform_fee: platformFee,
+      applied_offers: offers.appliedOffers,
+      total,
+      client_secret: clientSecret,
+    });
   } catch (e) {
     console.error("place-order:", e);
     return err("Internal server error", 500);

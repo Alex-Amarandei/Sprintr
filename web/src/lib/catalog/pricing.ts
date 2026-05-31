@@ -2,9 +2,12 @@ import type { Item, PriceRule } from "./schema";
 
 /**
  * Client mirror of the authoritative pricing algorithm (CLAUDE.md §7).
- * The Edge Function recomputes this server-side at order time — this is preview only.
+ * place-order recomputes this server-side at order time — this is preview only, but it MUST
+ * match (a mismatch beyond 1 bani rejects the order).
  *
- *   total = base_price + Σ field contributions
+ *   quantity   = answers[the is_quantity number field]  (or 1 if none)
+ *   addons     = Σ field contributions (every NON-quantity field)
+ *   line_total = quantity × (base_price + addons)
  *   resolve(additive)      = amount
  *   resolve(per_unit, per) = amount × answers[per]
  *   round half-up to 2 decimals at the end.
@@ -31,13 +34,20 @@ function round2(n: number): number {
 export interface PriceResult {
   total: number;
   basePrice: number;
+  /** The is_quantity multiplier in effect (1 if the item has none). */
+  quantity: number;
   lines: PriceLine[];
 }
 
 export function computeItemPrice(item: Item, answers: Answers): PriceResult {
   const lines: PriceLine[] = [];
 
+  // The is_quantity number field multiplies the whole line; it is NOT an addon.
+  const qField = item.fields.find((f) => f.type === "number" && f.is_quantity);
+  const quantity = qField ? Number(answers[qField.key]) || 1 : 1;
+
   for (const f of item.fields) {
+    if (f.type === "number" && f.is_quantity) continue;
     switch (f.type) {
       case "single_select": {
         const opt = f.options.find((o) => o.value === answers[f.key]);
@@ -82,8 +92,9 @@ export function computeItemPrice(item: Item, answers: Answers): PriceResult {
 
   const sum = lines.reduce((s, l) => s + l.amount, 0);
   return {
-    total: round2(item.base_price + sum),
+    total: round2(quantity * (item.base_price + sum)),
     basePrice: item.base_price,
+    quantity,
     lines,
   };
 }

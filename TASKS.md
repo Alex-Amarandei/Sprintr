@@ -19,8 +19,11 @@ something C1 builds (build against a stub until it lands).
 
 ### Offers system (foundation) 🔗
 - [ ] Add offer banners + **general offers system** — `offers` table + API/repricing
-- [ ] Promos per product / category / cart — discount engine in the pricing module
-- [ ] Verify price calculation logic (`lib/catalog/pricing.ts` ↔ server reprice parity)
+      (table ✅ + place-order repricing ✅; remaining: CRUD/read API helpers + banner read layer)
+- [x] Promos per product / category / cart — discount engine in the pricing module
+      (`lib/catalog/offers.ts`: compounding + best-pick, wired into place-order; client/dashboard UI = C2/C3)
+- [x] Verify price calculation logic (`lib/catalog/pricing.ts` ↔ server reprice parity)
+      (fixed the `is_quantity` multiplier mismatch; added `is_quantity` to the number-field schema)
 
 ### Money & orders
 - [ ] Fix internal server error when placing order

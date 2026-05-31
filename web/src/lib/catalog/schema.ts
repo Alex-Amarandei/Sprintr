@@ -84,6 +84,8 @@ export const fieldSchema = z.discriminatedUnion("type", [
     step: z.number().positive().default(1),
     unit: z.string().nullable().default(null),
     price: priceRuleSchema.optional(),
+    // At most one per item: this field's value multiplies the whole line (CLAUDE.md §7).
+    is_quantity: z.boolean().optional(),
   }),
   z.object({
     ...fieldBase,
