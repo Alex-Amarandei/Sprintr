@@ -6,9 +6,15 @@ import {
   Stack,
   Text,
   Title,
+  Tooltip,
 } from "@mantine/core";
-import { Check, Clock, Package, Plus, TrendingUp } from "lucide-react";
-import { getMyShop, getShopOrders } from "@/lib/orders/queries";
+import { Check, Clock, Package, Plus, Star, TrendingUp } from "lucide-react";
+import {
+  getMyShop,
+  getShopOrders,
+  getShopRevenueDaily,
+  getShopStats,
+} from "@/lib/orders/queries";
 import { roCount } from "@/lib/utils/format";
 import { LinkButton } from "@/components/ui/links";
 import { StatCard } from "@/components/ui/StatCard";
@@ -19,7 +25,15 @@ import { ShopOrderQueue } from "@/components/dashboard/ShopOrderQueue";
 export const metadata: Metadata = { title: "Dashboard magazin" };
 
 export default async function ShopDashboardPage() {
-  const [shop, orders] = await Promise.all([getMyShop(), getShopOrders()]);
+  const shop = await getMyShop();
+  const [orders, revenueDaily, stats] = await Promise.all([
+    getShopOrders(),
+    shop ? getShopRevenueDaily(shop.id) : Promise.resolve([]),
+    shop ? getShopStats(shop.id) : Promise.resolve(null),
+  ]);
+  const maxRevenue = Math.max(...revenueDaily.map((d) => d.revenue), 1);
+  const dayLabel = (iso: string) =>
+    new Intl.DateTimeFormat("ro-RO", { weekday: "short" }).format(new Date(iso));
   const today = new Intl.DateTimeFormat("ro-RO", {
     weekday: "long",
     day: "numeric",
@@ -55,9 +69,19 @@ export default async function ShopDashboardPage() {
             {today}
           </Text>
           <DashboardGreeting name={shop?.name ?? "magazin"} />
-          <Text c="dimmed">
-            Ai {roCount(newCount, "comandă nouă", "comenzi noi")} care așteaptă aprobare.
-          </Text>
+          <Group gap="sm">
+            <Text c="dimmed">
+              Ai {roCount(newCount, "comandă nouă", "comenzi noi")} care așteaptă aprobare.
+            </Text>
+            {stats && stats.reviewsCount > 0 && (
+              <Group gap={4} c="dimmed">
+                <Star size={14} fill="var(--mantine-color-yellow-5)" color="var(--mantine-color-yellow-5)" />
+                <Text fz="sm">
+                  {stats.avgRating.toFixed(1)} · {roCount(stats.reviewsCount, "recenzie", "recenzii")}
+                </Text>
+              </Group>
+            )}
+          </Group>
         </div>
         <Group>
           <ExportReportButton orders={orders} />
@@ -88,7 +112,7 @@ export default async function ShopDashboardPage() {
         />
         <StatCard
           icon={<TrendingUp size={20} />}
-          value={`${doneRevenue.toFixed(0)} lei`}
+          value={`${doneRevenue.toFixed(2)} lei`}
           label="Venit finalizat"
           color="brand"
         />
@@ -96,12 +120,43 @@ export default async function ShopDashboardPage() {
 
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
         <Card>
-          <Text fw={700} mb="md">
-            Venit — ultimele 7 zile
-          </Text>
-          <Text c="dimmed" fz="sm" ta="center" py="xl">
-            Graficul de venit pe zile apare aici odată ce avem istoric de comenzi.
-          </Text>
+          <Group justify="space-between" mb="md">
+            <Text fw={700}>Venit — ultimele 7 zile</Text>
+            {stats && (
+              <Text fz="xs" c="dimmed">
+                Total: {stats.revenueTotal.toFixed(2)} lei
+              </Text>
+            )}
+          </Group>
+          {revenueDaily.every((d) => d.revenue === 0) ? (
+            <Text c="dimmed" fz="sm" ta="center" py="xl">
+              Niciun venit în ultimele 7 zile.
+            </Text>
+          ) : (
+            <Group align="flex-end" gap="xs" grow h={150} pt="md">
+              {revenueDaily.map((d) => (
+                <Stack key={d.day} gap={4} align="center" justify="flex-end" h="100%">
+                  <Text fz={9} c="dimmed">
+                    {d.revenue > 0 ? d.revenue.toFixed(0) : ""}
+                  </Text>
+                  <Tooltip label={`${d.revenue.toFixed(2)} lei`} withArrow>
+                    <div
+                      style={{
+                        width: "100%",
+                        height: `${Math.round((d.revenue / maxRevenue) * 100)}%`,
+                        minHeight: d.revenue > 0 ? 4 : 0,
+                        background: "var(--mantine-color-brand-6)",
+                        borderRadius: 4,
+                      }}
+                    />
+                  </Tooltip>
+                  <Text fz={9} c="dimmed" tt="capitalize">
+                    {dayLabel(d.day)}
+                  </Text>
+                </Stack>
+              ))}
+            </Group>
+          )}
         </Card>
         <Card>
           <Text fw={700} mb="md">
@@ -124,7 +179,7 @@ export default async function ShopDashboardPage() {
                     </Text>
                   </div>
                   <Text fw={700} fz="sm">
-                    {t.revenue.toFixed(0)} lei
+                    {t.revenue.toFixed(2)} lei
                   </Text>
                 </Group>
               ))}

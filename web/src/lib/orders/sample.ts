@@ -33,6 +33,9 @@ export interface SampleOrder {
   lines: SampleOrderLine[];
   subtotal: number;
   delivery: number;
+  /** Shop-facing payout breakdown (platform keeps `commission`; shop receives `payout`). */
+  commission?: number;
+  payout?: number;
   messages: SampleMessage[];
   /** Complaint-thread messages (post-completion). */
   complaintMessages?: SampleMessage[];

@@ -50,7 +50,6 @@ const stripePromise = stripePublishableKey
 interface PlaceOrderResult {
   order_id: string;
   total: number;
-  platform_fee: number;
   client_secret: string | null;
 }
 

@@ -237,11 +237,24 @@ export default async function ShopOrderDetailPage({ params }: Props) {
                 <Text fz="sm">{order.delivery.toFixed(2)} lei</Text>
               </Group>
               <Group justify="space-between" mt={4}>
-                <Text fw={700}>Total</Text>
+                <Text fw={700}>Total client</Text>
                 <Text fw={800} fz={20} c="var(--mantine-color-text)">
                   {order.total.toFixed(2)} lei
                 </Text>
               </Group>
+              {order.payout !== undefined && (
+                <>
+                  <Divider my="xs" />
+                  <Group justify="space-between">
+                    <Text fz="sm" c="dimmed">Comision platformă</Text>
+                    <Text fz="sm" c="dimmed">−{(order.commission ?? 0).toFixed(2)} lei</Text>
+                  </Group>
+                  <Group justify="space-between">
+                    <Text fw={600} c="teal.7">Încasezi</Text>
+                    <Text fw={700} c="teal.7">{(order.payout ?? 0).toFixed(2)} lei</Text>
+                  </Group>
+                </>
+              )}
             </Stack>
           </Card>
 

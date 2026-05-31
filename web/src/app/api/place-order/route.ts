@@ -12,9 +12,10 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const PLATFORM_FEE_PERCENT = 0.06;
 // Flat platform charge on every order; shown at checkout only (not in the cart).
 const SERVICE_FEE = 2;
+// No platform commission on orders whose goods value is below this (lei).
+const COMMISSION_FREE_BELOW = 2;
 const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 
 // Lazily initialized so the module can be imported at build time without env vars
@@ -140,7 +141,7 @@ export async function POST(req: NextRequest) {
     // Load active catalog + shipping fee
     const { data: shop } = await db
       .from("shops")
-      .select("active_version_id, delivery_fee")
+      .select("active_version_id, delivery_fee, commission_rate")
       .eq("id", shop_id)
       .single();
     if (!shop?.active_version_id) return err("Shop has no active catalog", 422);
@@ -218,9 +219,13 @@ export async function POST(req: NextRequest) {
     const shippingFee = offers.shippingFee;
     const serviceFee = SERVICE_FEE;
 
-    // Platform fee (6%) is unchanged here — it moves into the Stripe flow as a separate task.
-    const platformFee = round2(subtotal * PLATFORM_FEE_PERCENT);
-    const total = round2(subtotal - discount + shippingFee + serviceFee + platformFee);
+    // Platform commission: rate × goods, but nothing on tiny orders (goods < 2 lei). It's deducted
+    // from the shop's payout — the customer never pays it. payout = what the shop receives.
+    const goods = round2(subtotal - discount);
+    const commission =
+      goods >= COMMISSION_FREE_BELOW ? round2(goods * Number(shop.commission_rate ?? 0)) : 0;
+    const total = round2(goods + shippingFee + serviceFee);
+    const payout = round2(goods - commission + shippingFee);
 
     // Insert order
     const { data: order, error: orderErr } = await db
@@ -237,6 +242,8 @@ export async function POST(req: NextRequest) {
         discount,
         shipping_fee: shippingFee,
         service_fee: serviceFee,
+        commission,
+        payout,
         applied_offers: offers.appliedOffers as unknown as Database["public"]["Tables"]["orders"]["Insert"]["applied_offers"],
         total,
         payment_method,
@@ -281,7 +288,8 @@ export async function POST(req: NextRequest) {
       discount,
       shipping_fee: shippingFee,
       service_fee: serviceFee,
-      platform_fee: platformFee,
+      commission,
+      payout,
       applied_offers: offers.appliedOffers,
       total,
       client_secret: clientSecret,

@@ -75,7 +75,7 @@ export function summarize(answers: Record<string, unknown> | null, item?: Item):
 }
 
 const ORDER_SELECT =
-  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, contact_phone, notes, subtotal, total, payment_method, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
+  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, contact_phone, notes, subtotal, total, commission, payout, payment_method, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function toListOrder(o: any): SampleOrder {
@@ -104,6 +104,60 @@ function toListOrder(o: any): SampleOrder {
 }
 
 /** Customer's own orders for /orders. */
+export interface ShopStats {
+  revenueTotal: number;
+  revenueToday: number;
+  ordersTotal: number;
+  pending: number;
+  inProgress: number;
+  done: number;
+  avgRating: number;
+  reviewsCount: number;
+}
+
+/** Aggregated shop stats for the dashboard (member-gated RPC). */
+export async function getShopStats(shopId: string): Promise<ShopStats | null> {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("shop_stats", { p_shop_id: shopId });
+  const r = data?.[0];
+  if (!r) return null;
+  return {
+    revenueTotal: Number(r.revenue_total),
+    revenueToday: Number(r.revenue_today),
+    ordersTotal: Number(r.orders_total),
+    pending: Number(r.pending),
+    inProgress: Number(r.in_progress),
+    done: Number(r.done),
+    avgRating: Number(r.avg_rating),
+    reviewsCount: Number(r.reviews_count),
+  };
+}
+
+/** Last 7 days of completed-order revenue (zero-filled) for the dashboard chart. */
+export async function getShopRevenueDaily(
+  shopId: string,
+): Promise<{ day: string; revenue: number }[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("shop_revenue_daily", { p_shop_id: shopId });
+  return (data ?? []).map((d) => ({ day: d.day, revenue: Number(d.revenue) }));
+}
+
+/** The caller's own order aggregates (customer dashboard). */
+export async function getCustomerStats(): Promise<{
+  ordersCount: number;
+  totalSpent: number;
+  totalSaved: number;
+}> {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("customer_stats");
+  const r = data?.[0];
+  return {
+    ordersCount: Number(r?.orders_count ?? 0),
+    totalSpent: Number(r?.total_spent ?? 0),
+    totalSaved: Number(r?.total_saved ?? 0),
+  };
+}
+
 export async function getMyOrders(): Promise<SampleOrder[]> {
   const supabase = await createClient();
   const {
@@ -258,6 +312,8 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
     placedAt: relTime(order.created_at),
     subtotal,
     delivery: round2(total - subtotal),
+    commission: Number(order.commission ?? 0),
+    payout: Number(order.payout ?? 0),
     lines,
     messages,
     complaintMessages,

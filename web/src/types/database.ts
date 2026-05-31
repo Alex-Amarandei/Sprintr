@@ -272,6 +272,7 @@ export type Database = {
           applied_offers: Json
           archived_at: string | null
           catalog_version_id: string | null
+          commission: number
           completed_at: string | null
           contact_phone: string | null
           created_at: string
@@ -286,6 +287,7 @@ export type Database = {
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_ref: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
+          payout: number
           service_fee: number
           shipping_fee: number
           shop_id: string
@@ -299,6 +301,7 @@ export type Database = {
           applied_offers?: Json
           archived_at?: string | null
           catalog_version_id?: string | null
+          commission?: number
           completed_at?: string | null
           contact_phone?: string | null
           created_at?: string
@@ -313,6 +316,7 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_ref?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          payout?: number
           service_fee?: number
           shipping_fee?: number
           shop_id: string
@@ -326,6 +330,7 @@ export type Database = {
           applied_offers?: Json
           archived_at?: string | null
           catalog_version_id?: string | null
+          commission?: number
           completed_at?: string | null
           contact_phone?: string | null
           created_at?: string
@@ -340,6 +345,7 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_ref?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          payout?: number
           service_fee?: number
           shipping_fee?: number
           shop_id?: string
@@ -504,6 +510,45 @@ export type Database = {
           },
         ]
       }
+      shop_invitations: {
+        Row: {
+          created_at: string
+          email: string
+          invited_by: string | null
+          role: Database["public"]["Enums"]["shop_role"]
+          shop_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["shop_role"]
+          shop_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["shop_role"]
+          shop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_invitations_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shop_legal: {
         Row: {
           created_at: string
@@ -595,6 +640,7 @@ export type Database = {
           active_version_id: string | null
           address: string | null
           banner_path: string | null
+          commission_rate: number
           created_at: string
           delivery_fee: number
           description: string | null
@@ -609,6 +655,7 @@ export type Database = {
           active_version_id?: string | null
           address?: string | null
           banner_path?: string | null
+          commission_rate?: number
           created_at?: string
           delivery_fee?: number
           description?: string | null
@@ -623,6 +670,7 @@ export type Database = {
           active_version_id?: string | null
           address?: string | null
           banner_path?: string | null
+          commission_rate?: number
           created_at?: string
           delivery_fee?: number
           description?: string | null
@@ -660,36 +708,6 @@ export type Database = {
         Args: { p_email: string; p_shop_id: string }
         Returns: undefined
       }
-      list_shop_invitations: {
-        Args: { p_shop_id: string }
-        Returns: {
-          created_at: string
-          email: string
-          role: Database["public"]["Enums"]["shop_role"]
-        }[]
-      }
-      set_shop_member_role: {
-        Args: {
-          p_profile_id: string
-          p_role: Database["public"]["Enums"]["shop_role"]
-          p_shop_id: string
-        }
-        Returns: undefined
-      }
-      list_shop_members: {
-        Args: { p_shop_id: string }
-        Returns: {
-          created_at: string
-          email: string
-          full_name: string | null
-          profile_id: string
-          role: Database["public"]["Enums"]["shop_role"]
-        }[]
-      }
-      remove_shop_member: {
-        Args: { p_profile_id: string; p_shop_id: string }
-        Returns: undefined
-      }
       create_catalog_draft: {
         Args: { p_label?: string; p_shop_id: string }
         Returns: {
@@ -710,6 +728,14 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      customer_stats: {
+        Args: never
+        Returns: {
+          orders_count: number
+          total_saved: number
+          total_spent: number
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
       is_shop_member: {
         Args: {
@@ -718,12 +744,42 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_shop_invitations: {
+        Args: { p_shop_id: string }
+        Returns: {
+          created_at: string
+          email: string
+          role: Database["public"]["Enums"]["shop_role"]
+        }[]
+      }
+      list_shop_members: {
+        Args: { p_shop_id: string }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          profile_id: string
+          role: Database["public"]["Enums"]["shop_role"]
+        }[]
+      }
       offer_is_live: {
         Args: { o: Database["public"]["Tables"]["offers"]["Row"] }
         Returns: boolean
       }
+      remove_shop_member: {
+        Args: { p_profile_id: string; p_shop_id: string }
+        Returns: undefined
+      }
       set_active_catalog_version: {
         Args: { p_version_id: string }
+        Returns: undefined
+      }
+      set_shop_member_role: {
+        Args: {
+          p_profile_id: string
+          p_role: Database["public"]["Enums"]["shop_role"]
+          p_shop_id: string
+        }
         Returns: undefined
       }
       shop_conversations: {
@@ -737,6 +793,26 @@ export type Database = {
           order_id: string
           status: Database["public"]["Enums"]["order_status"]
           unread: number
+        }[]
+      }
+      shop_revenue_daily: {
+        Args: { p_shop_id: string }
+        Returns: {
+          day: string
+          revenue: number
+        }[]
+      }
+      shop_stats: {
+        Args: { p_shop_id: string }
+        Returns: {
+          avg_rating: number
+          done: number
+          in_progress: number
+          orders_total: number
+          pending: number
+          revenue_today: number
+          revenue_total: number
+          reviews_count: number
         }[]
       }
       shop_unread_count: { Args: never; Returns: number }
