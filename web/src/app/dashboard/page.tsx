@@ -18,6 +18,7 @@ import {
   getShopTopItems,
 } from "@/lib/orders/queries";
 import { roCount } from "@/lib/utils/format";
+import { getViewerIdentity } from "@/lib/auth/identity";
 import { LinkButton } from "@/components/ui/links";
 import { StatCard } from "@/components/ui/StatCard";
 import { DashboardGreeting } from "@/components/dashboard/DashboardGreeting";
@@ -28,6 +29,7 @@ export const metadata: Metadata = { title: "Dashboard magazin" };
 
 export default async function ShopDashboardPage() {
   const shop = await getMyShop();
+  const viewer = await getViewerIdentity();
   const [orders, revenueDaily, stats, topItems] = await Promise.all([
     getShopOrders(),
     shop ? getShopRevenueDaily(shop.id) : Promise.resolve([]),
@@ -58,7 +60,7 @@ export default async function ShopDashboardPage() {
           <Text fz="sm" c="dimmed" tt="capitalize">
             {today}
           </Text>
-          <DashboardGreeting name={shop?.name ?? "magazin"} />
+          <DashboardGreeting name={viewer?.firstName ?? "echipă"} />
           <Group gap="sm">
             <Text c="dimmed">
               Ai {roCount(newCount, "comandă nouă", "comenzi noi")} care așteaptă aprobare.

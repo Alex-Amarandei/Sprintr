@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { parseDocument } from "@/lib/catalog/schema";
+import { getActiveShopId } from "./active";
 import type { WeeklySchedule } from "./schedule";
 
 /**
@@ -34,20 +35,15 @@ export async function loadShopProfile(): Promise<ShopProfileData | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: membership } = await supabase
-    .from("shop_permissions")
-    .select("shop_id")
-    .eq("profile_id", user.id)
-    .limit(1)
-    .maybeSingle();
-  if (!membership) return null;
+  const shopId = await getActiveShopId();
+  if (!shopId) return null;
 
   const { data: shop } = await supabase
     .from("shops")
     .select(
       "id, name, description, phone, email, address, logo_path, banner_path, schedule, default_eta_minutes, delivery_fee, active_version_id"
     )
-    .eq("id", membership.shop_id)
+    .eq("id", shopId)
     .maybeSingle();
   if (!shop) return null;
 

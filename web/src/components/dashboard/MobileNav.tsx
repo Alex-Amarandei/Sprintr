@@ -6,7 +6,6 @@ import { Box, Burger, Drawer, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { LinkAnchor } from "@/components/ui/links";
 import { Logo } from "@/components/ui/Logo";
-import { SignOutButton } from "@/components/auth/SignOutButton";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
@@ -38,10 +37,7 @@ export function MobileNav() {
             <Logo />
           </LinkAnchor>
         </Group>
-        <Group gap="xs" wrap="nowrap">
-          <ThemeToggle />
-          <SignOutButton />
-        </Group>
+        <ThemeToggle />
       </Group>
 
       <Drawer

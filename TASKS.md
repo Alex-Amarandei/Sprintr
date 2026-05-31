@@ -278,20 +278,19 @@ Captured here as they come up; not yet assigned to a lane.
   Anulează / Golește coșul) before adding from another shop. TODO: `beforeunload` prompt
   on refresh/back; persist cart in localStorage (see Cart/checkout above)._
 
-### 🅿️ Parking lot — header / nav / shop-identity polish (C2/C3 UI; BE ready)
+### 🅿️ Parking lot — header / nav / shop-identity polish
 
-- [ ] **Multi-shop switcher** — dropdown to switch active shop when an owner belongs to several
-  shops. BE: `getMyShop`/`getShopOrders` pick the first membership today; needs an active-shop
-  cookie helper for C3's switcher (see C1 unblock note above).
-- [ ] **Profile-icon dropdown** (customer header) — clicking the profile icon opens a menu with an
-  account preview + avatar before going to orders; if the user also has a shop role, offer
-  "Switch to shop view".
-- [ ] **Profile icon in shop view** — show the same profile icon/menu inside the dashboard too.
-- [ ] **Shop greeting → employee name** — the "Bună ziua/Bună seara" greeting in the dashboard
-  should use the logged-in employee's name, not the shop name.
-- [ ] **Company-name badge** — a badge with the shop's full name (e.g. "Pim Copy") visible on all
-  shop/dashboard pages.
-- [ ] **Role badge** — next to the company-name badge, show the role you hold at the shop
-  (staff/catalog/owner).
-- [ ] **Account/avatar** — profile pictures (needs an `avatar_path` on `profiles` + public bucket
-  read; BE follow-up if we want real uploads).
+- [x] **Multi-shop switcher** — active-shop cookie (`sprintr.active_shop`) + `getActiveShopId`/
+  `getActiveMembership` (`lib/shop/active.ts`); all shop-scoped reads honor it; `setActiveShop`
+  action; switcher dropdown in the dashboard topbar (shown when you belong to >1 shop).
+- [x] **Profile-icon dropdown** (customer header) — `ProfileMenu`: avatar (Google photo → initials)
+  + name/email, "Comenzile mele", and "Panou magazin" when the user holds a shop role; sign out.
+- [x] **Profile icon in shop view** — dashboard topbar account menu ("Vezi ca client" + sign out).
+- [x] **Shop greeting → employee name** — greeting now uses the logged-in person's first name
+  (`getViewerIdentity().firstName`), not the shop name.
+- [x] **Company-name badge** + **Role badge** — dashboard topbar shows the active shop's name +
+  your role (Angajat/Catalog/Proprietar) on every dashboard page.
+- [x] **Account/avatar** — Google OAuth picture (`user_metadata.avatar_url`) with an initials
+  fallback; no schema/upload (chosen over a custom `avatar_path` for now).
+- [ ] **Pending-orders badge** — show a badge with the count of "În așteptare" (pending) orders
+  for the shop (e.g. on the Comenzi nav item, like the Mesaje unread badge).

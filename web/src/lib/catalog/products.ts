@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveShopId } from "@/lib/shop/active";
 import { emptyDocument, parseDocument, type CatalogDocument, type Item } from "./schema";
 
 type DbClient = Awaited<ReturnType<typeof createClient>>;
@@ -11,18 +12,8 @@ type DbClient = Awaited<ReturnType<typeof createClient>>;
  * (so unpublished edits show in the dashboard), else the live active version.
  */
 
-async function resolveShopId(supabase: DbClient): Promise<string | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data } = await supabase
-    .from("shop_permissions")
-    .select("shop_id")
-    .eq("profile_id", user.id)
-    .limit(1)
-    .maybeSingle();
-  return data?.shop_id ?? null;
+async function resolveShopId(_supabase: DbClient): Promise<string | null> {
+  return getActiveShopId();
 }
 
 async function loadEditableDocument(

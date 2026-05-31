@@ -3,13 +3,14 @@ import { Box, Group } from "@mantine/core";
 import { LinkAnchor } from "@/components/ui/links";
 import { Logo } from "@/components/ui/Logo";
 import { PageBackground } from "@/components/ui/PageBackground";
-import { SignOutButton } from "@/components/auth/SignOutButton";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
+import { DashboardTopbar } from "@/components/dashboard/DashboardTopbar";
 import { MobileNav } from "@/components/dashboard/MobileNav";
 import { UnreadProvider } from "@/components/dashboard/UnreadProvider";
 import { createClient } from "@/lib/supabase/server";
 import { getShopUnreadCount } from "@/lib/messages/queries";
+import { getViewerIdentity } from "@/lib/auth/identity";
 
 const SIDEBAR_WIDTH = 260;
 
@@ -33,6 +34,7 @@ export default async function ShopLayout({
   if (profile?.role !== "shop" && profile?.role !== "admin") redirect("/browse");
 
   const unread = await getShopUnreadCount();
+  const viewer = await getViewerIdentity();
 
   return (
     <UnreadProvider initialCount={unread} currentUserId={user.id}>
@@ -56,10 +58,7 @@ export default async function ShopLayout({
             <LinkAnchor href="/dashboard" underline="never" display="inline-flex">
               <Logo />
             </LinkAnchor>
-            <Group gap="xs" wrap="nowrap">
-              <ThemeToggle />
-              <SignOutButton />
-            </Group>
+            <ThemeToggle />
           </Group>
         </Box>
         <DashboardNav />
@@ -73,6 +72,17 @@ export default async function ShopLayout({
         ml={{ base: 0, md: SIDEBAR_WIDTH }}
         p={{ base: "md", md: "xl" }}
       >
+        {viewer && (
+          <DashboardTopbar
+            name={viewer.name}
+            email={viewer.email}
+            avatarUrl={viewer.avatarUrl}
+            role={viewer.activeShop?.role ?? ""}
+            shops={viewer.shops}
+            activeShopId={viewer.activeShop?.id ?? null}
+            activeShopName={viewer.activeShop?.name ?? "Magazin"}
+          />
+        )}
         {children}
       </Box>
     </Box>

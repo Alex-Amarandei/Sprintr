@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveShopId } from "@/lib/shop/active";
 import type { OrderStatus } from "@/lib/design/status";
 import type { ExportRow } from "./sample";
 
@@ -19,18 +20,13 @@ export async function exportShopOrders(opts: {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return [];
-  const { data: m } = await supabase
-    .from("shop_permissions")
-    .select("shop_id")
-    .eq("profile_id", user.id)
-    .limit(1)
-    .maybeSingle();
-  if (!m) return [];
+  const shopId = await getActiveShopId();
+  if (!shopId) return [];
 
   let q = supabase
     .from("orders")
     .select("id, created_at, status, total, commission, payout, payment_method")
-    .eq("shop_id", m.shop_id)
+    .eq("shop_id", shopId)
     .order("created_at", { ascending: false });
   if (opts.from) q = q.gte("created_at", opts.from);
   if (opts.to) q = q.lt("created_at", opts.to);

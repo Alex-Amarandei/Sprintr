@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { Stack, Title } from "@mantine/core";
 import { Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveMembership } from "@/lib/shop/active";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { MembersManager } from "@/components/dashboard/MembersManager";
 
@@ -13,13 +14,8 @@ export default async function MembersPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Resolve the caller's shop + their role (owner can manage; others view the roster).
-  const { data: membership } = await supabase
-    .from("shop_permissions")
-    .select("shop_id, role")
-    .eq("profile_id", user?.id ?? "")
-    .limit(1)
-    .maybeSingle();
+  // Resolve the active shop + the caller's role there (owner can manage; others view the roster).
+  const membership = await getActiveMembership();
 
   if (!user || !membership) {
     return (
@@ -36,7 +32,7 @@ export default async function MembersPage() {
 
   return (
     <MembersManager
-      shopId={membership.shop_id}
+      shopId={membership.id}
       isOwner={membership.role === "owner"}
       currentUserId={user.id}
     />

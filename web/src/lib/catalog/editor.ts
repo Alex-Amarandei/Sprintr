@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveMembership } from "@/lib/shop/active";
 import { emptyDocument, parseDocument, type CatalogDocument } from "./schema";
 
 /**
@@ -27,16 +28,11 @@ export async function loadCatalogEditor(): Promise<CatalogEditorData | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // The shop this user belongs to (first membership) + their role there.
-  const { data: membership } = await supabase
-    .from("shop_permissions")
-    .select("shop_id, role")
-    .eq("profile_id", user.id)
-    .limit(1)
-    .maybeSingle();
+  // The active shop this user is operating + their role there.
+  const membership = await getActiveMembership();
   if (!membership) return null;
 
-  const shopId = membership.shop_id;
+  const shopId = membership.id;
   const role = membership.role;
   const canEdit = role === "catalog" || role === "owner";
 

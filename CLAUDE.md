@@ -146,6 +146,18 @@ self-contained record — it never changes when the catalog is later edited.
 - Auth: `/login`, `/register`. `/` routes by role. `middleware.ts` skips auth when env keys are
   placeholder; protected prefixes `/order /orders /dashboard /courier` (segment-precise).
 
+## Active shop & viewer identity
+- A user can belong to **several shops** (`shop_permissions`). The dashboard scopes to ONE
+  **active shop** via the `sprintr.active_shop` cookie. `lib/shop/active.ts` =
+  `getMyShops()` / `getActiveMembership()` / `getActiveShopId()` (cookie → validate → first
+  membership), all `cache()`d per request. **Every shop-scoped read resolves through these**
+  (getMyShop, getShopOrders, exportShopOrders, loadShopProfile, loadCatalogEditor, products,
+  members) — never `shop_permissions … limit(1)` ad-hoc. Switch via `setActiveShop` action.
+- `lib/auth/identity.ts` `getViewerIdentity()` = display name + Google avatar
+  (`user_metadata.avatar_url`, no profiles column; initials fallback via `utils/format.initials`)
+  + shop memberships + active one. Powers the customer header `ProfileMenu`, the dashboard
+  `DashboardTopbar` (company + role badges, shop switcher, account menu), and the greeting.
+
 ## Read/write layers (server-only unless noted)
 - Reads: `lib/catalog/shops.ts` (getShops/getShopView/getShopCatalog), `lib/catalog/products.ts`,
   `lib/orders/queries.ts` (getMyOrders/getOrderDetail/getShopOrders/getMyShop), `lib/offers/queries.ts`.

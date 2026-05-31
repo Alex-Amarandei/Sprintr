@@ -1,7 +1,7 @@
-import { User } from "lucide-react";
 import { Box, Container, Group } from "@mantine/core";
-import { LinkAnchor, LinkActionIcon } from "@/components/ui/links";
-import { SignOutButton } from "@/components/auth/SignOutButton";
+import { LinkAnchor } from "@/components/ui/links";
+import { ProfileMenu, LoginIconLink } from "@/components/auth/ProfileMenu";
+import { getViewerIdentity } from "@/lib/auth/identity";
 import { CartProvider } from "@/components/cart/CartContext";
 import { CartBar } from "@/components/cart/CartBar";
 import { SearchProvider } from "@/components/search/SearchContext";
@@ -11,11 +11,12 @@ import { PageBackground } from "@/components/ui/PageBackground";
 import { SiteFooter } from "@/components/ui/SiteFooter";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
-export default function CustomerLayout({
+export default async function CustomerLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const viewer = await getViewerIdentity();
   return (
     <CartProvider>
       <SearchProvider>
@@ -40,16 +41,16 @@ export default function CustomerLayout({
               <Group gap="sm" wrap="nowrap">
                 <ThemeToggle />
                 <CartBar />
-                <LinkActionIcon
-                  href="/orders"
-                  variant="subtle"
-                  color="gray"
-                  size="lg"
-                  aria-label="Profil"
-                >
-                  <User size={22} />
-                </LinkActionIcon>
-                <SignOutButton />
+                {viewer ? (
+                  <ProfileMenu
+                    name={viewer.name}
+                    email={viewer.email}
+                    avatarUrl={viewer.avatarUrl}
+                    hasShopRole={viewer.shops.length > 0}
+                  />
+                ) : (
+                  <LoginIconLink />
+                )}
               </Group>
             </Group>
           </Container>

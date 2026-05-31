@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveShopId } from "@/lib/shop/active";
 import { parseDocument, type Item } from "@/lib/catalog/schema";
 import type { OrderStatus } from "@/lib/design/status";
 import type { SampleOrder, SampleOrderLine, SampleMessage } from "./sample";
@@ -253,17 +254,12 @@ export async function getMyShop(): Promise<{
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data: membership } = await supabase
-    .from("shop_permissions")
-    .select("shop_id")
-    .eq("profile_id", user.id)
-    .limit(1)
-    .maybeSingle();
-  if (!membership) return null;
+  const shopId = await getActiveShopId();
+  if (!shopId) return null;
   const { data: shop } = await supabase
     .from("shops")
     .select("id, name, description, phone, email, address, delivery_fee, default_eta_minutes, schedule")
-    .eq("id", membership.shop_id)
+    .eq("id", shopId)
     .maybeSingle();
   return shop ?? null;
 }
@@ -275,18 +271,13 @@ export async function getShopOrders(): Promise<SampleOrder[]> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return [];
-  const { data: membership } = await supabase
-    .from("shop_permissions")
-    .select("shop_id")
-    .eq("profile_id", user.id)
-    .limit(1)
-    .maybeSingle();
-  if (!membership) return [];
+  const shopId = await getActiveShopId();
+  if (!shopId) return [];
 
   const { data, error } = await supabase
     .from("orders")
     .select(ORDER_SELECT)
-    .eq("shop_id", membership.shop_id)
+    .eq("shop_id", shopId)
     // Show ALL of the shop's orders (incl. unpaid online) — the row carries a payment-status
     // badge, and online orders flip to "paid" via the Stripe confirmation (webhook or the
     // confirmOrderPayment fallback). The shop can advance an order's status regardless.
