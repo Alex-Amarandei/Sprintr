@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { Box, Group } from "@mantine/core";
 import { LinkAnchor } from "@/components/ui/links";
-import { Wordmark } from "@/components/ui/Wordmark";
+import { Logo } from "@/components/ui/Logo";
+import { PageBackground } from "@/components/ui/PageBackground";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
@@ -30,7 +31,8 @@ export default async function ShopLayout({
   if (profile?.role !== "shop" && profile?.role !== "admin") redirect("/browse");
 
   return (
-    <Box mih="100vh" bg="var(--mantine-color-body)">
+    <Box mih="100vh" bg="var(--mantine-color-body)" style={{ isolation: "isolate" }}>
+      <PageBackground />
       {/* Desktop fixed sidebar */}
       <Box
         component="aside"
@@ -44,19 +46,10 @@ export default async function ShopLayout({
           borderRight: "1px solid var(--mantine-color-default-border)",
         }}
       >
-        <Box
-          p="lg"
-          style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
-        >
+        <Box p="lg">
           <Group justify="space-between" align="center" wrap="nowrap">
-            <LinkAnchor
-              href="/dashboard"
-              fw={700}
-              fz="xl"
-              c="brand.6"
-              underline="never"
-            >
-              <Wordmark />
+            <LinkAnchor href="/dashboard" underline="never" display="inline-flex">
+              <Logo />
             </LinkAnchor>
             <Group gap="xs" wrap="nowrap">
               <ThemeToggle />

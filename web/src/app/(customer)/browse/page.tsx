@@ -1,32 +1,11 @@
 import { Metadata } from "next";
-import {
-  Box,
-  Button,
-  Group,
-  Paper,
-  SimpleGrid,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
-import { Copy, Layers, PenTool, Printer, Upload, Zap } from "lucide-react";
+import { Paper, Stack, Text, Title } from "@mantine/core";
 import { getShops } from "@/lib/catalog/shops";
 import { createClient } from "@/lib/supabase/server";
-import { ShopCard } from "@/components/shop/ShopCard";
-import { LinkButton } from "@/components/ui/links";
+import { ShopResults } from "@/components/shop/ShopResults";
 import { roCount } from "@/lib/utils/format";
 
 export const metadata: Metadata = { title: "Magazine" };
-
-// Visual filter chips (filtering not wired yet — TODO once BE shop reads land).
-const FILTERS = [
-  { label: "Toate", icon: null },
-  { label: "Printare", icon: Printer },
-  { label: "Copiere", icon: Copy },
-  { label: "Legare", icon: Layers },
-  { label: "Birotică", icon: PenTool },
-  { label: "Rapid (sub 30 min)", icon: Zap },
-] as const;
 
 export default async function BrowsePage() {
   // Greeting personalisation (browse is public → user may be null).
@@ -58,57 +37,18 @@ export default async function BrowsePage() {
             "linear-gradient(120deg, var(--mantine-color-ink-9), var(--mantine-color-slate-7))",
         }}
       >
-        <Group justify="space-between" align="center" wrap="wrap" gap="md">
-          <div>
-            <Title order={2} c="white">
-              Bună{firstName ? `, ${firstName}` : ""} 👋
-            </Title>
-            <Text c="gray.4" mt={4}>
-              {roCount(openCount, "magazin", "magazine")} {openCount === 1 ? "este deschis" : "sunt deschise"} acum în Iași. De unde comanzi azi?
-            </Text>
-          </div>
-          {shops[0] && (
-            <LinkButton
-              href={`/shop/${shops[0].id}`}
-              size="md"
-              leftSection={<Upload size={18} />}
-            >
-              Încarcă PDF & comandă rapid
-            </LinkButton>
-          )}
-        </Group>
+        <div>
+          <Title order={2} c="white">
+            Bună{firstName ? `, ${firstName}` : ""} 👋
+          </Title>
+          <Text c="gray.4" mt={4}>
+            {roCount(openCount, "magazin", "magazine")} {openCount === 1 ? "este deschis" : "sunt deschise"} acum în Iași. De unde comanzi azi?
+          </Text>
+        </div>
       </Paper>
 
-      {/* Filters (visual) */}
-      <Group gap="sm">
-        {FILTERS.map(({ label, icon: Icon }, i) => (
-          <Button
-            key={label}
-            size="xs"
-            radius="xl"
-            variant={i === 0 ? "filled" : "default"}
-            color={i === 0 ? "ink" : undefined}
-            leftSection={Icon ? <Icon size={14} /> : undefined}
-          >
-            {label}
-          </Button>
-        ))}
-      </Group>
-
-      {/* Shop grid */}
-      <Box>
-        <Group justify="space-between" align="baseline" mb="md">
-          <Title order={3}>Magazine în Iași</Title>
-          <Text fz="sm" c="dimmed">
-            {roCount(shops.length, "magazin", "magazine")}
-          </Text>
-        </Group>
-        <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">
-          {shops.map((shop) => (
-            <ShopCard key={shop.id} shop={shop} />
-          ))}
-        </SimpleGrid>
-      </Box>
+      {/* Shop grid — client-side, debounced search via the header input */}
+      <ShopResults shops={shops} />
     </Stack>
   );
 }

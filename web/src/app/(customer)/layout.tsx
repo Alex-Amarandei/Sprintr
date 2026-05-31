@@ -1,11 +1,14 @@
-import { Search, User } from "lucide-react";
-import { Box, Container, Group, TextInput } from "@mantine/core";
+import { User } from "lucide-react";
+import { Box, Container, Group } from "@mantine/core";
 import { LinkAnchor, LinkActionIcon } from "@/components/ui/links";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { CartProvider } from "@/components/cart/CartContext";
 import { CartBar } from "@/components/cart/CartBar";
+import { SearchProvider } from "@/components/search/SearchContext";
+import { HeaderSearch } from "@/components/search/HeaderSearch";
+import { Logo } from "@/components/ui/Logo";
+import { PageBackground } from "@/components/ui/PageBackground";
 import { SiteFooter } from "@/components/ui/SiteFooter";
-import { Wordmark } from "@/components/ui/Wordmark";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export default function CustomerLayout({
@@ -15,36 +18,25 @@ export default function CustomerLayout({
 }) {
   return (
     <CartProvider>
-      <Box mih="100vh" bg="var(--mantine-color-body)">
+      <SearchProvider>
+      <Box mih="100vh" bg="var(--mantine-color-body)" style={{ isolation: "isolate" }}>
+        <PageBackground />
         <Box
           component="header"
-          bg="var(--mantine-color-body)"
           style={{
             position: "sticky",
             top: 0,
             zIndex: 50,
-            borderBottom: "1px solid var(--mantine-color-default-border)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
           }}
         >
           <Container size="lg" h={64}>
             <Group h="100%" justify="space-between" wrap="nowrap">
-              <LinkAnchor
-                href="/browse"
-                fw={700}
-                fz="xl"
-                c="brand.6"
-                underline="never"
-              >
-                <Wordmark />
+              <LinkAnchor href="/browse" underline="never" display="inline-flex">
+                <Logo />
               </LinkAnchor>
-              <TextInput
-                flex={1}
-                maw={420}
-              visibleFrom="sm"
-                mx="md"
-                placeholder="Caută magazine sau servicii..."
-                leftSection={<Search size={16} />}
-              />
+              <HeaderSearch />
               <Group gap="sm" wrap="nowrap">
                 <ThemeToggle />
                 <CartBar />
@@ -67,6 +59,7 @@ export default function CustomerLayout({
         </Container>
         <SiteFooter />
       </Box>
+      </SearchProvider>
     </CartProvider>
   );
 }

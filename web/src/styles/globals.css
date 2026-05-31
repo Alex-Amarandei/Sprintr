@@ -15,6 +15,111 @@ body {
   --mantine-color-dimmed: var(--mantine-color-mist-5);
 }
 
+/* Shared page background: drifting aurora blobs + a faint dot grid behind all content.
+   Fixed to the viewport and sits at z-index -1 inside an `isolation: isolate` root. */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+.page-bg__grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    var(--mantine-color-default-border) 1px,
+    transparent 1px
+  );
+  background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 50% at 50% 20%,
+    #000 0%,
+    transparent 80%
+  );
+  mask-image: radial-gradient(
+    ellipse 70% 50% at 50% 20%,
+    #000 0%,
+    transparent 80%
+  );
+  opacity: 0.5;
+}
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.55;
+  will-change: transform;
+}
+.hero-blob--ember {
+  width: 460px;
+  height: 460px;
+  top: -120px;
+  right: -60px;
+  background: radial-gradient(circle, rgba(231, 112, 35, 0.55), transparent 70%);
+  animation: hero-drift-a 18s ease-in-out infinite;
+}
+.hero-blob--teal {
+  width: 420px;
+  height: 420px;
+  top: 35%;
+  left: -100px;
+  background: radial-gradient(circle, rgba(10, 132, 151, 0.45), transparent 70%);
+  animation: hero-drift-b 22s ease-in-out infinite;
+}
+.hero-blob--slate {
+  width: 360px;
+  height: 360px;
+  top: 55%;
+  left: 50%;
+  background: radial-gradient(circle, rgba(69, 100, 120, 0.32), transparent 70%);
+  animation: hero-drift-a 26s ease-in-out infinite reverse;
+}
+.hero-blob--ember2 {
+  width: 400px;
+  height: 400px;
+  bottom: -120px;
+  right: 5%;
+  background: radial-gradient(circle, rgba(231, 112, 35, 0.4), transparent 70%);
+  animation: hero-drift-b 24s ease-in-out infinite;
+}
+@keyframes hero-drift-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-40px, 40px) scale(1.12);
+  }
+}
+@keyframes hero-drift-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(50px, -30px) scale(1.15);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-blob {
+    animation: none;
+  }
+}
+
+/* Landing "how it works" cards: lift + ember border on hover. */
+.hero-step-card {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+.hero-step-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--mantine-shadow-lg);
+  border-color: var(--mantine-color-brand-4);
+}
+
 /*
  * Dark mode: keep every `light` variant (Badge / ThemeIcon / Avatar / Alert / light Button)
  * using the SAME pale tint as light mode — pale `<color>-1` background + dark `<color>-7`
