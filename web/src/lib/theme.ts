@@ -49,11 +49,22 @@ const stone: MantineColorsTuple = [
   "#75787c", "#5e6063", "#48494c", "#333436", "#1f2021",
 ];
 
+// Dark — overrides Mantine's default neutral-grey `dark` ramp so dark mode is on-brand:
+// a cool charcoal-blue tuned to the Slate · Ink hue, not muddy grey. Mantine derives every
+// dark-scheme token from this, so a single coherent ramp restyles the whole dark theme:
+//   0 = primary text · 3 = placeholder · 4 = borders/dividers · 5 = hover/subtle fill
+//   6 = raised surfaces (cards, inputs, menus) · 7 = body background · 8–9 = deeper wells.
+// Surfaces (6) sit a clear step above the body (7) for "lift"; borders (4) stay visible but quiet.
+const dark: MantineColorsTuple = [
+  "#c5d1db", "#aab8c4", "#8896a4", "#62717e", "#3a4751",
+  "#2a353f", "#222e38", "#1a232b", "#131b22", "#0d141a",
+];
+
 export const theme = createTheme({
   primaryColor: "brand",
   primaryShade: 6,
   autoContrast: true, // readable text on filled brand/teal/ink surfaces
-  colors: { brand, slate, ink, teal, cyan, mist, stone },
+  colors: { brand, slate, ink, teal, cyan, mist, stone, dark },
 
   // Radius scale: button 8 (md) · card 12 (lg) · banner 16 (xl).
   defaultRadius: "md",

@@ -28,7 +28,15 @@ export function ShopSchedule({ schedule }: { schedule: WeeklySchedule }) {
         </Group>
         <Group gap={6} align="center">
           <Dot color={status.open ? "teal" : "red"} />
-          <Text fz="sm" fw={600} c={status.open ? "teal.7" : "red.7"}>
+          <Text
+            fz="sm"
+            fw={600}
+            style={{
+              color: status.open
+                ? "light-dark(var(--mantine-color-teal-7), var(--mantine-color-teal-4))"
+                : "light-dark(var(--mantine-color-red-7), var(--mantine-color-red-4))",
+            }}
+          >
             {status.label}
           </Text>
         </Group>

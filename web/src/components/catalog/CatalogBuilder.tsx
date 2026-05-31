@@ -159,7 +159,7 @@ function CategorySection({
       style={{
         background: isOver
           ? "light-dark(var(--mantine-color-stone-1), var(--mantine-color-stone-7))"
-          : "light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6))",
+          : "light-dark(var(--mantine-color-stone-0), var(--mantine-color-dark-6))",
         transition: "background 120ms",
       }}
     >
