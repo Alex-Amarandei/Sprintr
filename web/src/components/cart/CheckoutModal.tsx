@@ -354,7 +354,7 @@ interface CheckoutModalProps {
 type Step = "delivery" | "payment" | "success";
 
 export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
-  const { lines, shopId, total, deliveryFee, clear } = useCart();
+  const { lines, shopId, total, deliveryFee, clear, payable } = useCart();
   const [step, setStep] = useState<Step>("delivery");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -472,7 +472,7 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
 
       {step === "delivery" && (
         <DeliveryStep
-          total={total}
+          total={payable}
           deliveryFee={deliveryFee}
           onNext={handleDeliverySubmit}
           loading={loading}

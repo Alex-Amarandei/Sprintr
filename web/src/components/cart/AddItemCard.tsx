@@ -197,15 +197,7 @@ export function AddItemCard({
             item={item}
             submitLabel="Adaugă în coș"
             onPlaceOrder={(p) => {
-              tryAdd({
-                lineId: crypto.randomUUID(),
-                itemId: p.itemId,
-                title: item.title,
-                kind: item.kind,
-                answers: p.answers,
-                total: p.total,
-                files: p.files,
-              });
+              tryAdd(buildCartLine(item, p.answers, p.files));
               close();
             }}
           />

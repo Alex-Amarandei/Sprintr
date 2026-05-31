@@ -19,7 +19,11 @@ export default function CustomerLayout({
   return (
     <CartProvider>
       <SearchProvider>
-      <Box mih="100vh" bg="var(--mantine-color-body)" style={{ isolation: "isolate" }}>
+      <Box
+        mih="100vh"
+        bg="var(--mantine-color-body)"
+        style={{ display: "flex", flexDirection: "column", isolation: "isolate" }}
+      >
         <PageBackground />
         <Box
           component="header"
@@ -54,9 +58,12 @@ export default function CustomerLayout({
             </Group>
           </Container>
         </Box>
-        <Container size="lg" py="xl">
-          {children}
-        </Container>
+        {/* flex:1 pushes the footer to the viewport bottom on short pages (sticky footer). */}
+        <Box style={{ flex: 1 }}>
+          <Container size="lg" py="xl">
+            {children}
+          </Container>
+        </Box>
         <SiteFooter />
       </Box>
       </SearchProvider>

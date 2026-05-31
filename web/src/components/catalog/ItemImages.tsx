@@ -114,6 +114,11 @@ export function ItemImages({
 
   function onFiles(files: FileList | null) {
     if (!files?.length) return;
+
+    // Snapshot the File objects BEFORE clearing the input. `files` is the input's LIVE
+    // FileList — resetting `value` empties it, so reading it afterwards would yield
+    // nothing and no preview would be added. (Clearing still lets you re-pick the same file.)
+    const picked = Array.from(files);
     if (inputRef.current) inputRef.current.value = "";
 
     const remaining = MAX_IMAGES - images.length;
@@ -122,7 +127,6 @@ export function ItemImages({
       return;
     }
 
-    const picked = Array.from(files);
     const withinSize = picked.filter((f) => f.size <= MAX_IMAGE_MB * 1024 * 1024);
     const tooBig = picked.length - withinSize.length;
     const accepted = withinSize.slice(0, remaining);

@@ -139,8 +139,13 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
       (FileText/Package) with a tooltip on each catalog card_
 - [x] Display products per category on each store — _catalog grouped into `document.categories`
       sections (count badge + divider); degrades to one grid when a shop has no categories_
-- [ ] Active offers per store in banner ⬅BE 🔗
-- [ ] Offers: strikethrough old price, render the new one beside it ⬅BE 🔗
+- [x] Active offers per store in banner — _`getActiveOffers(shopId)` (live automatic only) →
+      `<ShopOffers>` promo banner on the store page (above schedule); hidden when empty._
+- [x] Offers: strikethrough old price, render the new one beside it — _cart computes a live
+      discount preview: `CartContext` loads the shop's live automatic offers, runs the shared
+      `applyOffers` engine, and exposes `discount`/`payable`/`freeShipping`/`lineFinal`. `CartBar`
+      strikes through each discounted line (orig → discounted in brand) and shows
+      Subtotal / Reducere / Livrare gratuită / Total. Matches the server reprice at placement._
 - [x] Rating & Reviews per store — customer display + post-purchase review — _BE already had
       the `reviews` table (verified-purchase RLS, public read). Added `lib/reviews/queries.ts`:
       `getShopRatings` (avg+count from `shop`-target reviews → wired into `getShops`/`getShopView`,

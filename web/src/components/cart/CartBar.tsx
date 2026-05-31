@@ -28,8 +28,19 @@ import { useCart } from "./CartContext";
 import { CheckoutModal } from "./CheckoutModal";
 
 export function CartBar() {
-  const { lines, count, total, shopOpen, shopName, removeLine, clear } =
-    useCart();
+  const {
+    lines,
+    count,
+    total,
+    discount,
+    payable,
+    freeShipping,
+    lineFinal,
+    shopOpen,
+    shopName,
+    removeLine,
+    clear,
+  } = useCart();
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
   const [checkoutOpened, { open: openCheckout, close: closeCheckout }] = useDisclosure(false);
 
@@ -79,6 +90,8 @@ export function CartBar() {
             <Stack gap="sm">
               {lines.map((l) => {
                 const Icon = l.kind === "service" ? FileText : Package;
+                const finalTotal = lineFinal(l.lineId);
+                const discounted = finalTotal < l.total - 0.001;
                 return (
                   <Paper key={l.lineId} withBorder radius="md" p="sm">
                     <Group justify="space-between" wrap="nowrap" align="flex-start">
@@ -102,9 +115,21 @@ export function CartBar() {
                         </div>
                       </Group>
                       <Group gap={4} wrap="nowrap">
-                        <Text fw={700} fz="sm" style={{ whiteSpace: "nowrap" }}>
-                          {formatPrice(l.total)}
-                        </Text>
+                        <div style={{ textAlign: "right" }}>
+                          {discounted && (
+                            <Text fz="xs" c="dimmed" td="line-through" style={{ whiteSpace: "nowrap" }}>
+                              {formatPrice(l.total)}
+                            </Text>
+                          )}
+                          <Text
+                            fw={700}
+                            fz="sm"
+                            c={discounted ? "brand" : undefined}
+                            style={{ whiteSpace: "nowrap" }}
+                          >
+                            {formatPrice(finalTotal)}
+                          </Text>
+                        </div>
                         <ActionIcon
                           variant="subtle"
                           color="red"
@@ -128,19 +153,29 @@ export function CartBar() {
                 </Text>
                 <Text fz="sm">{formatPrice(total)}</Text>
               </Group>
+              {discount > 0 && (
+                <Group justify="space-between" mb={6}>
+                  <Text fz="sm" c="brand" fw={600}>
+                    Reducere
+                  </Text>
+                  <Text fz="sm" c="brand" fw={600}>
+                    −{formatPrice(discount)}
+                  </Text>
+                </Group>
+              )}
               <Group justify="space-between" mb="xs">
                 <Text fz="sm" c="dimmed">
                   Livrare
                 </Text>
-                <Text fz="sm" c="dimmed">
-                  Calculată la finalizare
+                <Text fz="sm" c={freeShipping ? "brand" : "dimmed"} fw={freeShipping ? 600 : undefined}>
+                  {freeShipping ? "Gratuită" : "Calculată la finalizare"}
                 </Text>
               </Group>
               <Divider mb="xs" />
               <Group justify="space-between">
                 <Text fw={700}>Total</Text>
                 <Text fw={800} fz="xl" c="var(--mantine-color-text)">
-                  {formatPrice(total)}
+                  {formatPrice(payable)}
                 </Text>
               </Group>
             </Paper>

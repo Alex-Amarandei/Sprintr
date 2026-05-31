@@ -14,8 +14,10 @@ import {
 import { Clock, MapPin, Phone, Star, Truck } from "lucide-react";
 import { getShopView, getShopCatalog } from "@/lib/catalog/shops";
 import { getShopReviews } from "@/lib/reviews/queries";
+import { getActiveOffers } from "@/lib/offers/queries";
 import { SHOP_CATEGORY } from "@/components/shop/category";
 import { ShopReviews } from "@/components/shop/ShopReviews";
+import { ShopOffers } from "@/components/shop/ShopOffers";
 import { OpenBadge } from "@/components/ui/OpenBadge";
 import { ShopCatalogTabs } from "@/components/shop/ShopCatalogTabs";
 import { ShopSchedule } from "@/components/shop/ShopSchedule";
@@ -31,10 +33,11 @@ interface Props {
 export default async function ShopDetailPage({ params }: Props) {
   const { shopId } = await params;
 
-  const [shop, catalog, reviews] = await Promise.all([
+  const [shop, catalog, reviews, offers] = await Promise.all([
     getShopView(shopId),
     getShopCatalog(shopId),
     getShopReviews(shopId),
+    getActiveOffers(shopId),
   ]);
   if (!shop) notFound();
   const { items, categories } = catalog;
@@ -140,22 +143,8 @@ export default async function ShopDetailPage({ params }: Props) {
         </Group>
       </Card>
 
-      {/* Active promo (visual; offers wiring TODO) — full width */}
-      <Card mx="md">
-        <Text tt="uppercase" fz="xs" fw={700} c="brand.6" style={{ letterSpacing: 0.6 }}>
-          Promoție activă
-        </Text>
-        <Text fw={700} fz="lg" mt="xs">
-          10% reducere licență
-        </Text>
-        <Text c="dimmed" fz="sm" mt={4}>
-          Aplică automat cu codul{" "}
-          <Text span fw={700} c="var(--mantine-color-text)">
-            STUDENT10
-          </Text>{" "}
-          la coș.
-        </Text>
-      </Card>
+      {/* Live automatic promotions for this shop (hidden when there are none). */}
+      <ShopOffers offers={offers} />
 
       {/* Program — full width */}
       <Box mx="md">
