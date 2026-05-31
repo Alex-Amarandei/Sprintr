@@ -92,8 +92,11 @@ export type ScheduleStatus = {
   open: boolean;
   /** Today's Monday-first key (for highlighting the row). */
   today: WeekdayKey;
-  /** Short human label, e.g. "Deschis · până la 20:00" / "Închis · deschide luni la 08:00". */
+  /** Full label, e.g. "Deschis · până la 20:00" / "Închis · deschide luni la 08:00". */
   label: string;
+  /** Compact label for tight spots next to an open/closed badge: "până la 20:00" /
+   *  "deschide mâine 09:00" (no "Deschis/Închis" prefix — the badge already says it). */
+  short: string;
 };
 
 /**
@@ -120,7 +123,12 @@ export function getScheduleStatus(
 
   const todays = hoursFor(0, today);
   if (todays && nowMin >= toMinutes(todays.open) && nowMin < toMinutes(todays.close)) {
-    return { open: true, today, label: `Deschis · până la ${todays.close}` };
+    return {
+      open: true,
+      today,
+      label: `Deschis · până la ${todays.close}`,
+      short: `până la ${todays.close}`,
+    };
   }
 
   // Closed now — find the next opening (today later, or a following day).
@@ -131,14 +139,25 @@ export function getScheduleStatus(
     if (!hours) continue;
     const opensAt = toMinutes(hours.open);
     if (offset === 0 && nowMin >= opensAt) continue; // already past today's open window
-    const when =
+    const whenLong =
       offset === 0
         ? `astăzi la ${hours.open}`
         : offset === 1
           ? `mâine la ${hours.open}`
           : `${DAY_LABELS[key].toLowerCase()} la ${hours.open}`;
-    return { open: false, today, label: `Închis · deschide ${when}` };
+    const whenShort =
+      offset === 0
+        ? `la ${hours.open}`
+        : offset === 1
+          ? `mâine ${hours.open}`
+          : `${DAY_LABELS[key].toLowerCase()} ${hours.open}`;
+    return {
+      open: false,
+      today,
+      label: `Închis · deschide ${whenLong}`,
+      short: `deschide ${whenShort}`,
+    };
   }
 
-  return { open: false, today, label: "Închis" };
+  return { open: false, today, label: "Închis", short: "Închis azi" };
 }
