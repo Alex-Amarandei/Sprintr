@@ -121,17 +121,32 @@ export default async function ShopDetailPage({ params }: Props) {
                       : "Livrare gratuită"}
                   </Text>
                 </Group>
-                <Group gap={4}>
-                  <MapPin size={15} />
-                  <Text fz="sm">{shop.address}</Text>
-                </Group>
-                {shop.phone && (
+                {shop.address && (
                   <Anchor
-                    href={`tel:${shop.phone.replace(/\s+/g, "")}`}
-                    c="dimmed"
+                    // Opens the address in Google Maps (new tab). Ember + hover underline so it
+                    // clearly reads as clickable against the dimmed meta row.
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(shop.address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    c="brand.6"
+                    fw={500}
                     underline="hover"
                   >
-                    <Group gap={4}>
+                    <Group gap={4} wrap="nowrap">
+                      <MapPin size={15} />
+                      <Text fz="sm">{shop.address}</Text>
+                    </Group>
+                  </Anchor>
+                )}
+                {shop.phone && (
+                  <Anchor
+                    // Native dial (tel:). Same ember link treatment as the address.
+                    href={`tel:${shop.phone.replace(/\s+/g, "")}`}
+                    c="brand.6"
+                    fw={500}
+                    underline="hover"
+                  >
+                    <Group gap={4} wrap="nowrap">
                       <Phone size={15} />
                       <Text fz="sm">{shop.phone}</Text>
                     </Group>
