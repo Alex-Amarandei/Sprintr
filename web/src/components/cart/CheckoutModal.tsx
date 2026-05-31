@@ -94,12 +94,19 @@ interface DeliveryFormValues {
 const SERVICE_FEE = 2;
 
 function DeliveryStep({
-  total,
+  subtotal,
+  discount,
+  freeShipping,
   deliveryFee,
   onNext,
   loading,
 }: {
-  total: number;
+  /** Pre-discount goods subtotal. */
+  subtotal: number;
+  /** Goods discount from live automatic offers. */
+  discount: number;
+  /** A free-shipping offer is in effect (waives the delivery fee). */
+  freeShipping: boolean;
   deliveryFee: number;
   onNext: (values: DeliveryFormValues) => void;
   loading: boolean;
@@ -125,6 +132,14 @@ function DeliveryStep({
   });
 
   const pickup = form.values.fulfilment === "pickup";
+
+  // Live total preview, mirroring the server's authoritative reprice:
+  //   total = (subtotal − discount) + shipping + service fee
+  // Shipping applies only to delivery, and a free-shipping offer waives it.
+  const shipping = pickup || freeShipping ? 0 : deliveryFee;
+  const orderTotal =
+    Math.round((subtotal - discount + shipping + SERVICE_FEE) * 100) / 100;
+
   const [locating, setLocating] = useState(false);
 
   // Apply a chosen point: store coords + best-effort reverse-geocode into the address field.
@@ -300,17 +315,27 @@ function DeliveryStep({
 
         <Divider />
 
-        {/* Money breakdown — delivery fee only applies to delivery; service fee is flat. */}
+        {/* Money breakdown — subtotal, discount, then fees. Mirrors the server's reprice. */}
         <Stack gap={4}>
           <Group justify="space-between">
             <Text fz="sm" c="dimmed">Subtotal</Text>
-            <Text fz="sm">{formatPrice(total)}</Text>
+            <Text fz="sm">{formatPrice(subtotal)}</Text>
           </Group>
+          {discount > 0 && (
+            <Group justify="space-between">
+              <Text fz="sm" c="brand" fw={600}>Reducere</Text>
+              <Text fz="sm" c="brand" fw={600}>−{formatPrice(discount)}</Text>
+            </Group>
+          )}
           {!pickup && (
             <Group justify="space-between">
               <Text fz="sm" c="dimmed">Livrare</Text>
-              <Text fz="sm">
-                {deliveryFee > 0 ? formatPrice(deliveryFee) : "Gratuit"}
+              <Text
+                fz="sm"
+                c={shipping === 0 ? "brand" : undefined}
+                fw={shipping === 0 ? 600 : undefined}
+              >
+                {shipping > 0 ? formatPrice(shipping) : "Gratuit"}
               </Text>
             </Group>
           )}
@@ -326,7 +351,7 @@ function DeliveryStep({
               Total
             </Text>
             <Text fz={22} fw={800} c="var(--mantine-color-text)" lh={1}>
-              {formatPrice(total + (pickup ? 0 : deliveryFee) + SERVICE_FEE)}
+              {formatPrice(orderTotal)}
             </Text>
           </div>
           <Button type="submit" size="md" loading={loading}>
@@ -443,7 +468,7 @@ interface CheckoutModalProps {
 type Step = "delivery" | "payment" | "success";
 
 export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
-  const { lines, shopId, total, deliveryFee, clear, payable } = useCart();
+  const { lines, shopId, total, discount, freeShipping, deliveryFee, clear } = useCart();
   const [step, setStep] = useState<Step>("delivery");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -568,7 +593,9 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
 
       {step === "delivery" && (
         <DeliveryStep
-          total={payable}
+          subtotal={total}
+          discount={discount}
+          freeShipping={freeShipping}
           deliveryFee={deliveryFee}
           onNext={handleDeliverySubmit}
           loading={loading}

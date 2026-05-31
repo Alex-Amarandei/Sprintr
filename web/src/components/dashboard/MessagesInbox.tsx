@@ -171,7 +171,7 @@ export function MessagesInbox({
                             {timeOnly(c.lastAtIso)}
                           </Text>
                           {c.unread > 0 && (
-                            <Badge size="sm" circle variant="filled" color="brand">
+                            <Badge size="sm" circle variant="filled" color="brand.5" c="white">
                               {c.unread > 9 ? "9+" : c.unread}
                             </Badge>
                           )}
