@@ -88,6 +88,8 @@ interface DeliveryFormValues {
   contact_phone: string;
   notes: string;
   payment_method: "cash_in_store" | "cash_on_delivery" | "online";
+  /** Optional promo code typed at checkout (validated server-side at placement). */
+  code: string;
 }
 
 // Fixed platform service fee per order (matches the server's SERVICE_FEE; not shop-configurable).
@@ -119,6 +121,7 @@ function DeliveryStep({
       delivery_lng: null,
       contact_phone: "",
       notes: "",
+      code: "",
       // Delivery is the default fulfilment → must be paid online.
       payment_method: "online",
     },
@@ -278,6 +281,13 @@ function DeliveryStep({
           autosize
           minRows={2}
           {...form.getInputProps("notes")}
+        />
+
+        <TextInput
+          label="Cod promoțional (opțional)"
+          placeholder="ex. STUDENT10"
+          {...form.getInputProps("code")}
+          onChange={(e) => form.setFieldValue("code", e.currentTarget.value.toUpperCase())}
         />
 
         <Divider />
@@ -516,6 +526,7 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
         contact_phone: values.contact_phone,
         notes: values.notes || undefined,
         payment_method: values.payment_method,
+        code: values.code.trim() || undefined,
       };
 
       const res = await fetch("/api/place-order", {

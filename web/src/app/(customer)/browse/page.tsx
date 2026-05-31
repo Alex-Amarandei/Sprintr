@@ -3,6 +3,7 @@ import { Paper, Stack, Text, Title } from "@mantine/core";
 import { getShops } from "@/lib/catalog/shops";
 import { createClient } from "@/lib/supabase/server";
 import { ShopResults } from "@/components/shop/ShopResults";
+import { MobileShopSearch } from "@/components/search/MobileShopSearch";
 import { roCount } from "@/lib/utils/format";
 
 export const metadata: Metadata = { title: "Magazine" };
@@ -46,6 +47,9 @@ export default async function BrowsePage() {
           </Text>
         </div>
       </Paper>
+
+      {/* Mobile search (header search is hidden below sm) */}
+      <MobileShopSearch />
 
       {/* Shop grid — client-side, debounced search via the header input */}
       <ShopResults shops={shops} />
