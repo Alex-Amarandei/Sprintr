@@ -10,6 +10,9 @@ import {
 } from "@mantine/core";
 import { Toaster } from "sonner";
 import { theme } from "@/lib/theme";
+import { ServiceWorkerRegistrar } from "@/components/ui/ServiceWorkerRegistrar";
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 const inter = Inter({
   variable: "--font-geist-sans",
@@ -17,6 +20,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "SprintR",
     template: "%s | SprintR",
@@ -24,6 +28,20 @@ export const metadata: Metadata = {
   description:
     "Papetărie la ușa ta. Printare, legătorie și produse de birou livrate rapid în Iași.",
   keywords: ["papetărie", "printare", "legătorie", "livrare", "Iași"],
+  applicationName: "SprintR",
+  appleWebApp: { capable: true, title: "SprintR", statusBarStyle: "default" },
+  openGraph: {
+    type: "website",
+    siteName: "SprintR",
+    locale: "ro_RO",
+    title: "SprintR — Papetărie la ușa ta",
+    description:
+      "Printare, legătorie și produse de birou livrate rapid în Iași.",
+  },
+};
+
+export const viewport = {
+  themeColor: "#ea6c1f",
 };
 
 export default function RootLayout({
@@ -41,6 +59,7 @@ export default function RootLayout({
           {children}
         </MantineProvider>
         <Toaster position="bottom-right" richColors closeButton />
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );

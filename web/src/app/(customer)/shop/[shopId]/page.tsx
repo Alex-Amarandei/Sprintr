@@ -25,10 +25,24 @@ import { ShopSchedule } from "@/components/shop/ShopSchedule";
 import { SAMPLE_SCHEDULE, getScheduleStatus } from "@/lib/shop/schedule";
 import { roCount } from "@/lib/utils/format";
 
-export const metadata: Metadata = { title: "Magazin" };
-
 interface Props {
   params: Promise<{ shopId: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { shopId } = await params;
+  const shop = await getShopView(shopId);
+  if (!shop) return { title: "Magazin" };
+  const description = shop.description || `Comandă printare și papetărie de la ${shop.name} pe SprintR.`;
+  return {
+    title: shop.name,
+    description,
+    openGraph: {
+      title: shop.name,
+      description,
+      images: shop.bannerUrl ? [shop.bannerUrl] : undefined,
+    },
+  };
 }
 
 export default async function ShopDetailPage({ params }: Props) {
