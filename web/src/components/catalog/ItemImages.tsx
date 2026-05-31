@@ -54,9 +54,17 @@ function Thumb({
       />
 
       {isMain && (
-        <Badge size="xs" color="brand" pos="absolute" bottom={3} left={3} style={{ pointerEvents: "none" }}>
-          Principală
-        </Badge>
+        <Box
+          pos="absolute"
+          bottom={3}
+          left={0}
+          right={0}
+          style={{ display: "flex", justifyContent: "center", pointerEvents: "none" }}
+        >
+          <Badge size="xs" color="brand">
+            Principală
+          </Badge>
+        </Box>
       )}
       {pending && !isMain && (
         <Badge size="xs" variant="light" color="yellow" pos="absolute" bottom={3} left={3} style={{ pointerEvents: "none" }}>
