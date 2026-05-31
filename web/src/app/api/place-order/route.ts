@@ -242,7 +242,10 @@ export async function POST(req: NextRequest) {
       : undefined;
     const engineOffers = [...autos, ...(codeOffer ? [codeOffer] : [])].map(toEngineOffer);
 
-    const offers = applyOffers(cartLines, engineOffers, shop.delivery_fee ?? 0);
+    // Shipping only applies to delivery — pickup has no delivery fee. Passing the correct
+    // baseShipping also makes a free-shipping offer score correctly (it saves nothing on pickup).
+    const baseShipping = fulfilment === "pickup" ? 0 : (shop.delivery_fee ?? 0);
+    const offers = applyOffers(cartLines, engineOffers, baseShipping);
     const discount = offers.discount;
     const shippingFee = offers.shippingFee;
     const serviceFee = SERVICE_FEE;

@@ -55,7 +55,7 @@ export function CartBar() {
           leftSection={<ShoppingCart size={18} />}
           onClick={openDrawer}
         >
-          {formatPrice(total)}
+          {formatPrice(payable)}
         </Button>
       </Indicator>
 
