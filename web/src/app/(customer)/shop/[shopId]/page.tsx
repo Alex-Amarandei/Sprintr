@@ -12,6 +12,7 @@ import {
   Title,
 } from "@mantine/core";
 import { Clock, MapPin, Phone, Star, Truck } from "lucide-react";
+import { ScrollToHash } from "@/components/ui/ScrollToHash";
 import { getShopView, getShopCatalog } from "@/lib/catalog/shops";
 import { getShopReviews } from "@/lib/reviews/queries";
 import { getActiveOffers } from "@/lib/offers/queries";
@@ -51,6 +52,7 @@ export default async function ShopDetailPage({ params }: Props) {
 
   return (
     <Stack gap="lg">
+      <ScrollToHash />
       {/* Banner */}
       <Box
         h={180}

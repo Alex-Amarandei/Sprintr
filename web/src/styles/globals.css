@@ -121,6 +121,22 @@ body {
   border-color: var(--mantine-color-brand-3);
 }
 
+/* Brief pulse when an order line deep-links to its product card (#item-<id>). */
+.hash-flash {
+  animation: hash-flash 1.6s ease;
+}
+@keyframes hash-flash {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    border-color: var(--mantine-color-default-border);
+  }
+  20% {
+    box-shadow: 0 0 0 3px var(--mantine-color-brand-3);
+    border-color: var(--mantine-color-brand-5);
+  }
+}
+
 /* Landing "how it works" cards: lift + ember border on hover. */
 .hero-step-card {
   transition:
