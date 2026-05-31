@@ -49,3 +49,9 @@ export const ORDER_FLOW: OrderStatus[] = [
 export function statusStep(status: OrderStatus): number {
   return ORDER_FLOW.indexOf(status);
 }
+
+/** Terminal = the order is finished (done or rejected). Receipts are only offered then. */
+export const TERMINAL_STATUSES: OrderStatus[] = ["done", "rejected"];
+export function isTerminalStatus(status: OrderStatus): boolean {
+  return TERMINAL_STATUSES.includes(status);
+}

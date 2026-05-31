@@ -47,7 +47,7 @@ type RawItem = {
 };
 
 /** Build a readable config summary from answers using the catalog item's labels. */
-function summarize(answers: Record<string, unknown> | null, item?: Item): string {
+export function summarize(answers: Record<string, unknown> | null, item?: Item): string {
   if (!answers) return "";
   if (!item) {
     return Object.values(answers)

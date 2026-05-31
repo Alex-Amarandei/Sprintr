@@ -38,7 +38,9 @@ something C1 builds (build against a stub until it lands).
 - [x] Add "in delivery" order status 🔗 — `order_status` enum migration
       (`in_delivery` between `in_progress`→`done`; shared token "În livrare"/grape in `ORDER_FLOW`;
       `advanceOrderStatus` accepts it. FE wiring: C3 action button + C2 timeline step.)
-- [ ] Invoice download + generate invoices/receipts & export — PDF gen + storage + API
+- [x] Invoice download + generate invoices/receipts & export — PDF gen + API
+      (`GET /api/orders/[orderId]/invoice` → receipt PDF via @react-pdf/renderer + Noto Sans;
+      `lib/invoice/*`. On-demand from frozen order; storage-caching deferred. FE download buttons = C2/C3.)
 
 ### Storage & data
 - [ ] Store PDFs in S3 🔗

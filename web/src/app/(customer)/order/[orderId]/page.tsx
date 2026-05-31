@@ -2,7 +2,6 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   Box,
-  Button,
   Card,
   Divider,
   Group,
@@ -10,12 +9,14 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { ArrowLeft, Download, FileText } from "lucide-react";
+import { ArrowLeft, FileText } from "lucide-react";
 import { getOrderDetail } from "@/lib/orders/queries";
 import { createClient } from "@/lib/supabase/server";
+import { isTerminalStatus } from "@/lib/design/status";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { ChatPanel } from "@/components/order/ChatPanel";
+import { DownloadReceiptButton } from "@/components/order/DownloadReceiptButton";
 import { LinkAnchor } from "@/components/ui/links";
 
 export const metadata: Metadata = { title: "Detalii comandă" };
@@ -56,9 +57,10 @@ export default async function OrderDetailPage({ params }: Props) {
             {order.eta ? ` · ETA ${order.eta}` : ""}
           </Text>
         </div>
-        <Button variant="default" leftSection={<Download size={16} />}>
-          Descarcă factura
-        </Button>
+        <DownloadReceiptButton
+          orderId={order.id}
+          enabled={isTerminalStatus(order.status)}
+        />
       </Group>
 
       <Group align="flex-start" gap="lg" wrap="nowrap">

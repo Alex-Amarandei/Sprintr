@@ -1201,3 +1201,20 @@ trigger still fires only on `done`/`rejected` (no change). Shared token `lib/des
 label **"În livrare"**, colour `grape`, and it's in `ORDER_FLOW` between `in_progress` and
 `done`. `advanceOrderStatus` already accepts any status, so no action change. FE follow-ups
 (tracked in TASKS): C3 shop-side "in delivery" action button, C2 customer timeline step.
+
+## Invoice / receipt PDF — IMPLEMENTED (2026-05-31)
+
+`GET /api/orders/[orderId]/invoice` streams a PDF **receipt** (a chitanță, not a fiscal factură).
+- **Auth gate:** `getOrderDetail()` runs under the caller's RLS (customer own / shop member /
+  admin); null ⇒ 404. The PDF data is then loaded with the **service client** (accurate customer
+  name despite the profiles RLS gap, + the full money breakdown). Generated **on-demand** from the
+  FROZEN order — no storage needed (it's regenerable; storage-caching deferred as an optimization).
+- **Stack:** `@react-pdf/renderer` (kept external via `serverExternalPackages`), Node runtime, with
+  an embedded **Noto Sans** TTF for Romanian diacritics (`outputFileTracingIncludes` ships the
+  fonts to Vercel). Needs `SUPABASE_SERVICE_ROLE_KEY`.
+- **Modules:** `lib/invoice/data.ts` (load + label summaries via the exported `summarize`),
+  `template.tsx` (layout), `render.tsx` (`renderToBuffer`). Receipt shows shop + customer, line
+  items with frozen config summary, and subtotal / discount (+ offer names) / shipping / service
+  fee / total + payment method & status.
+- **FE hook (C2/C3):** just link to it — `<a href={`/api/orders/${id}/invoice`} target="_blank">`.
+  Shop-side + customer-side download buttons are the FE tasks.
