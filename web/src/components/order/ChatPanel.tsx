@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   ActionIcon,
   Avatar,
@@ -60,6 +60,9 @@ export function ChatPanel({
 }) {
   const supabase = useMemo(() => createClient(), []);
   const mySide = perspective === "shop" ? "shop" : "customer";
+  // Unique per mounted instance: the page renders ChatPanel twice (desktop + mobile copies),
+  // so a shared topic would collide ("cannot add postgres_changes after subscribe()").
+  const channelKey = useId();
 
   const [messages, setMessages] = useState<ChatMsg[]>(() =>
     initialMessages.map((m) => ({ id: null, ...m }))
@@ -73,7 +76,7 @@ export function ChatPanel({
   // Live subscription: new messages on this order arrive here (RLS scopes to participants).
   useEffect(() => {
     const channel = supabase
-      .channel(`order-chat-${orderId}`)
+      .channel(`order-chat-${orderId}-${channelKey}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `order_id=eq.${orderId}` },
@@ -102,7 +105,7 @@ export function ChatPanel({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, orderId, customerId]);
+  }, [supabase, orderId, customerId, channelKey]);
 
   // Keep the newest message in view.
   useEffect(() => {
