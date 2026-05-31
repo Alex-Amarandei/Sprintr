@@ -108,7 +108,13 @@ export function DashboardTopbar({
       <Menu position="bottom-end" width={240} withArrow shadow="md">
         <Menu.Target>
           <UnstyledButton aria-label="Cont" style={{ display: "inline-flex", borderRadius: "50%" }}>
-            <Avatar src={avatarUrl ?? undefined} size={34} radius="xl" color="brand">
+            <Avatar
+              src={avatarUrl ?? undefined}
+              size={34}
+              radius="xl"
+              color="brand"
+              imageProps={{ referrerPolicy: "no-referrer" }}
+            >
               {initials(name)}
             </Avatar>
           </UnstyledButton>

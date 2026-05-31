@@ -34,11 +34,9 @@ export const useUnread = () => useContext(UnreadContext);
  */
 export function UnreadProvider({
   initialCount,
-  currentUserId,
   children,
 }: {
   initialCount: number;
-  currentUserId: string;
   children: React.ReactNode;
 }) {
   const supabase = useMemo(() => createClient(), []);
@@ -80,17 +78,11 @@ export function UnreadProvider({
 
   const markRead = useCallback(
     async (orderId: string) => {
-      await supabase.from("message_reads").upsert(
-        {
-          order_id: orderId,
-          profile_id: currentUserId,
-          last_read_at: new Date().toISOString(),
-        },
-        { onConflict: "order_id,profile_id" }
-      );
+      // Server-time upsert (avoids client clock skew leaving a just-read message "unread").
+      await supabase.rpc("mark_order_read", { p_order_id: orderId });
       await refresh();
     },
-    [supabase, currentUserId, refresh]
+    [supabase, refresh]
   );
 
   const value = useMemo(

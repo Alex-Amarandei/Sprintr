@@ -772,6 +772,7 @@ export type Database = {
           role: Database["public"]["Enums"]["shop_role"]
         }[]
       }
+      mark_order_read: { Args: { p_order_id: string }; Returns: undefined }
       offer_is_live: {
         Args: { o: Database["public"]["Tables"]["offers"]["Row"] }
         Returns: boolean

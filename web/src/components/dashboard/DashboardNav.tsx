@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Badge, NavLink, Stack, Text } from "@mantine/core";
+import { Badge, Group, NavLink, Stack, Text } from "@mantine/core";
 import {
   BarChart3,
   LayoutDashboard,
@@ -48,12 +48,16 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
   },
 ];
 
+const badgeText = (n: number) => (n > 9 ? "9+" : String(n));
+
 export function DashboardNav({
   onNavigate,
   pendingCount = 0,
+  inProgressCount = 0,
 }: {
   onNavigate?: () => void;
   pendingCount?: number;
+  inProgressCount?: number;
 }) {
   const pathname = usePathname();
   const { count } = useUnread();
@@ -81,8 +85,30 @@ export function DashboardNav({
                 ? pathname === "/dashboard"
                 : pathname.startsWith(href);
             const showUnread = href === "/dashboard/messages" && count > 0;
-            const showPending = href === "/dashboard/orders" && pendingCount > 0;
-            const badgeValue = showUnread ? count : showPending ? pendingCount : 0;
+            const isOrders = href === "/dashboard/orders";
+            let rightSection: React.ReactNode;
+            if (showUnread) {
+              rightSection = (
+                <Badge size="sm" variant="filled" color="brand" aria-label="mesaje necitite">
+                  {badgeText(count)}
+                </Badge>
+              );
+            } else if (isOrders && (pendingCount > 0 || inProgressCount > 0)) {
+              rightSection = (
+                <Group gap={4} wrap="nowrap">
+                  {pendingCount > 0 && (
+                    <Badge size="sm" variant="filled" color="brand" aria-label="comenzi noi">
+                      {badgeText(pendingCount)}
+                    </Badge>
+                  )}
+                  {inProgressCount > 0 && (
+                    <Badge size="sm" variant="light" color="cyan" aria-label="comenzi în lucru">
+                      {badgeText(inProgressCount)}
+                    </Badge>
+                  )}
+                </Group>
+              );
+            }
             return (
               <NavLink
                 key={href}
@@ -94,18 +120,7 @@ export function DashboardNav({
                 variant="light"
                 onClick={onNavigate}
                 leftSection={<Icon size={18} />}
-                rightSection={
-                  showUnread || showPending ? (
-                    <Badge
-                      size="sm"
-                      variant="filled"
-                      color="brand"
-                      aria-label={showUnread ? "mesaje necitite" : "comenzi în așteptare"}
-                    >
-                      {badgeValue > 9 ? "9+" : badgeValue}
-                    </Badge>
-                  ) : undefined
-                }
+                rightSection={rightSection}
                 styles={{
                   root: { borderRadius: "var(--mantine-radius-md)" },
                   // Tighter icon↔label gap; dim inactive icons so the active brand row pops.

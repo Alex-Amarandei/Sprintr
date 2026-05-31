@@ -21,6 +21,7 @@ export function ShopCard({ shop }: { shop: SampleShop }) {
     <Card
       p={0}
       withBorder
+      className="catalog-card"
       style={{
         overflow: "hidden",
         height: "100%",

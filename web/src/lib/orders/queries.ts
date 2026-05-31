@@ -264,17 +264,24 @@ export async function getMyShop(): Promise<{
   return shop ?? null;
 }
 
-/** Count of pending ("în așteptare") orders for the active shop — drives the nav badge. */
-export async function getShopPendingCount(): Promise<number> {
+/** New (pending) + in-progress order counts for the active shop — drives the Comenzi nav badges. */
+export async function getShopOrderCounts(): Promise<{ pending: number; inProgress: number }> {
   const supabase = await createClient();
   const shopId = await getActiveShopId();
-  if (!shopId) return 0;
-  const { count } = await supabase
-    .from("orders")
-    .select("id", { count: "exact", head: true })
-    .eq("shop_id", shopId)
-    .eq("status", "pending");
-  return count ?? 0;
+  if (!shopId) return { pending: 0, inProgress: 0 };
+  const [pendingRes, progressRes] = await Promise.all([
+    supabase
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("shop_id", shopId)
+      .eq("status", "pending"),
+    supabase
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("shop_id", shopId)
+      .in("status", ["accepted", "in_progress", "in_delivery"]),
+  ]);
+  return { pending: pendingRes.count ?? 0, inProgress: progressRes.count ?? 0 };
 }
 
 /** Orders for the shop the current user belongs to (dashboard queue). */
@@ -371,6 +378,7 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
 
   const items = (order.order_items ?? []) as RawItem[];
   const lines: SampleOrderLine[] = items.map((it) => ({
+    itemId: it.item_id,
     title: it.item_title,
     summary: summarize(it.answers, catalogItems.find((ci) => ci.id === it.item_id)),
     lineTotal: Number(it.line_total),

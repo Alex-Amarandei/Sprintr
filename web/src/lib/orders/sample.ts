@@ -14,6 +14,8 @@ export interface ExportRow {
 
 /** Order view-model shared by the customer order views and the shop dashboard. */
 export interface SampleOrderLine {
+  /** Frozen catalog item id — used to deep-link the order line back to the product card. */
+  itemId?: string;
   title: string;
   summary: string;
   lineTotal: number;

@@ -297,5 +297,7 @@ Captured here as they come up; not yet assigned to a lane.
   your role (Angajat/Catalog/Proprietar) on every dashboard page.
 - [x] **Account/avatar** — Google OAuth picture (`user_metadata.avatar_url`) with an initials
   fallback; no schema/upload (chosen over a custom `avatar_path` for now).
-- [x] **Pending-orders badge** — `getShopPendingCount` → badge on the Comenzi nav item (sidebar +
-  mobile drawer), mirroring the Mesaje unread badge.
+- [x] **Pending-orders badge** — `getShopOrderCounts` → two badges on the Comenzi nav item (new
+  =brand, in-progress=cyan; sidebar + mobile drawer), mirroring the Mesaje unread badge.
+- [ ] **Comenzi search** — search box on `/dashboard/orders` (by order #, customer, item).
+- [ ] **Comenzi pagination** — configurable page size (20 / 50 / 100) on `/dashboard/orders`.

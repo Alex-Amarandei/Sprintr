@@ -90,9 +90,15 @@ export default async function OrderDetailPage({ params }: Props) {
                 <Box key={i}>
                   <Group justify="space-between" align="flex-start" wrap="nowrap">
                     <div>
-                      <Text fw={600} fz="sm">
+                      <LinkAnchor
+                        href={`/shop/${order.shopId}${line.itemId ? `#item-${line.itemId}` : ""}`}
+                        fw={600}
+                        fz="sm"
+                        c="var(--mantine-color-text)"
+                        underline="hover"
+                      >
                         {line.title}
-                      </Text>
+                      </LinkAnchor>
                       <Text fz="xs" c="dimmed" mt={2}>
                         {line.summary}
                       </Text>

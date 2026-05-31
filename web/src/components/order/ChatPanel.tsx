@@ -21,6 +21,7 @@ import type { OrderStatus } from "@/lib/design/status";
 import { Dot } from "@/components/ui/Dot";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { LinkActionIcon } from "@/components/ui/links";
+import { useUnread } from "@/components/dashboard/UnreadProvider";
 
 type Thread = "order" | "complaint";
 type ChatMsg = {
@@ -131,6 +132,13 @@ export function ChatPanel({
   }, [supabase, orderId, customerId, channelKey, onMessage]);
 
   const messages = tab === "complaint" ? complaintMsgs : orderMsgs;
+
+  // Shop side: opening the order (and any new message while it's open) marks the thread read,
+  // clearing the sidebar unread badge. No-op on the customer side (no UnreadProvider).
+  const { markRead } = useUnread();
+  useEffect(() => {
+    if (perspective === "shop") void markRead(orderId);
+  }, [perspective, orderId, markRead, orderMsgs.length, complaintMsgs.length]);
 
   // Keep the newest message in view (on thread switch + new messages).
   useEffect(() => {

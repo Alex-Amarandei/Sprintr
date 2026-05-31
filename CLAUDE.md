@@ -184,6 +184,11 @@ self-contained record — it never changes when the catalog is later edited.
 - **Fonts:** next/font var must be on `<html>` (not just `<body>`) or Mantine falls back to serif.
 - **Nested Mantine `Collapse`** mis-measures height → use conditional render for nested expandables.
 - **Screenshots:** `/dashboard/*` and `/browse` never reach network-idle → verify via DOM, not screenshots.
+- **Google avatars:** `lh3.googleusercontent.com` (the OAuth `avatar_url`) 403s when a referrer is
+  sent → pass `imageProps={{ referrerPolicy: "no-referrer" }}` to Mantine `<Avatar>` or it shows a
+  broken image instead of the initials fallback.
+- **Read state:** mark a chat read via the `mark_order_read(order_id)` RPC (server `now()`), not a
+  client-time upsert — clock skew left just-read messages "unread" so the badge never cleared.
 - **Pricing parity:** the place-order server reprice (`api/place-order/route.ts`) must stay
   byte-equivalent to `lib/catalog/pricing.ts` — any >1 bani divergence rejects a valid cart. Watch:
   per_unit with an unanswered `per` = 0 (not amount×1); quantity multiplier `|| 1` (0/NaN → 1); and

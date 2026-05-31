@@ -10,7 +10,7 @@ import { MobileNav } from "@/components/dashboard/MobileNav";
 import { UnreadProvider } from "@/components/dashboard/UnreadProvider";
 import { createClient } from "@/lib/supabase/server";
 import { getShopUnreadCount } from "@/lib/messages/queries";
-import { getShopPendingCount } from "@/lib/orders/queries";
+import { getShopOrderCounts } from "@/lib/orders/queries";
 import { getViewerIdentity } from "@/lib/auth/identity";
 
 const SIDEBAR_WIDTH = 260;
@@ -35,11 +35,11 @@ export default async function ShopLayout({
   if (profile?.role !== "shop" && profile?.role !== "admin") redirect("/browse");
 
   const unread = await getShopUnreadCount();
-  const pending = await getShopPendingCount();
+  const { pending, inProgress } = await getShopOrderCounts();
   const viewer = await getViewerIdentity();
 
   return (
-    <UnreadProvider initialCount={unread} currentUserId={user.id}>
+    <UnreadProvider initialCount={unread}>
     <Box mih="100vh" bg="var(--mantine-color-body)" style={{ isolation: "isolate" }}>
       <PageBackground />
       {/* Desktop fixed sidebar */}
@@ -69,11 +69,11 @@ export default async function ShopLayout({
             <ThemeToggle />
           </Group>
         </Box>
-        <DashboardNav pendingCount={pending} />
+        <DashboardNav pendingCount={pending} inProgressCount={inProgress} />
       </Box>
 
       {/* Mobile top bar + nav (hamburger → Drawer) */}
-      <MobileNav pendingCount={pending} />
+      <MobileNav pendingCount={pending} inProgressCount={inProgress} />
 
       <Box
         component="main"
