@@ -28,6 +28,18 @@ const initials = (n: string) =>
   n.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 const short = (id: string) => id.slice(0, 8);
 
+/** Payment badge for the shop: paid / unpaid (online) / pay-on-handover (cash). */
+function paymentBadge(o: SampleOrder): { label: string; color: string } {
+  if (o.paymentStatus === "paid") return { label: "Plătită", color: "teal" };
+  if (o.paymentStatus === "refunded") return { label: "Rambursată", color: "gray" };
+  if (o.online) {
+    return o.paymentStatus === "failed"
+      ? { label: "Plată eșuată", color: "red" }
+      : { label: "Neplătită", color: "orange" };
+  }
+  return { label: "Plată la primire", color: "gray" };
+}
+
 /**
  * Shop-side incoming order queue with inline accept/reject/advance.
  * Optimistic update + server persistence via the `advanceOrderStatus` action.
@@ -163,6 +175,7 @@ export function ShopOrderQueue({
   const row = (o: SampleOrder) => {
     const hasPdf = o.lines.some((l) => l.pdfName);
     const act = actions(o);
+    const pb = paymentBadge(o);
     return (
       <Box
         key={o.id}
@@ -210,6 +223,9 @@ export function ShopOrderQueue({
                 PDF
               </Badge>
             )}
+            <Badge variant="light" color={pb.color} visibleFrom="md" style={{ whiteSpace: "nowrap" }}>
+              {pb.label}
+            </Badge>
             <Text fw={700} fz="sm" ta="right" style={{ whiteSpace: "nowrap" }}>
               {o.total.toFixed(2)} lei
             </Text>
@@ -225,7 +241,12 @@ export function ShopOrderQueue({
 
         {/* Mobile: status + actions on their own row */}
         <Group justify="space-between" hiddenFrom="sm" mt="sm" wrap="nowrap">
-          <StatusBadge status={o.status} />
+          <Group gap="xs" wrap="nowrap">
+            <StatusBadge status={o.status} />
+            <Badge variant="light" color={pb.color} size="sm" style={{ whiteSpace: "nowrap" }}>
+              {pb.label}
+            </Badge>
+          </Group>
           {act}
         </Group>
       </Box>

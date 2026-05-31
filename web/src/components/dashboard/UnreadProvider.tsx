@@ -64,6 +64,20 @@ export function UnreadProvider({
     };
   }, [supabase, refresh]);
 
+  // Read state is shop-wide: another employee may have read a thread on their own screen.
+  // Recompute when this tab regains focus so the badge reflects their read.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", refresh);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [refresh]);
+
   const markRead = useCallback(
     async (orderId: string) => {
       await supabase.from("message_reads").upsert(

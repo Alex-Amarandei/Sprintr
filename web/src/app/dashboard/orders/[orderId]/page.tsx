@@ -122,7 +122,17 @@ export default async function ShopOrderDetailPage({ params }: Props) {
             <InfoRow icon={<MapPin size={15} />} label="Adresă" value={order.deliveryAddress} />
           )}
           {order.paymentMethod && (
-            <InfoRow icon={<FileText size={15} />} label="Plată" value={order.paymentMethod} />
+            <InfoRow
+              icon={<FileText size={15} />}
+              label="Plată"
+              value={
+                order.paymentStatus === "paid"
+                  ? `${order.paymentMethod} · Plătită`
+                  : order.online
+                    ? `${order.paymentMethod} · Neplătită`
+                    : order.paymentMethod
+              }
+            />
           )}
         </Stack>
       </Card>
@@ -281,7 +291,7 @@ export default async function ShopOrderDetailPage({ params }: Props) {
                         </Text>
                       </div>
                     </Group>
-                    <DownloadButton orderId={order.id} fileName={f.name} />
+                    <DownloadButton orderId={order.id} fileName={f.name} label="" />
                   </Group>
                 ))}
               </Stack>

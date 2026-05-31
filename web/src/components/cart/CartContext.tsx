@@ -14,10 +14,23 @@ function loadCart(): PersistedCart {
     if (!raw) return { lines: [], shop: null };
     const parsed = JSON.parse(raw) as PersistedCart;
     if (!Array.isArray(parsed.lines)) return { lines: [], shop: null };
-    return { lines: parsed.lines, shop: parsed.shop ?? null };
+    // `files` are in-memory File objects — they can't be persisted, so any stored
+    // line comes back without them. Force an empty array so the shape stays valid.
+    const lines = parsed.lines
+      .filter((l) => l && typeof l.lineId === "string")
+      .map((l) => ({ ...l, files: [] }));
+    return { lines, shop: parsed.shop ?? null };
   } catch {
     return { lines: [], shop: null };
   }
+}
+
+/** Strip in-memory File objects before persisting (they don't serialize). */
+function serializeCart(lines: CartLine[], shop: CartShop | null): string {
+  return JSON.stringify({
+    lines: lines.map((l) => ({ ...l, files: [] })),
+    shop,
+  });
 }
 
 /** Identity of the shop a cart belongs to, captured when lines are added. */
@@ -60,7 +73,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!hydrated) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ lines, shop }));
+      window.localStorage.setItem(STORAGE_KEY, serializeCart(lines, shop));
     } catch {
       /* storage full / unavailable — non-fatal */
     }

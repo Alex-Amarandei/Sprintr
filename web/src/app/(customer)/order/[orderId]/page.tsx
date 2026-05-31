@@ -12,11 +12,13 @@ import {
 } from "@mantine/core";
 import { ArrowLeft, FileText } from "lucide-react";
 import { getOrderDetail } from "@/lib/orders/queries";
+import { getMyShopReview } from "@/lib/reviews/queries";
 import { createClient } from "@/lib/supabase/server";
 import { isTerminalStatus } from "@/lib/design/status";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { ChatPanel } from "@/components/order/ChatPanel";
+import { ReviewForm } from "@/components/order/ReviewForm";
 import { DownloadReceiptButton } from "@/components/order/DownloadReceiptButton";
 import { LinkAnchor } from "@/components/ui/links";
 
@@ -36,6 +38,10 @@ export default async function OrderDetailPage({ params }: Props) {
     data: { user },
   } = await supabase.auth.getUser();
   const chatClosed = order.status === "done" || order.status === "rejected";
+
+  // Post-purchase review is available once the order is done.
+  const myReview =
+    order.status === "done" ? await getMyShopReview(order.shopId) : null;
 
   const shortId = order.id.slice(0, 8);
 
@@ -125,6 +131,15 @@ export default async function OrderDetailPage({ params }: Props) {
               </Group>
             </Stack>
           </Card>
+
+          {order.status === "done" && (
+            <ReviewForm
+              shopId={order.shopId}
+              orderId={order.id}
+              currentUserId={user?.id ?? ""}
+              existing={myReview}
+            />
+          )}
         </Stack>
 
         {/* Chat — ONE instance only. Two ChatPanels here would open two identical

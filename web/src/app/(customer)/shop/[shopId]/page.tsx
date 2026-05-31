@@ -13,7 +13,9 @@ import {
 } from "@mantine/core";
 import { Clock, MapPin, Phone, Star } from "lucide-react";
 import { getShopView, getShopCatalog } from "@/lib/catalog/shops";
+import { getShopReviews } from "@/lib/reviews/queries";
 import { SHOP_CATEGORY } from "@/components/shop/category";
+import { ShopReviews } from "@/components/shop/ShopReviews";
 import { OpenBadge } from "@/components/ui/OpenBadge";
 import { ShopCatalogTabs } from "@/components/shop/ShopCatalogTabs";
 import { ShopSchedule } from "@/components/shop/ShopSchedule";
@@ -29,9 +31,10 @@ interface Props {
 export default async function ShopDetailPage({ params }: Props) {
   const { shopId } = await params;
 
-  const [shop, catalog] = await Promise.all([
+  const [shop, catalog, reviews] = await Promise.all([
     getShopView(shopId),
     getShopCatalog(shopId),
+    getShopReviews(shopId),
   ]);
   if (!shop) notFound();
   const { items, categories } = catalog;
@@ -162,6 +165,15 @@ export default async function ShopDetailPage({ params }: Props) {
           shopId={shopId}
           shopName={shop.name}
           shopOpen={open}
+        />
+      </Box>
+
+      {/* Reviews (full width) */}
+      <Box mx="md">
+        <ShopReviews
+          reviews={reviews}
+          rating={shop.rating}
+          count={shop.reviews}
         />
       </Box>
     </Stack>

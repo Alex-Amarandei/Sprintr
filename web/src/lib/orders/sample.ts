@@ -45,4 +45,8 @@ export interface SampleOrder {
   deliveryAddress?: string;
   fulfilment?: "delivery" | "pickup";
   paymentMethod?: string;
+  /** Payment state: pending | paid | failed | refunded (drives the shop's payment badge). */
+  paymentStatus?: "pending" | "paid" | "failed" | "refunded";
+  /** Whether the payment method is online (card) — distinguishes "unpaid" from "pay on handover". */
+  online?: boolean;
 }

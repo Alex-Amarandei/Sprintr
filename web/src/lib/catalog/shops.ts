@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { getShopRatings } from "@/lib/reviews/queries";
 import { parseDocument, type Category, type Item } from "./schema";
 import { shopAssetUrl } from "@/lib/storage/shopAssets";
 import type { SampleShop, ShopCategory } from "./samples";
@@ -74,7 +75,20 @@ export async function getShops(): Promise<SampleShop[]> {
     .select("id, name, description, address, phone, logo_path, banner_path, schedule, schedule_overrides")
     .order("created_at", { ascending: true });
   if (error || !data) return [];
-  return data.map(toView);
+
+  const ratings = await getShopRatings(
+    supabase,
+    data.map((r) => r.id)
+  );
+  return data.map((row) => {
+    const view = toView(row);
+    const agg = ratings.get(row.id);
+    if (agg) {
+      view.rating = agg.rating;
+      view.reviews = agg.count;
+    }
+    return view;
+  });
 }
 
 export async function getShopView(id: string): Promise<SampleShop | null> {
@@ -84,7 +98,15 @@ export async function getShopView(id: string): Promise<SampleShop | null> {
     .select("id, name, description, address, phone, logo_path, banner_path, schedule, schedule_overrides")
     .eq("id", id)
     .maybeSingle();
-  return data ? toView(data) : null;
+  if (!data) return null;
+
+  const view = toView(data);
+  const agg = (await getShopRatings(supabase, [id])).get(id);
+  if (agg) {
+    view.rating = agg.rating;
+    view.reviews = agg.count;
+  }
+  return view;
 }
 
 /** Items from the shop's live (active) catalog version. */

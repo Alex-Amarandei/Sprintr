@@ -53,6 +53,23 @@ export function DownloadButton({
     }
   }
 
+  // Empty label → icon-only button (no leftSection margin around an absent label).
+  if (!label) {
+    return (
+      <Button
+        variant="default"
+        size="xs"
+        px="xs"
+        loading={loading}
+        onClick={download}
+        aria-label="Descarcă"
+        {...props}
+      >
+        <Download size={14} />
+      </Button>
+    );
+  }
+
   return (
     <Button
       variant="default"

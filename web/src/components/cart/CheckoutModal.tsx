@@ -37,6 +37,7 @@ import { phoneError, sanitizePhoneInput } from "@/lib/utils/validation";
 import { useCart } from "./CartContext";
 import { createClient } from "@/lib/supabase/client";
 import { uploadOrderFiles } from "@/lib/storage/orderFiles";
+import { confirmOrderPayment } from "@/lib/orders/payment";
 
 // Only initialise Stripe when the publishable key is actually configured —
 // `loadStripe(undefined)` throws, and the key is absent in local/dev without Stripe.
@@ -407,7 +408,12 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
     }
   }
 
-  function handlePaymentSuccess() {
+  async function handlePaymentSuccess() {
+    // Mark the order paid now (verified against Stripe), so it surfaces to the shop
+    // immediately even when the Stripe webhook isn't running. Idempotent vs the webhook.
+    if (result?.order_id) {
+      await confirmOrderPayment(result.order_id);
+    }
     clear();
     setStep("success");
   }

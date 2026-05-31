@@ -75,7 +75,7 @@ export function summarize(answers: Record<string, unknown> | null, item?: Item):
 }
 
 const ORDER_SELECT =
-  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, contact_phone, notes, subtotal, total, commission, payout, payment_method, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
+  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, contact_phone, notes, subtotal, total, commission, payout, payment_method, payment_status, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function toListOrder(o: any): SampleOrder {
@@ -94,6 +94,9 @@ function toListOrder(o: any): SampleOrder {
     placedAt: relTime(o.created_at),
     subtotal,
     delivery: round2(total - subtotal),
+    paymentMethod: PAYMENT_LABEL[o.payment_method] ?? o.payment_method,
+    paymentStatus: o.payment_status,
+    online: o.payment_method === "online",
     lines: items.map((it) => ({
       title: it.item_title,
       summary: "",
@@ -223,10 +226,9 @@ export async function getShopOrders(): Promise<SampleOrder[]> {
     .from("orders")
     .select(ORDER_SELECT)
     .eq("shop_id", membership.shop_id)
-    // An online order is only "placed" once paid — hide unpaid/abandoned card checkouts
-    // from the shop (the row is created before payment to mint the Stripe intent). Cash
-    // orders are placed on creation, which is the final checkout step.
-    .or("payment_method.neq.online,payment_status.eq.paid")
+    // Show ALL of the shop's orders (incl. unpaid online) — the row carries a payment-status
+    // badge, and online orders flip to "paid" via the Stripe confirmation (webhook or the
+    // confirmOrderPayment fallback). The shop can advance an order's status regardless.
     .order("created_at", { ascending: false });
   if (error || !data) return [];
 
@@ -322,5 +324,7 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
     deliveryAddress: order.delivery_address ?? undefined,
     fulfilment: order.fulfilment ?? undefined,
     paymentMethod: PAYMENT_LABEL[order.payment_method] ?? order.payment_method,
+    paymentStatus: order.payment_status,
+    online: order.payment_method === "online",
   };
 }
