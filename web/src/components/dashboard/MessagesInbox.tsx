@@ -22,12 +22,14 @@ import type { OrderStatus } from "@/lib/design/status";
 import type { SampleMessage } from "@/lib/orders/sample";
 import { ChatPanel } from "@/components/order/ChatPanel";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useUnread } from "./UnreadProvider";
 
 const timeOnly = (iso: string) =>
   new Intl.DateTimeFormat("ro-RO", { hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
 const initials = (n: string) =>
   n.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+const short = (id: string) => id.slice(0, 8);
 const chatClosed = (s: OrderStatus) => s === "done" || s === "rejected";
 
 export function MessagesInbox({
@@ -148,6 +150,13 @@ export function MessagesInbox({
                             {initials(c.customerName)}
                           </Avatar>
                           <div style={{ minWidth: 0 }}>
+                            {/* Order reference + status first, then the customer name. */}
+                            <Group gap={6} wrap="nowrap" mb={2}>
+                              <Text fw={700} fz="xs" truncate>
+                                #{short(c.orderId)}
+                              </Text>
+                              <StatusBadge status={c.status} size="xs" style={{ flexShrink: 0 }} />
+                            </Group>
                             <Text fw={600} fz="sm" truncate>
                               {c.customerName}
                             </Text>
@@ -197,11 +206,17 @@ export function MessagesInbox({
             </Paper>
           ) : (
             <Stack gap="sm">
-              <Group gap="sm" hiddenFrom="md">
+              <Group gap="sm" hiddenFrom="md" wrap="nowrap">
                 <ActionIcon variant="subtle" color="gray" onClick={() => setSelectedId(null)} aria-label="Înapoi la listă">
                   <ArrowLeft size={18} />
                 </ActionIcon>
-                <Text fw={600}>{selected.customerName}</Text>
+                <Text fw={700} fz="sm" style={{ whiteSpace: "nowrap" }}>
+                  #{short(selected.orderId)}
+                </Text>
+                <StatusBadge status={selected.status} size="xs" />
+                <Text fw={600} fz="sm" truncate>
+                  {selected.customerName}
+                </Text>
               </Group>
               {loading || messages === null ? (
                 <Paper withBorder radius="lg" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 560 }}>
@@ -214,6 +229,8 @@ export function MessagesInbox({
                   currentUserId={currentUserId}
                   customerId={selected.customerId}
                   peerName={selected.customerName}
+                  orderRef={`#${short(selected.orderId)}`}
+                  orderStatus={selected.status}
                   perspective="shop"
                   initialMessages={messages}
                   complaintMessages={complaintMessages}

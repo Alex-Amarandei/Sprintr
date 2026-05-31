@@ -45,7 +45,10 @@ export function ShopOrderActions({
         <>
           <Button
             variant="default"
-            bg="stone.0"
+            // Theme-aware surface: keep the soft stone fill in light mode, but use the
+            // dark raised-surface token in dark mode (a hardcoded light `stone.0` left
+            // the default variant's light text unreadable on a near-white button).
+            bg="light-dark(var(--mantine-color-stone-0), var(--mantine-color-dark-6))"
             leftSection={<X size={16} />}
             disabled={pending}
             onClick={() => set("rejected", `Comanda #${short(id)} respinsă`)}

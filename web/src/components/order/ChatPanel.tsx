@@ -17,7 +17,9 @@ import { Paperclip, Receipt, Send } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import type { SampleMessage } from "@/lib/orders/sample";
+import type { OrderStatus } from "@/lib/design/status";
 import { Dot } from "@/components/ui/Dot";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { LinkActionIcon } from "@/components/ui/links";
 
 type Thread = "order" | "complaint";
@@ -45,6 +47,8 @@ export function ChatPanel({
   currentUserId,
   customerId,
   peerName,
+  orderRef,
+  orderStatus,
   initialMessages,
   complaintMessages = [],
   height = 520,
@@ -59,6 +63,10 @@ export function ChatPanel({
   customerId?: string;
   /** The other party's name (shop on the customer side, customer on the shop side). */
   peerName: string;
+  /** Optional order reference shown as the header title (e.g. "#7d301208"). */
+  orderRef?: string;
+  /** Optional order status shown beside the reference in the header. */
+  orderStatus?: OrderStatus;
   /** Order-thread history. */
   initialMessages: SampleMessage[];
   /** Complaint-thread history. */
@@ -205,15 +213,34 @@ export function ChatPanel({
             {initials}
           </Avatar>
           <div style={{ minWidth: 0 }}>
-            <Text fw={600} fz="sm" truncate>
-              {peerName}
-            </Text>
-            <Group gap={6}>
-              <Dot color="teal" />
-              <Text fz="xs" c="dimmed">
-                Online · răspunde rapid
-              </Text>
-            </Group>
+            {orderRef ? (
+              <>
+                {/* Title: order reference + status first, then the name (per the inbox spec). */}
+                <Group gap={6} wrap="nowrap">
+                  <Text fw={600} fz="sm" truncate>
+                    {orderRef}
+                  </Text>
+                  {orderStatus && (
+                    <StatusBadge status={orderStatus} size="xs" style={{ flexShrink: 0 }} />
+                  )}
+                </Group>
+                <Text fz="xs" c="dimmed" truncate>
+                  {peerName}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text fw={600} fz="sm" truncate>
+                  {peerName}
+                </Text>
+                <Group gap={6}>
+                  <Dot color="teal" />
+                  <Text fz="xs" c="dimmed">
+                    Online · răspunde rapid
+                  </Text>
+                </Group>
+              </>
+            )}
           </div>
         </Group>
 
