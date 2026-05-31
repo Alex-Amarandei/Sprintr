@@ -106,9 +106,16 @@ function toListOrder(o: any): SampleOrder {
 /** Customer's own orders for /orders. */
 export async function getMyOrders(): Promise<SampleOrder[]> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  // Filter to the caller's OWN orders explicitly — a shop member also passes the
+  // orders_select_shop RLS, so without this they'd see the whole shop's orders here.
   const { data, error } = await supabase
     .from("orders")
     .select(ORDER_SELECT)
+    .eq("customer_id", user.id)
     .order("created_at", { ascending: false });
   if (error || !data) return [];
   return data.map(toListOrder);

@@ -11,6 +11,7 @@ import {
   ShoppingBag,
   Tag,
   User,
+  Users,
   Wrench,
 } from "lucide-react";
 import { useUnread } from "./UnreadProvider";
@@ -22,6 +23,7 @@ const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/dashboard/products", label: "Produse", icon: Package },
   { href: "/dashboard/services", label: "Servicii", icon: Wrench },
   { href: "/dashboard/offers", label: "Oferte", icon: Tag },
+  { href: "/dashboard/members", label: "Echipă", icon: Users },
   { href: "/dashboard/profile", label: "Profil", icon: User },
 ];
 

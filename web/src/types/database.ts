@@ -648,6 +648,48 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_shop_member: {
+        Args: {
+          p_email: string
+          p_role: Database["public"]["Enums"]["shop_role"]
+          p_shop_id: string
+        }
+        Returns: string
+      }
+      cancel_shop_invitation: {
+        Args: { p_email: string; p_shop_id: string }
+        Returns: undefined
+      }
+      list_shop_invitations: {
+        Args: { p_shop_id: string }
+        Returns: {
+          created_at: string
+          email: string
+          role: Database["public"]["Enums"]["shop_role"]
+        }[]
+      }
+      set_shop_member_role: {
+        Args: {
+          p_profile_id: string
+          p_role: Database["public"]["Enums"]["shop_role"]
+          p_shop_id: string
+        }
+        Returns: undefined
+      }
+      list_shop_members: {
+        Args: { p_shop_id: string }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string | null
+          profile_id: string
+          role: Database["public"]["Enums"]["shop_role"]
+        }[]
+      }
+      remove_shop_member: {
+        Args: { p_profile_id: string; p_shop_id: string }
+        Returns: undefined
+      }
       create_catalog_draft: {
         Args: { p_label?: string; p_shop_id: string }
         Returns: {

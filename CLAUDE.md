@@ -71,6 +71,12 @@ self-contained record — it never changes when the catalog is later edited.
   Orders carry `total, subtotal, discount, shipping_fee, service_fee, applied_offers (jsonb),
   status, payment_method, payment_status, payment_ref, paid_at, catalog_version_id, handled_by,
   completed_at, archived_at`. **No client insert** — only the place-order Server Action (service role).
+- **`shop_invitations`** `(shop_id, email, role)` = pre-authorized members without an account yet.
+  Owner-only SECURITY DEFINER RPCs manage the team (`add_shop_member` → 'added' if the email has a
+  profile else 'invited'; `set_shop_member_role`, `remove_shop_member`, `list_shop_members`,
+  `list_shop_invitations`, `cancel_shop_invitation`; last-owner lockout guard). `handle_new_user`
+  **claims** matching invites on first Google login. Becoming a member grants `profiles.role='shop'`
+  (dashboard access). UI: `/dashboard/members`. No invite email yet (pre-auth only).
 - **`messages`** = per-order chat (Realtime). Participants insert directly under RLS. `kind`
   (`order|complaint`): RLS allows `order` posts only while active, `complaint` posts only once the
   order is `done`/`rejected` — so a closed order's chat is read-only but a complaint thread opens.

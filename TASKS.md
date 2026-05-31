@@ -53,8 +53,11 @@ something C1 builds (build against a stub until it lands).
 - [x] Chat lifecycle backend 🔗 — gate chat to active orders + complaint thread on close
       (`messages.kind` enum order|complaint; RLS posts order-kind while active, complaint-kind
       once done/rejected; ChatPanel tab on closed orders; inbox + both detail pages split threads)
-- [ ] Owner: add users/employees — RPC/helper to resolve a profile by email and insert a
-      `shop_permissions` row (backs C3's members UI) 🔗
+- [x] Owner: add users/employees — `/dashboard/members` (Echipă): add by email (existing → granted;
+      no account → pending invite auto-claimed on first Google login via `handle_new_user`),
+      promote/demote, remove; last-owner guard; becoming a member grants `role='shop'`. RPCs:
+      `add_shop_member`/`list_shop_members`/`set_shop_member_role`/`remove_shop_member`/
+      `list_shop_invitations`/`cancel_shop_invitation`. (No invite *email* — pre-auth only.)
 
 ### Gaps from CLAUDE.md audit (added 2026-05-31)
 Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the split above.
