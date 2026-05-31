@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   ActionIcon,
   Menu,
@@ -12,7 +13,18 @@ import { Monitor, Moon, Sun } from "lucide-react";
 export function ThemeToggle() {
   const { colorScheme, setColorScheme } = useMantineColorScheme();
   const computed = useComputedColorScheme("light");
-  const Icon = colorScheme === "auto" ? Monitor : computed === "dark" ? Moon : Sun;
+
+  // The resolved scheme is only known on the client (localStorage / OS). Render a
+  // stable icon during SSR + first paint so hydration matches, then swap in the real one.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const Icon = !mounted
+    ? Monitor
+    : colorScheme === "auto"
+      ? Monitor
+      : computed === "dark"
+        ? Moon
+        : Sun;
 
   return (
     <Menu shadow="md" width={170} position="bottom-end" withinPortal>

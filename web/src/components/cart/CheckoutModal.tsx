@@ -36,9 +36,12 @@ import { formatPrice } from "@/lib/utils/format";
 import { useCart } from "./CartContext";
 import { createClient } from "@/lib/supabase/client";
 
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-);
+// Only initialise Stripe when the publishable key is actually configured —
+// `loadStripe(undefined)` throws, and the key is absent in local/dev without Stripe.
+const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripePublishableKey
+  ? loadStripe(stripePublishableKey)
+  : null;
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

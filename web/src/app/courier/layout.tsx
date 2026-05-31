@@ -1,7 +1,8 @@
 import { Bike, Wallet } from "lucide-react";
 import { Box, Container, Group } from "@mantine/core";
 import { LinkAnchor, LinkButton } from "@/components/ui/links";
-import { Wordmark } from "@/components/ui/Wordmark";
+import { Logo } from "@/components/ui/Logo";
+import { PageBackground } from "@/components/ui/PageBackground";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export default function CourierLayout({
@@ -10,27 +11,26 @@ export default function CourierLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Box mih="100vh" bg="var(--mantine-color-body)">
+    <Box mih="100vh" bg="var(--mantine-color-body)" style={{ isolation: "isolate" }}>
+      <PageBackground />
       <Box
         component="header"
-        bg="var(--mantine-color-body)"
         style={{
           position: "sticky",
           top: 0,
           zIndex: 50,
-          borderBottom: "1px solid var(--mantine-color-default-border)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
         }}
       >
         <Container size="sm" h={64}>
           <Group h="100%" justify="space-between">
             <LinkAnchor
               href="/courier/deliveries"
-              fw={700}
-              fz="xl"
-              c="brand.6"
               underline="never"
+              display="inline-flex"
             >
-              <Wordmark />
+              <Logo />
             </LinkAnchor>
             <Group gap="xs">
               <LinkButton

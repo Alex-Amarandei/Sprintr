@@ -30,7 +30,8 @@ export function CartBar() {
 
       <Indicator label={count} size={18} disabled={count === 0} color="brand">
         <Button
-          variant="default"
+          variant="subtle"
+          color="gray"
           leftSection={<ShoppingCart size={18} />}
           onClick={openDrawer}
         >

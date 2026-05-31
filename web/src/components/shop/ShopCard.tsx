@@ -19,10 +19,24 @@ export function ShopCard({ shop }: { shop: SampleShop }) {
     <Card
       p={0}
       withBorder
-      style={{ overflow: "hidden", height: "100%", display: "flex", flexDirection: "column" }}
+      style={{
+        overflow: "hidden",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        opacity: open ? 1 : 0.65,
+      }}
     >
       {/* Gradient header with category icon + rating + open state */}
-      <Box h={132} p="sm" style={{ background: cat.gradient, position: "relative" }}>
+      <Box
+        h={132}
+        p="sm"
+        style={{
+          background: cat.gradient,
+          position: "relative",
+          filter: open ? undefined : "grayscale(1)",
+        }}
+      >
         <Group justify="space-between">
           {shop.rating != null && (
             <Group

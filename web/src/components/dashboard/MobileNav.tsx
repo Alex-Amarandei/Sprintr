@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Box, Burger, Drawer, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { LinkAnchor } from "@/components/ui/links";
-import { Wordmark } from "@/components/ui/Wordmark";
+import { Logo } from "@/components/ui/Logo";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -23,19 +23,19 @@ export function MobileNav() {
   return (
     <Box
       hiddenFrom="md"
-      bg="var(--mantine-color-body)"
       style={{
         position: "sticky",
         top: 0,
         zIndex: 50,
-        borderBottom: "1px solid var(--mantine-color-default-border)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
       }}
     >
       <Group justify="space-between" align="center" wrap="nowrap" p="md">
         <Group gap="sm" align="center" wrap="nowrap">
           <Burger opened={opened} onClick={open} size="sm" aria-label="Meniu" />
-          <LinkAnchor href="/dashboard" fw={700} fz="xl" c="brand.6" underline="never">
-            <Wordmark />
+          <LinkAnchor href="/dashboard" underline="never" display="inline-flex">
+            <Logo />
           </LinkAnchor>
         </Group>
         <Group gap="xs" wrap="nowrap">
@@ -49,7 +49,7 @@ export function MobileNav() {
         onClose={close}
         size="xs"
         padding="md"
-        title={<Wordmark />}
+        title={<Logo />}
       >
         <DashboardNav onNavigate={close} />
       </Drawer>
