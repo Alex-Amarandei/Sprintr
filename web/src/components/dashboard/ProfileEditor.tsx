@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   Group,
+  NumberInput,
   Progress,
   SimpleGrid,
   Stack,
@@ -65,8 +66,6 @@ export function ProfileEditor({
   meta: { itemCount: number };
 }) {
   const [form, setForm] = useState<ProfileText>(initial);
-  // Email has no `shops` column yet → local state, validated but not persisted.
-  const [email, setEmail] = useState("");
   const [schedule, setSchedule] = useState<WeeklySchedule>(() =>
     normalizeWeek(initialSchedule)
   );
@@ -111,7 +110,12 @@ export function ProfileEditor({
     }
   }
 
-  const field = (k: keyof ProfileText) => ({
+  // Only the string-valued profile fields bind through this helper (NumberInput fields
+  // like defaultEtaMinutes are wired separately).
+  type StringKey = {
+    [K in keyof ProfileText]-?: ProfileText[K] extends string ? K : never;
+  }[keyof ProfileText];
+  const field = (k: StringKey) => ({
     value: form[k],
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((f) => ({ ...f, [k]: e.currentTarget.value })),
@@ -289,21 +293,33 @@ export function ProfileEditor({
                   }}
                   error={form.phone ? phoneError(form.phone) : null}
                 />
-                {/* No email column on `shops` — visual only, but validated. */}
                 <TextInput
                   label="Email"
                   type="email"
                   inputMode="email"
                   placeholder="contact@magazin.ro"
-                  value={email}
-                  onChange={(e) => setEmail(e.currentTarget.value)}
-                  error={email ? emailError(email) : null}
+                  {...field("email")}
+                  error={form.email ? emailError(form.email) : null}
                 />
               </SimpleGrid>
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
                 <TextInput label="Adresă" {...field("address")} />
                 <TextInput label="Oraș" defaultValue="Iași" disabled />
               </SimpleGrid>
+              <NumberInput
+                label="Timp estimat de pregătire (minute)"
+                description="Implicit pentru comenzi noi; îl poți ajusta pe fiecare comandă. Vizibil clientului."
+                placeholder="ex. 30"
+                min={0}
+                step={5}
+                value={form.defaultEtaMinutes ?? ""}
+                onChange={(v) =>
+                  setForm((f) => ({
+                    ...f,
+                    defaultEtaMinutes: v === "" || v == null ? null : Number(v),
+                  }))
+                }
+              />
             </Stack>
           </Card>
 

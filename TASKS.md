@@ -79,22 +79,23 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 - [ ] **WhatsApp courier ping on accept** 🔗 — CORE scope, currently only an `orders.whatsapp_sent`
       column exists (migration 5); no send code. Server-side send to the courier group on shop
       accept, then set `whatsapp_sent` (creds server-only; real API vs `wa.me` fallback TBD).
-- [ ] **Server-side validation parity** — the place-order reprice/validator must accept the FE
-      schema extensions or it rejects valid carts: option `swatch`, `categories` + item
-      `category_id`, item `accepted_file_types`, and multi-file `file` answers. **Likely the cause
-      of "Fix internal server error when placing order" above** — check first.
+- [x] **Server-side validation parity** — place-order reprice now byte-matches `lib/catalog/pricing.ts`
+      (per_unit unanswered → 0 not ×1; quantity `|| 1`), guards a missing `item.fields` (was a 500),
+      and validates `accepted_file_types` by extension. swatch (display-only single_select),
+      `categories`/`category_id` and multi-file `line.files` were already tolerated.
 - [x] **Uploaded files end-to-end** 🔗 — upload at checkout (`lib/storage/orderFiles.ts`) → freeze
       `{path,name}[]` into `order_items.files` → signed-URL endpoint `GET /api/orders/[id]/files`
       (service role) wired to the shop's `DownloadButton`. (Customer-side re-download still TODO.)
-- [ ] **Shop → customer identity (RLS)** — `profiles` only has `profiles_select_own`; add a policy
-      so shop members can read `full_name`/`phone` of customers who placed an order at their shop
-      (queue/detail currently fall back to "Client").
-- [ ] **Order ETA** — no column/source; FE omits the ETA text/timeline until one exists. Decide
-      shop-set vs computed estimate and add the column.
-- [ ] **Shop profile persistence** — extend `updateShopProfile` to save `schedule` (weekly-hours
-      jsonb) + email; today only name/description/phone/address persist (backs C3 profile editor).
-- [ ] **(minor) Product SKU + unit** — no schema columns; the simple product editor drops them.
-      Add columns only if SKU/unit must survive.
+- [x] **Shop → customer identity (RLS)** — `profiles_select_shop_customer` policy + SECURITY DEFINER
+      `can_read_customer(uuid)` lets a shop member read `full_name`/`phone`/`email` of any customer
+      who ordered at their shop. `getShopOrders`/`getOrderDetail` surface name/phone/email.
+- [x] **Order ETA** — `orders.eta_minutes` (per-order, shop-editable, visible both sides) seeded
+      from new `shops.default_eta_minutes` at placement. `setOrderEta` action + ETA in reads;
+      default configurable in the profile editor. (FE: shop ETA edit control + customer display = C3/C2.)
+- [x] **Shop profile persistence** — `updateShopProfile` now saves `schedule`, `email`
+      (new `shops.email`) + `default_eta_minutes`; profile editor wired (email + ETA fields).
+- [x] **(minor) Product SKU + unit** — added optional `sku`/`unit` to the item JSON schema
+      (backward-compatible, no migration; pricing ignores them). Editor capture UI = C3.
 
 ---
 
@@ -274,3 +275,21 @@ Captured here as they come up; not yet assigned to a lane.
   _DONE: cross-shop confirm dialog ("Există deja produse în coș de la {magazin}" →
   Anulează / Golește coșul) before adding from another shop. TODO: `beforeunload` prompt
   on refresh/back; persist cart in localStorage (see Cart/checkout above)._
+
+### 🅿️ Parking lot — header / nav / shop-identity polish (C2/C3 UI; BE ready)
+
+- [ ] **Multi-shop switcher** — dropdown to switch active shop when an owner belongs to several
+  shops. BE: `getMyShop`/`getShopOrders` pick the first membership today; needs an active-shop
+  cookie helper for C3's switcher (see C1 unblock note above).
+- [ ] **Profile-icon dropdown** (customer header) — clicking the profile icon opens a menu with an
+  account preview + avatar before going to orders; if the user also has a shop role, offer
+  "Switch to shop view".
+- [ ] **Profile icon in shop view** — show the same profile icon/menu inside the dashboard too.
+- [ ] **Shop greeting → employee name** — the "Bună ziua/Bună seara" greeting in the dashboard
+  should use the logged-in employee's name, not the shop name.
+- [ ] **Company-name badge** — a badge with the shop's full name (e.g. "Pim Copy") visible on all
+  shop/dashboard pages.
+- [ ] **Role badge** — next to the company-name badge, show the role you hold at the shop
+  (staff/catalog/owner).
+- [ ] **Account/avatar** — profile pictures (needs an `avatar_path` on `profiles` + public bucket
+  read; BE follow-up if we want real uploads).

@@ -75,7 +75,16 @@ export function summarize(answers: Record<string, unknown> | null, item?: Item):
 }
 
 const ORDER_SELECT =
-  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, contact_phone, notes, subtotal, total, commission, payout, payment_method, payment_status, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
+  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, contact_phone, notes, subtotal, total, commission, payout, eta_minutes, payment_method, payment_status, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
+
+/** Format an ETA in minutes as a short label (e.g. "~30 min", "~1 h 20 min"). */
+function etaLabel(min: number | null | undefined): string | undefined {
+  if (min == null) return undefined;
+  if (min < 60) return `~${min} min`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return m ? `~${h} h ${m} min` : `~${h} h`;
+}
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function toListOrder(o: any): SampleOrder {
@@ -92,6 +101,8 @@ function toListOrder(o: any): SampleOrder {
     total,
     status: o.status as OrderStatus,
     placedAt: relTime(o.created_at),
+    eta: etaLabel(o.eta_minutes),
+    etaMinutes: o.eta_minutes ?? null,
     subtotal,
     delivery: round2(total - subtotal),
     commission: Number(o.commission ?? 0),
@@ -228,8 +239,11 @@ export async function getMyShop(): Promise<{
   name: string;
   description: string | null;
   phone: string | null;
+  email: string | null;
   address: string | null;
   delivery_fee: number;
+  default_eta_minutes: number | null;
+  schedule: import("@/types/database").Json | null;
 } | null> {
   const supabase = await createClient();
   const {
@@ -245,7 +259,7 @@ export async function getMyShop(): Promise<{
   if (!membership) return null;
   const { data: shop } = await supabase
     .from("shops")
-    .select("id, name, description, phone, address, delivery_fee")
+    .select("id, name, description, phone, email, address, delivery_fee, default_eta_minutes, schedule")
     .eq("id", membership.shop_id)
     .maybeSingle();
   return shop ?? null;
@@ -276,17 +290,26 @@ export async function getShopOrders(): Promise<SampleOrder[]> {
     .order("created_at", { ascending: false });
   if (error || !data) return [];
 
-  // Resolve customer names (best-effort — RLS may hide them → "Client").
+  // Resolve customer identity. Shop members can now read name/phone/email of their own
+  // customers (profiles_select_shop_customer RLS); falls back to "Client" if unavailable.
   const ids = [...new Set(data.map((o: any) => o.customer_id))];
-  const names: Record<string, string> = {};
+  const profiles: Record<string, { full_name: string | null; phone: string | null; email: string }> = {};
   if (ids.length) {
-    const { data: profs } = await supabase.from("profiles").select("id, full_name").in("id", ids);
-    for (const p of profs ?? []) if (p.full_name) names[p.id] = p.full_name;
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, full_name, phone, email")
+      .in("id", ids);
+    for (const p of profs ?? []) profiles[p.id] = p;
   }
-  return data.map((o: any) => ({
-    ...toListOrder(o),
-    customerName: names[o.customer_id] ?? "Client",
-  }));
+  return data.map((o: any) => {
+    const p = profiles[o.customer_id];
+    return {
+      ...toListOrder(o),
+      customerName: p?.full_name ?? "Client",
+      customerPhone: p?.phone ?? undefined,
+      customerEmail: p?.email ?? undefined,
+    };
+  });
 }
 
 /** Full order detail (works for both customer + shop; RLS authorizes). */
@@ -300,14 +323,19 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
   if (error || !o) return null;
   const order = o as any;
 
-  // Customer name (best-effort).
+  // Customer identity. The customer reads their own row; a shop member reads it via the
+  // profiles_select_shop_customer policy. Phone/email are only used on the shop detail.
   let customerName = "Client";
+  let customerPhone: string | undefined;
+  let customerEmail: string | undefined;
   const { data: prof } = await supabase
     .from("profiles")
-    .select("full_name")
+    .select("full_name, phone, email")
     .eq("id", order.customer_id)
     .maybeSingle();
   if (prof?.full_name) customerName = prof.full_name;
+  customerPhone = prof?.phone ?? undefined;
+  customerEmail = prof?.email ?? undefined;
 
   // Catalog doc → field labels for the config summary.
   let catalogItems: Item[] = [];
@@ -351,11 +379,15 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
     shopName: order.shops?.name ?? "Magazin",
     customerName,
     customerId: order.customer_id,
+    customerPhone,
+    customerEmail,
     category: "print",
     itemsCount: lines.length,
     total,
     status: order.status as OrderStatus,
     placedAt: relTime(order.created_at),
+    eta: etaLabel(order.eta_minutes),
+    etaMinutes: order.eta_minutes ?? null,
     subtotal,
     delivery: round2(total - subtotal),
     commission: Number(order.commission ?? 0),

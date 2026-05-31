@@ -14,8 +14,10 @@ export interface ShopProfileData {
   name: string;
   description: string;
   phone: string;
+  email: string;
   address: string;
   schedule: WeeklySchedule | null;
+  defaultEtaMinutes: number | null;
   logoPath: string | null;
   bannerPath: string | null;
   hasLogo: boolean;
@@ -42,7 +44,7 @@ export async function loadShopProfile(): Promise<ShopProfileData | null> {
   const { data: shop } = await supabase
     .from("shops")
     .select(
-      "id, name, description, phone, address, logo_path, banner_path, schedule, active_version_id"
+      "id, name, description, phone, email, address, logo_path, banner_path, schedule, default_eta_minutes, active_version_id"
     )
     .eq("id", membership.shop_id)
     .maybeSingle();
@@ -63,8 +65,10 @@ export async function loadShopProfile(): Promise<ShopProfileData | null> {
     name: shop.name ?? "",
     description: shop.description ?? "",
     phone: shop.phone ?? "",
+    email: shop.email ?? "",
     address: shop.address ?? "",
     schedule: (shop.schedule as WeeklySchedule | null) ?? null,
+    defaultEtaMinutes: shop.default_eta_minutes ?? null,
     logoPath: shop.logo_path ?? null,
     bannerPath: shop.banner_path ?? null,
     hasLogo: Boolean(shop.logo_path),

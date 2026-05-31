@@ -56,9 +56,14 @@ self-contained record — it never changes when the catalog is later edited.
 ### Schema (deployed)
 - **`profiles`** (1:1 auth.users): `id, email, full_name, phone, role, created_at`. `role` =
   `user_role` enum `customer | shop | admin`. `handle_new_user()` trigger auto-creates on signup.
+  RLS = select-own **plus** `profiles_select_shop_customer`: a shop member can read the
+  name/phone/email of any customer who ordered at their shop (via SECURITY DEFINER
+  `can_read_customer(uuid)`, no orders-RLS recursion).
 - **`shops`** = public-readable storefront: `id, name, description, logo_path, banner_path, phone,
-  address, schedule (jsonb), schedule_overrides (jsonb), delivery_fee, active_version_id, created_at`.
-  Storage **paths** not URLs. No `owner_id`, no `city`.
+  email, address, schedule (jsonb), schedule_overrides (jsonb), delivery_fee, commission_rate,
+  default_eta_minutes, active_version_id, created_at`. Storage **paths** not URLs. No `owner_id`,
+  no `city`. `commission_rate` owner-immutable (admin-only, trigger `shops_guard_commission`);
+  `default_eta_minutes` seeds new orders' ETA.
 - **`shop_permissions`** `(shop_id, profile_id, role)`, `shop_role` enum ordered `staff < catalog <
   owner`. staff=orders+chat; catalog=+catalog/offers; owner=+members/legal/finance. RLS via
   `is_shop_member(shop_id, min_role)` SECURITY DEFINER helper.
@@ -68,9 +73,11 @@ self-contained record — it never changes when the catalog is later edited.
   `set_active_catalog_version`. `catalog`+ manage; public reads only the active version's `document`.
 - **`orders`** + **`order_items`** (mixed cart, one row + N lines). Lines freeze `kind, item_id,
   item_title, quantity, answers (jsonb), price_breakdown (jsonb), line_total, files (jsonb)`.
-  Orders carry `total, subtotal, discount, shipping_fee, service_fee, applied_offers (jsonb),
-  status, payment_method, payment_status, payment_ref, paid_at, catalog_version_id, handled_by,
-  completed_at, archived_at`. **No client insert** — only the place-order Server Action (service role).
+  Orders carry `total, subtotal, discount, shipping_fee, service_fee, commission, payout,
+  eta_minutes, applied_offers (jsonb), status, payment_method, payment_status, payment_ref, paid_at,
+  catalog_version_id, handled_by, completed_at, archived_at`. `eta_minutes` = per-order estimate
+  (visible both sides; shop-editable via `setOrderEta`; seeded from `shops.default_eta_minutes`).
+  **No client insert** — only the place-order Server Action (service role).
 - **`shop_invitations`** `(shop_id, email, role)` = pre-authorized members without an account yet.
   Owner-only SECURITY DEFINER RPCs manage the team (`add_shop_member` → 'added' if the email has a
   profile else 'invited'; `set_shop_member_role`, `remove_shop_member`, `list_shop_members`,
@@ -95,8 +102,9 @@ self-contained record — it never changes when the catalog is later edited.
 ### Catalog document (the `document` JSON) — see CONTEXT_HISTORY §1–11 for the full contract
 - `{ schema_version, categories[], items[] }`. Categories nested via `parent_id`.
 - **Item:** `id (stable across versions), kind (service|product), title, description, image_path,
-  is_active, in_stock, sort_order, base_price, category_id, requires_upload, accepted_file_types,
-  fields[]`. `is_active` = published/listed; `in_stock` = availability (both must be true to show/order).
+  is_active, in_stock, sort_order, base_price, sku, unit, category_id, requires_upload,
+  accepted_file_types, fields[]`. `is_active` = published/listed; `in_stock` = availability (both
+  must be true to show/order). `sku`/`unit` = optional retail metadata (display-only, no pricing impact).
 - **Field types (only these 5):** `single_select | multi_select | boolean | number | text`, plus
   `file` handled at item level via `requires_upload`/`accepted_file_types`. Rich UIs (color swatches,
   image choices) are just `single_select` with shop-defined options — not new types.
@@ -147,9 +155,12 @@ self-contained record — it never changes when the catalog is later edited.
   = exclusive; best-pick between all-stackable vs each-exclusive-alone.
 
 ## Known gaps / still-stubbed (visual placeholders until BE lands)
-- No ETA on orders; revenue/stats dashboard numbers are hardcoded sample data.
-- Shop profile editor saves only `name/description/phone/address` (schedule, logo/banner upload not wired).
-- Customer-name visibility for shops depends on `profiles` RLS — may fall back to "Client".
+- Shop profile editor persists name/description/phone/email/address/schedule/delivery_fee/
+  default_eta_minutes; logo/banner upload wired via `shop-assets`. (City still hardcoded Iași.)
+- Order ETA: `orders.eta_minutes` exists + is read on both sides; shop edit control / customer
+  timeline display is FE polish (C3/C2).
+- Customer identity for shops now resolvable (`profiles_select_shop_customer`); still falls back
+  to "Client" if a profile has no `full_name`.
 - WhatsApp courier ping not built yet (server-side, on accept).
 - Inventory (Phase 2: `inventory_items`, `consumes`) deferred — `in_stock` flag is the simple gate for now.
 
@@ -161,6 +172,10 @@ self-contained record — it never changes when the catalog is later edited.
 - **Fonts:** next/font var must be on `<html>` (not just `<body>`) or Mantine falls back to serif.
 - **Nested Mantine `Collapse`** mis-measures height → use conditional render for nested expandables.
 - **Screenshots:** `/dashboard/*` and `/browse` never reach network-idle → verify via DOM, not screenshots.
+- **Pricing parity:** the place-order server reprice (`api/place-order/route.ts`) must stay
+  byte-equivalent to `lib/catalog/pricing.ts` — any >1 bani divergence rejects a valid cart. Watch:
+  per_unit with an unanswered `per` = 0 (not amount×1); quantity multiplier `|| 1` (0/NaN → 1); and
+  always guard `item.fields ?? []` (products may omit `fields` → was a 500).
 - **Charts:** `@mantine/charts@9` requires **recharts ≥3.2.1** — do NOT downgrade to recharts 2 (the
   Donut/Pie still renders on v2 but cartesian charts like AreaChart silently draw axes with no series).
   In recharts 3 the Pie `activeIndex` prop is gone — drive the hover-active sector via `activeShape` +

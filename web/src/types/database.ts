@@ -279,6 +279,7 @@ export type Database = {
           customer_id: string
           delivery_address: string | null
           discount: number
+          eta_minutes: number | null
           fulfilment: Database["public"]["Enums"]["fulfilment_type"]
           handled_by: string | null
           id: string
@@ -308,6 +309,7 @@ export type Database = {
           customer_id: string
           delivery_address?: string | null
           discount?: number
+          eta_minutes?: number | null
           fulfilment?: Database["public"]["Enums"]["fulfilment_type"]
           handled_by?: string | null
           id?: string
@@ -337,6 +339,7 @@ export type Database = {
           customer_id?: string
           delivery_address?: string | null
           discount?: number
+          eta_minutes?: number | null
           fulfilment?: Database["public"]["Enums"]["fulfilment_type"]
           handled_by?: string | null
           id?: string
@@ -642,8 +645,10 @@ export type Database = {
           banner_path: string | null
           commission_rate: number
           created_at: string
+          default_eta_minutes: number | null
           delivery_fee: number
           description: string | null
+          email: string | null
           id: string
           logo_path: string | null
           name: string
@@ -657,8 +662,10 @@ export type Database = {
           banner_path?: string | null
           commission_rate?: number
           created_at?: string
+          default_eta_minutes?: number | null
           delivery_fee?: number
           description?: string | null
+          email?: string | null
           id?: string
           logo_path?: string | null
           name: string
@@ -672,8 +679,10 @@ export type Database = {
           banner_path?: string | null
           commission_rate?: number
           created_at?: string
+          default_eta_minutes?: number | null
           delivery_fee?: number
           description?: string | null
+          email?: string | null
           id?: string
           logo_path?: string | null
           name?: string
@@ -704,6 +713,7 @@ export type Database = {
         }
         Returns: string
       }
+      can_read_customer: { Args: { p_customer: string }; Returns: boolean }
       cancel_shop_invitation: {
         Args: { p_email: string; p_shop_id: string }
         Returns: undefined
@@ -802,13 +812,6 @@ export type Database = {
           revenue: number
         }[]
       }
-      shop_status_counts: {
-        Args: { p_shop_id: string }
-        Returns: {
-          status: Database["public"]["Enums"]["order_status"]
-          count: number
-        }[]
-      }
       shop_stats: {
         Args: { p_shop_id: string }
         Returns: {
@@ -824,16 +827,23 @@ export type Database = {
           reviews_count: number
         }[]
       }
+      shop_status_counts: {
+        Args: { p_shop_id: string }
+        Returns: {
+          count: number
+          status: Database["public"]["Enums"]["order_status"]
+        }[]
+      }
       shop_top_items: {
         Args: { p_limit?: number; p_shop_id: string }
         Returns: {
-          item_id: string
-          title: string
-          kind: Database["public"]["Enums"]["item_kind"]
-          qty: number
-          orders: number
-          revenue: number
           avg_rating: number
+          item_id: string
+          kind: Database["public"]["Enums"]["item_kind"]
+          orders: number
+          qty: number
+          revenue: number
+          title: string
         }[]
       }
       shop_unread_count: { Args: never; Returns: number }

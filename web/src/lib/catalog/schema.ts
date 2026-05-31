@@ -127,6 +127,11 @@ export const itemSchema = z.object({
   in_stock: z.boolean().default(true),
   sort_order: z.number().int().default(0),
   base_price: z.number().min(0).default(0),
+  // Optional retail metadata (mainly products): stock-keeping unit + the unit goods are sold in
+  // (e.g. "buc", "set", "pachet"). Display-only — never affects pricing/validation.
+  // Backward-compatible: old documents without them parse to null.
+  sku: z.string().max(TEXT_MAX).nullable().default(null),
+  unit: z.string().max(TEXT_MAX).nullable().default(null),
   requires_upload: z.boolean().default(false),
   // Which file types the customer may upload when `requires_upload`. Defaults to PDF
   // (backward-compatible with documents created before this field existed).

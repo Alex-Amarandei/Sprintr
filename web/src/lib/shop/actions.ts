@@ -19,11 +19,21 @@ export async function updateShopProfile(
       name: input.name,
       description: input.description || null,
       phone: input.phone || null,
+      email: input.email || null,
       address: input.address || null,
       schedule: input.schedule,
       // Only touch delivery_fee when provided, so saves that omit it don't reset it to 0.
       ...(input.deliveryFee !== undefined
         ? { delivery_fee: Math.max(0, Math.round(input.deliveryFee * 100) / 100) }
+        : {}),
+      // Likewise for the per-shop default ETA — only when explicitly provided.
+      ...(input.defaultEtaMinutes !== undefined
+        ? {
+            default_eta_minutes:
+              input.defaultEtaMinutes == null
+                ? null
+                : Math.max(0, Math.round(input.defaultEtaMinutes)),
+          }
         : {}),
     })
     .eq("id", shopId);

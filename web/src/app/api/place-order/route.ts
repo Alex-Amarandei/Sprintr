@@ -9,6 +9,8 @@ import {
   type CartLineInput,
   type OfferRow,
 } from "@/lib/catalog/offers";
+import { FILE_TYPES } from "@/lib/catalog/fileTypes";
+import type { FileTypeKey } from "@/lib/catalog/schema";
 
 export const dynamic = "force-dynamic";
 
@@ -51,26 +53,40 @@ type CatalogItem = {
   base_price: number;
   category_id?: string | null;
   requires_upload?: boolean;
+  accepted_file_types?: FileTypeKey[];
   in_stock?: boolean;
-  fields: CatalogField[];
+  fields?: CatalogField[];
 };
 type OrderFileRef = { path: string; name: string };
 
+/** Server-side mirror of fileTypes.fileAllowed — by extension, lenient when no types set. */
+function fileTypeAllowed(name: string, accepted: FileTypeKey[] | undefined): boolean {
+  const keys = accepted?.length ? accepted : (Object.keys(FILE_TYPES) as FileTypeKey[]);
+  const ext = name.split(".").pop()?.toLowerCase() ?? "";
+  return keys.some((k) => FILE_TYPES[k]?.ext.includes(ext));
+}
+
+// IMPORTANT: must stay byte-for-byte equivalent to lib/catalog/pricing.ts (the FE preview).
+// Any divergence > 1 bani rejects a legitimate order. Notably: per_unit with an unanswered
+// `per` field resolves to 0 (NOT amount×1), and the quantity multiplier falls back to 1 when
+// the answer is missing/0/NaN (`|| 1`, not `?? 1`).
 function resolvePrice(rule: PriceRule | undefined, answers: Answers): number {
   if (!rule) return 0;
   if (rule.mode === "additive") return rule.amount;
-  if (rule.mode === "per_unit" && rule.per) return rule.amount * Number(answers[rule.per] ?? 1);
-  return 0;
+  return rule.per ? rule.amount * (Number(answers[rule.per]) || 0) : 0;
 }
 
 function computeItemPrice(item: CatalogItem, answers: Answers) {
-  const qField = item.fields.find((f) => f.is_quantity);
-  const quantity = qField ? Number(answers[qField.key] ?? 1) : 1;
+  // Defensive: an item document may predate `fields` (e.g. a simple product) — treat as no fields
+  // rather than crashing the whole request with a 500.
+  const fields = item.fields ?? [];
+  const qField = fields.find((f) => f.type === "number" && f.is_quantity);
+  const quantity = qField ? Number(answers[qField.key]) || 1 : 1;
   let addons = 0;
   const breakdown: Record<string, number> = {};
 
-  for (const field of item.fields) {
-    if (field.is_quantity) continue;
+  for (const field of fields) {
+    if (field.type === "number" && field.is_quantity) continue;
     const val = answers[field.key];
     let c = 0;
     if (field.type === "single_select") {
@@ -141,7 +157,7 @@ export async function POST(req: NextRequest) {
     // Load active catalog + shipping fee
     const { data: shop } = await db
       .from("shops")
-      .select("active_version_id, delivery_fee, commission_rate")
+      .select("active_version_id, delivery_fee, commission_rate, default_eta_minutes")
       .eq("id", shop_id)
       .single();
     if (!shop?.active_version_id) return err("Shop has no active catalog", 422);
@@ -180,6 +196,10 @@ export async function POST(req: NextRequest) {
       }
       if (catalogItem.requires_upload && files.length === 0) {
         return err(`"${line.title}" requires a file upload`, 422);
+      }
+      const badFile = files.find((f) => !fileTypeAllowed(f.name, catalogItem.accepted_file_types));
+      if (badFile) {
+        return err(`"${badFile.name}" has a file type not accepted for "${line.title}"`, 422);
       }
 
       orderItems.push({
@@ -244,6 +264,7 @@ export async function POST(req: NextRequest) {
         service_fee: serviceFee,
         commission,
         payout,
+        eta_minutes: shop.default_eta_minutes ?? null,
         applied_offers: offers.appliedOffers as unknown as Database["public"]["Tables"]["orders"]["Insert"]["applied_offers"],
         total,
         payment_method,

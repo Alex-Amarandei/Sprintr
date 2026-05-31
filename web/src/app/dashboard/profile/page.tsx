@@ -13,7 +13,9 @@ export default async function ShopProfilePage() {
         name: shop?.name ?? "",
         description: shop?.description ?? "",
         phone: shop?.phone ?? "",
+        email: shop?.email ?? "",
         address: shop?.address ?? "",
+        defaultEtaMinutes: shop?.defaultEtaMinutes ?? null,
       }}
       schedule={shop?.schedule ?? null}
       logoPath={shop?.logoPath ?? null}

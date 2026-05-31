@@ -35,12 +35,18 @@ export interface SampleOrder {
   customerName: string;
   /** Customer's profile id — used by the chat to classify message sides. */
   customerId?: string;
+  /** Customer contact — only resolvable by the shop (RLS), used on the shop order detail. */
+  customerPhone?: string;
+  customerEmail?: string;
   category: ShopCategory;
   itemsCount: number;
   total: number;
   status: OrderStatus;
   placedAt: string;
+  /** ETA display string (e.g. "~30 min") derived from etaMinutes. */
   eta?: string;
+  /** Raw per-order ETA in minutes (shop-editable, defaults from the shop). Visible both sides. */
+  etaMinutes?: number | null;
   lines: SampleOrderLine[];
   subtotal: number;
   delivery: number;

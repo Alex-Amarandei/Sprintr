@@ -73,3 +73,30 @@ export async function advanceOrderStatus(
   revalidatePath(`/dashboard/orders/${orderId}`);
   return { ok: true };
 }
+
+/**
+ * Shop-side: set/clear the per-order ETA (minutes). RLS scopes updates to the shop's own
+ * orders (customers can't update orders), so this is effectively shop-only. Visible to both
+ * sides on the order detail.
+ */
+export async function setOrderEta(
+  orderId: string,
+  etaMinutes: number | null
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Neautentificat" };
+
+  const eta =
+    etaMinutes == null || Number.isNaN(etaMinutes) ? null : Math.max(0, Math.round(etaMinutes));
+
+  const { error } = await supabase.from("orders").update({ eta_minutes: eta }).eq("id", orderId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/dashboard/orders");
+  revalidatePath(`/dashboard/orders/${orderId}`);
+  revalidatePath(`/order/${orderId}`);
+  return { ok: true };
+}
