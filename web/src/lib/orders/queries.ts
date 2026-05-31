@@ -94,6 +94,8 @@ function toListOrder(o: any): SampleOrder {
     placedAt: relTime(o.created_at),
     subtotal,
     delivery: round2(total - subtotal),
+    commission: Number(o.commission ?? 0),
+    payout: Number(o.payout ?? 0),
     paymentMethod: PAYMENT_LABEL[o.payment_method] ?? o.payment_method,
     paymentStatus: o.payment_status,
     online: o.payment_method === "online",
@@ -110,6 +112,8 @@ function toListOrder(o: any): SampleOrder {
 export interface ShopStats {
   revenueTotal: number;
   revenueToday: number;
+  payoutTotal: number;
+  commissionTotal: number;
   ordersTotal: number;
   pending: number;
   inProgress: number;
@@ -127,6 +131,8 @@ export async function getShopStats(shopId: string): Promise<ShopStats | null> {
   return {
     revenueTotal: Number(r.revenue_total),
     revenueToday: Number(r.revenue_today),
+    payoutTotal: Number(r.payout_total),
+    commissionTotal: Number(r.commission_total),
     ordersTotal: Number(r.orders_total),
     pending: Number(r.pending),
     inProgress: Number(r.in_progress),
@@ -136,13 +142,51 @@ export async function getShopStats(shopId: string): Promise<ShopStats | null> {
   };
 }
 
-/** Last 7 days of completed-order revenue (zero-filled) for the dashboard chart. */
+export interface TopItem {
+  itemId: string;
+  title: string;
+  kind: "service" | "product";
+  qty: number;
+  orders: number;
+  revenue: number;
+  avgRating: number;
+}
+
+/** Best-selling catalog items (services + products) for the shop, by revenue. */
+export async function getShopTopItems(shopId: string, limit = 5): Promise<TopItem[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("shop_top_items", { p_shop_id: shopId, p_limit: limit });
+  return (data ?? []).map((r) => ({
+    itemId: r.item_id,
+    title: r.title,
+    kind: r.kind,
+    qty: Number(r.qty),
+    orders: Number(r.orders),
+    revenue: Number(r.revenue),
+    avgRating: Number(r.avg_rating),
+  }));
+}
+
+/** Daily completed-order revenue over the last `days` (zero-filled) for charts. */
 export async function getShopRevenueDaily(
   shopId: string,
+  days = 7,
 ): Promise<{ day: string; revenue: number }[]> {
   const supabase = await createClient();
-  const { data } = await supabase.rpc("shop_revenue_daily", { p_shop_id: shopId });
+  const { data } = await supabase.rpc("shop_revenue_daily", {
+    p_shop_id: shopId,
+    p_days: days,
+  });
   return (data ?? []).map((d) => ({ day: d.day, revenue: Number(d.revenue) }));
+}
+
+/** Order counts per status (for the analytics donut). */
+export async function getShopStatusCounts(
+  shopId: string,
+): Promise<{ status: OrderStatus; count: number }[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("shop_status_counts", { p_shop_id: shopId });
+  return (data ?? []).map((r) => ({ status: r.status, count: Number(r.count) }));
 }
 
 /** The caller's own order aggregates (customer dashboard). */

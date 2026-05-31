@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import {
+  Badge,
   Card,
   Group,
   SimpleGrid,
@@ -14,6 +15,7 @@ import {
   getShopOrders,
   getShopRevenueDaily,
   getShopStats,
+  getShopTopItems,
 } from "@/lib/orders/queries";
 import { roCount } from "@/lib/utils/format";
 import { LinkButton } from "@/components/ui/links";
@@ -26,10 +28,11 @@ export const metadata: Metadata = { title: "Dashboard magazin" };
 
 export default async function ShopDashboardPage() {
   const shop = await getMyShop();
-  const [orders, revenueDaily, stats] = await Promise.all([
+  const [orders, revenueDaily, stats, topItems] = await Promise.all([
     getShopOrders(),
     shop ? getShopRevenueDaily(shop.id) : Promise.resolve([]),
     shop ? getShopStats(shop.id) : Promise.resolve(null),
+    shop ? getShopTopItems(shop.id, 5) : Promise.resolve([]),
   ]);
   const maxRevenue = Math.max(...revenueDaily.map((d) => d.revenue), 1);
   const dayLabel = (iso: string) =>
@@ -47,19 +50,6 @@ export default async function ShopDashboardPage() {
   const doneRevenue = orders
     .filter((o) => o.status === "done")
     .reduce((sum, o) => sum + o.total, 0);
-
-  // Top services by revenue — aggregated from real order line items.
-  const byTitle = new Map<string, { revenue: number; count: number }>();
-  for (const o of orders) {
-    for (const l of o.lines) {
-      const cur = byTitle.get(l.title) ?? { revenue: 0, count: 0 };
-      byTitle.set(l.title, { revenue: cur.revenue + l.lineTotal, count: cur.count + 1 });
-    }
-  }
-  const topServices = [...byTitle.entries()]
-    .map(([name, v]) => ({ name, ...v }))
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 4);
 
   return (
     <Stack gap="xl">
@@ -84,7 +74,7 @@ export default async function ShopDashboardPage() {
           </Group>
         </div>
         <Group>
-          <ExportReportButton orders={orders} />
+          <ExportReportButton />
           <LinkButton href="/dashboard/products" leftSection={<Plus size={16} />}>
             Adaugă produs
           </LinkButton>
@@ -160,25 +150,36 @@ export default async function ShopDashboardPage() {
         </Card>
         <Card>
           <Text fw={700} mb="md">
-            Top servicii
+            Top vânzări
           </Text>
-          {topServices.length === 0 ? (
+          {topItems.length === 0 ? (
             <Text c="dimmed" fz="sm" ta="center" py="xl">
               Nicio comandă încă.
             </Text>
           ) : (
             <Stack gap="sm">
-              {topServices.map((t) => (
-                <Group key={t.name} justify="space-between">
-                  <div>
-                    <Text fz="sm" fw={600}>
-                      {t.name}
-                    </Text>
+              {topItems.map((t) => (
+                <Group key={t.itemId} justify="space-between" wrap="nowrap" align="flex-start">
+                  <div style={{ minWidth: 0 }}>
+                    <Group gap={6} wrap="nowrap">
+                      <Text fz="sm" fw={600} truncate>
+                        {t.title}
+                      </Text>
+                      <Badge
+                        size="xs"
+                        variant="light"
+                        color={t.kind === "service" ? "brand" : "blue"}
+                      >
+                        {t.kind === "service" ? "Serviciu" : "Produs"}
+                      </Badge>
+                    </Group>
                     <Text fz="xs" c="dimmed">
-                      {roCount(t.count, "comandă", "comenzi")}
+                      {roCount(t.qty, "bucată vândută", "bucăți vândute")} ·{" "}
+                      {roCount(t.orders, "comandă", "comenzi")}
+                      {t.avgRating > 0 ? ` · ★ ${t.avgRating.toFixed(1)}` : ""}
                     </Text>
                   </div>
-                  <Text fw={700} fz="sm">
+                  <Text fw={700} fz="sm" style={{ whiteSpace: "nowrap" }}>
                     {t.revenue.toFixed(2)} lei
                   </Text>
                 </Group>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Badge, NavLink, Stack } from "@mantine/core";
 import {
+  BarChart3,
   LayoutDashboard,
   type LucideIcon,
   MessageSquare,
@@ -18,6 +19,7 @@ import { useUnread } from "./UnreadProvider";
 
 const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard/analytics", label: "Statistici", icon: BarChart3 },
   { href: "/dashboard/orders", label: "Comenzi", icon: ShoppingBag },
   { href: "/dashboard/messages", label: "Mesaje", icon: MessageSquare },
   { href: "/dashboard/products", label: "Produse", icon: Package },

@@ -1,6 +1,17 @@
 import type { OrderStatus } from "@/lib/design/status";
 import type { ShopCategory } from "@/lib/catalog/samples";
 
+/** One row of the shop's order export (CSV report). */
+export interface ExportRow {
+  id: string;
+  createdAt: string;
+  status: OrderStatus;
+  total: number;
+  commission: number;
+  payout: number;
+  paymentMethod: string;
+}
+
 /** Order view-model shared by the customer order views and the shop dashboard. */
 export interface SampleOrderLine {
   title: string;

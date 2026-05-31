@@ -49,7 +49,17 @@ something C1 builds (build against a stub until it lands).
 - [x] Store PDFs in S3 🔗 — uses **Supabase Storage** (S3-compatible), private `order-files` bucket
 - [x] Allow multiple PDFs upload — `FileInput multiple` → `order_items.files jsonb` + own-folder
       security; client type-check via `accepted_file_types`. (Deep server-side §8 type/size = partial.)
-- [ ] Analytics table for stats (shops, ratings, etc.) — source for both dashboards
+- [x] Analytics table for stats (shops, ratings, etc.) — source for both dashboards. _Done as
+      aggregation-on-read RPCs (`shop_stats`, `shop_revenue_daily`, `shop_status_counts`,
+      `shop_top_items`, `customer_stats`) — data is tiny + indexed, no rollup table needed._
+- [x] Platform commission / payout — per-shop `shops.commission_rate` (owner-immutable via
+      `shops_guard_commission`, admin-only), frozen `orders.commission`/`orders.payout` at
+      placement; 5% of goods, no charge below 2 lei. Invisible to customer; shown to shop only
+      on its own order breakdown.
+- [x] Robust export modal — period (week/month/year/all) × status filter (default Finalizată),
+      CSV with Total client / Comision / Încasări + TOTAL row (`exportShopOrders` Server Action).
+- [x] Top sellers per service/product — `shop_top_items` (qty, orders, revenue, rating) on
+      dashboard + analytics.
 - [x] Filter out-of-stock products/services — lightweight `in_stock` flag on items (not full
       Phase-2 inventory): "În stoc" switch in the catalog builder; `getShopCatalog` hides OOS;
       place-order rejects ordering them (409).
@@ -200,9 +210,9 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 
 ### Dashboard & orders
 
-- [~] Shop analytics — _StatCards + Top services already aggregate from REAL orders. Only
-  the 7-day revenue chart is a placeholder: needs raw order timestamps (C1's getShopOrders
-  formats `created_at` → relative string, so it can't be bucketed by day)_
+- [x] Shop analytics — dedicated `/dashboard/analytics` page: KPI StatCards (venit/încasări/
+  comision/AOV/rating), 30-day revenue area chart + status donut (`@mantine/charts`, recharts 3),
+  top-sellers. Dashboard 7-day revenue chart now real (`shop_revenue_daily`).
 - [ ] Shop-side "in delivery" status + order actions ⬅BE 🔗
 - [ ] Shop-side chat lifecycle + review replies / complaint handling ⬅BE 🔗
 

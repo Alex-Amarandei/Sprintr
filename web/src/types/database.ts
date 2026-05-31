@@ -796,23 +796,44 @@ export type Database = {
         }[]
       }
       shop_revenue_daily: {
-        Args: { p_shop_id: string }
+        Args: { p_days?: number; p_shop_id: string }
         Returns: {
           day: string
           revenue: number
+        }[]
+      }
+      shop_status_counts: {
+        Args: { p_shop_id: string }
+        Returns: {
+          status: Database["public"]["Enums"]["order_status"]
+          count: number
         }[]
       }
       shop_stats: {
         Args: { p_shop_id: string }
         Returns: {
           avg_rating: number
+          commission_total: number
           done: number
           in_progress: number
           orders_total: number
+          payout_total: number
           pending: number
           revenue_today: number
           revenue_total: number
           reviews_count: number
+        }[]
+      }
+      shop_top_items: {
+        Args: { p_limit?: number; p_shop_id: string }
+        Returns: {
+          item_id: string
+          title: string
+          kind: Database["public"]["Enums"]["item_kind"]
+          qty: number
+          orders: number
+          revenue: number
+          avg_rating: number
         }[]
       }
       shop_unread_count: { Args: never; Returns: number }

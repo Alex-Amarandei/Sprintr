@@ -109,8 +109,16 @@ self-contained record — it never changes when the catalog is later edited.
 - **Place order** (`/api/place-order` route handler / Server Action): requires auth, reloads the live
   catalog, **reprices every line server-side**, rejects on >1¢ mismatch or OOS line, applies offers,
   inserts via service role. Online payment → creates Stripe PaymentIntent (RON), returns `client_secret`.
-- **`total = subtotal − discount + shipping_fee + service_fee` (+ platform fee).** `service_fee` =
-  flat 2 lei (checkout only). Platform fee 6% is being moved into the Stripe flow (separate task).
+- **`total = subtotal − discount + shipping_fee + service_fee`.** `service_fee` = flat 2 lei
+  (checkout only). The customer is **not** charged a platform fee (the old +6% is removed).
+- **Platform commission (deducted from payout, not added to the customer):** per-shop
+  `shops.commission_rate` (default 5%). `goods = subtotal − discount`;
+  `commission = goods ≥ 2 ? round(goods × rate) : 0` (no commission below 2 lei);
+  `payout = goods − commission + shipping_fee`; platform take = `commission + service_fee`.
+  `orders.commission`/`orders.payout` are **frozen at placement** (no recompute). `commission_rate`
+  is **owner-immutable** (trigger `shops_guard_commission`, admin-only) and **invisible to the
+  customer** and to the shop except on its own order breakdown (`payout` line). Analytics +
+  reports/CSV reflect commission/payout.
 - **Stripe:** `/api/stripe-webhook` (raw-body signature verify) flips `payment_status`. Keys are
   Vercel server env only (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`; publishable is `NEXT_PUBLIC_`).
   Local: `stripe listen --forward-to localhost:3000/api/stripe-webhook`; test card `4242…`.
@@ -153,3 +161,8 @@ self-contained record — it never changes when the catalog is later edited.
 - **Fonts:** next/font var must be on `<html>` (not just `<body>`) or Mantine falls back to serif.
 - **Nested Mantine `Collapse`** mis-measures height → use conditional render for nested expandables.
 - **Screenshots:** `/dashboard/*` and `/browse` never reach network-idle → verify via DOM, not screenshots.
+- **Charts:** `@mantine/charts@9` requires **recharts ≥3.2.1** — do NOT downgrade to recharts 2 (the
+  Donut/Pie still renders on v2 but cartesian charts like AreaChart silently draw axes with no series).
+  In recharts 3 the Pie `activeIndex` prop is gone — drive the hover-active sector via `activeShape` +
+  the `Tooltip`. `valueFormatter`/`activeShape` are functions → keep charts in a `"use client"` wrapper
+  (`components/dashboard/AnalyticsCharts.tsx`), pass only serializable data from the Server Component.
