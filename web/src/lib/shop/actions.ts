@@ -20,6 +20,10 @@ export async function updateShopProfile(
       description: input.description || null,
       phone: input.phone || null,
       address: input.address || null,
+      // Only touch delivery_fee when provided, so saves that omit it don't reset it to 0.
+      ...(input.deliveryFee !== undefined
+        ? { delivery_fee: Math.max(0, Math.round(input.deliveryFee * 100) / 100) }
+        : {}),
     })
     .eq("id", shopId);
   if (error) return { ok: false, error: error.message };

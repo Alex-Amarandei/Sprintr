@@ -120,6 +120,7 @@ export async function getMyShop(): Promise<{
   description: string | null;
   phone: string | null;
   address: string | null;
+  delivery_fee: number;
 } | null> {
   const supabase = await createClient();
   const {
@@ -135,7 +136,7 @@ export async function getMyShop(): Promise<{
   if (!membership) return null;
   const { data: shop } = await supabase
     .from("shops")
-    .select("id, name, description, phone, address")
+    .select("id, name, description, phone, address, delivery_fee")
     .eq("id", membership.shop_id)
     .maybeSingle();
   return shop ?? null;

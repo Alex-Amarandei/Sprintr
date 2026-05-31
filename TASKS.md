@@ -26,10 +26,13 @@ something C1 builds (build against a stub until it lands).
       (fixed the `is_quantity` multiplier mismatch; added `is_quantity` to the number-field schema)
 
 ### Money & orders
-- [ ] Fix internal server error when placing order
-- [ ] Update 6% tax logic
-- [ ] Add delivery tax
-- [ ] Add mandatory fixed service fee per order
+- [x] Fix internal server error when placing order
+      (root cause: missing `SUPABASE_SERVICE_ROLE_KEY` in local `.env.local` — env gap, not code)
+- [ ] Update 6% tax logic — deferred to the Stripe flow (redirect % to us); untouched for now
+- [x] Add delivery tax — per-shop `shops.delivery_fee` (owner-update RLS), applied in place-order
+      as `shipping_fee`, configurable via `updateShopProfile`/read via `getMyShop`. (C3: profile form field)
+- [x] Add mandatory fixed service fee per order — flat 2 lei `orders.service_fee`, computed in
+      place-order, checkout-only display. (C2: checkout line)
 - [ ] Allow multiple vendor orders 🔗 — orders/placement data model
 - [ ] Add "in delivery" order status 🔗 — `order_status` enum migration
 - [ ] Invoice download + generate invoices/receipts & export — PDF gen + storage + API
