@@ -66,6 +66,7 @@ import {
 import { roCount } from "@/lib/utils/format";
 import { ItemCard } from "./ItemCard";
 import { ProductItemCard } from "./ProductItemCard";
+import { ItemReadOnlyCard } from "./ItemReadOnlyCard";
 import { CatalogVersions } from "./CatalogVersions";
 
 /** An ItemCard wrapped as a dnd-kit sortable, with its own drag handle. */
@@ -728,21 +729,45 @@ export function CatalogBuilder({
           {copy.empty}
         </Paper>
       ) : (
-        <Stack gap="md">
-          {visibleItems.map((item) => (
-            <Paper key={item.id} withBorder radius="lg" p="md">
-              <Group justify="space-between">
-                <Title order={4}>{item.title}</Title>
-                <Badge variant="light">
-                  {item.kind === "service" ? "Serviciu" : "Produs"}
-                </Badge>
+        <Stack gap="lg">
+          {/* Grouped by category (mirrors the edit view); empty categories are hidden. */}
+          {doc.categories.map((cat) => {
+            const items = itemsOf(cat.id);
+            if (items.length === 0) return null;
+            return (
+              <Stack key={cat.id} gap="sm">
+                <Group gap="xs" align="baseline">
+                  <Text fw={700}>{cat.name || "Categorie"}</Text>
+                  <Text fz="xs" c="dimmed">
+                    {roCount(items.length, copy.one, copy.many)}
+                  </Text>
+                </Group>
+                <Stack gap="md">
+                  {items.map((item) => (
+                    <ItemReadOnlyCard key={item.id} item={item} categories={doc.categories} />
+                  ))}
+                </Stack>
+              </Stack>
+            );
+          })}
+          {/* Uncategorized */}
+          {itemsOf(null).length > 0 && (
+            <Stack gap="sm">
+              <Group gap="xs" align="baseline">
+                <Text fw={700} c="dimmed">
+                  Fără categorie
+                </Text>
+                <Text fz="xs" c="dimmed">
+                  {roCount(itemsOf(null).length, copy.one, copy.many)}
+                </Text>
               </Group>
-              <Text size="sm" c="dimmed">
-                {roCount(item.fields.length, "câmp", "câmpuri")} · de la{" "}
-                {item.base_price} RON
-              </Text>
-            </Paper>
-          ))}
+              <Stack gap="md">
+                {itemsOf(null).map((item) => (
+                  <ItemReadOnlyCard key={item.id} item={item} categories={doc.categories} />
+                ))}
+              </Stack>
+            </Stack>
+          )}
         </Stack>
       )}
 

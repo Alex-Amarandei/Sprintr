@@ -90,17 +90,17 @@ body {
 [data-mantine-color-scheme="light"] .hero-blob--ember {
   background: radial-gradient(
     circle,
-    rgba(241, 169, 123, 0.3) 0%,
-    rgba(241, 169, 123, 0.13) 45%,
-    transparent 80%
+    rgba(236, 143, 83, 0.42) 0%,
+    rgba(236, 143, 83, 0.2) 45%,
+    transparent 82%
   );
 }
 [data-mantine-color-scheme="light"] .hero-blob--ember2 {
   background: radial-gradient(
     circle,
-    rgba(241, 169, 123, 0.22) 0%,
-    rgba(241, 169, 123, 0.09) 45%,
-    transparent 80%
+    rgba(236, 143, 83, 0.32) 0%,
+    rgba(236, 143, 83, 0.14) 45%,
+    transparent 82%
   );
 }
 @keyframes hero-drift-a {

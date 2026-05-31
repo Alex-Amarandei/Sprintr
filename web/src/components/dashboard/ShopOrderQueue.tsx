@@ -35,8 +35,13 @@ const initials = (n: string) =>
 const short = (id: string) => id.slice(0, 8);
 
 /** Payment badge for the shop: paid / unpaid (online) / pay-on-handover (cash). */
-function paymentBadge(o: SampleOrder): { label: string; color: string } {
-  if (o.paymentStatus === "paid") return { label: "Plătită", color: "teal" };
+function paymentBadge(o: SampleOrder): {
+  label: string;
+  color: string;
+  variant?: "light" | "filled";
+} {
+  if (o.paymentStatus === "paid")
+    return { label: "Plătită", color: "#166e75", variant: "filled" };
   if (o.paymentStatus === "refunded") return { label: "Rambursată", color: "gray" };
   if (o.online) {
     return o.paymentStatus === "failed"
@@ -262,19 +267,35 @@ export function ShopOrderQueue({
           </Link>
 
           <Group gap="md" wrap="nowrap">
-            {hasPdf && (
-              <Badge variant="light" color="red" leftSection={<FileText size={12} />} visibleFrom="md">
-                PDF
+            {/* Fixed-width slots so payment pill, price, status & actions line up across every row. */}
+            <Box w={48} visibleFrom="md">
+              {hasPdf && (
+                <Badge variant="light" color="red" leftSection={<FileText size={12} />}>
+                  PDF
+                </Badge>
+              )}
+            </Box>
+            <Box
+              w={150}
+              visibleFrom="md"
+              style={{ display: "flex", justifyContent: "flex-end" }}
+            >
+              <Badge
+                variant={pb.variant ?? "light"}
+                color={pb.color}
+                c={pb.variant === "filled" ? "white" : undefined}
+                style={{ whiteSpace: "nowrap" }}
+              >
+                {pb.label}
               </Badge>
-            )}
-            <Badge variant="light" color={pb.color} visibleFrom="md" style={{ whiteSpace: "nowrap" }}>
-              {pb.label}
-            </Badge>
-            <Text fw={700} fz="sm" ta="right" style={{ whiteSpace: "nowrap" }}>
-              {o.total.toFixed(2)} lei
-            </Text>
-            {/* Desktop: status + actions inline */}
-            <Box w={118} visibleFrom="sm">
+            </Box>
+            <Box w={90} style={{ flexShrink: 0 }}>
+              <Text fw={700} fz="sm" ta="right" style={{ whiteSpace: "nowrap" }}>
+                {o.total.toFixed(2)} lei
+              </Text>
+            </Box>
+            {/* Desktop: status (right-aligned, roomy) + actions inline */}
+            <Box w={150} visibleFrom="sm" style={{ display: "flex", justifyContent: "flex-end" }}>
               <StatusBadge status={o.status} />
             </Box>
             <Box w={170} ml="xl" visibleFrom="sm" style={{ display: "flex", justifyContent: "flex-end" }}>
@@ -287,7 +308,13 @@ export function ShopOrderQueue({
         <Group justify="space-between" hiddenFrom="sm" mt="sm" wrap="nowrap">
           <Group gap="xs" wrap="nowrap">
             <StatusBadge status={o.status} />
-            <Badge variant="light" color={pb.color} size="sm" style={{ whiteSpace: "nowrap" }}>
+            <Badge
+              variant={pb.variant ?? "light"}
+              color={pb.color}
+              c={pb.variant === "filled" ? "white" : undefined}
+              size="sm"
+              style={{ whiteSpace: "nowrap" }}
+            >
               {pb.label}
             </Badge>
           </Group>

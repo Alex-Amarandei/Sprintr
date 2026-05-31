@@ -89,7 +89,7 @@ export function DashboardNav({
             let rightSection: React.ReactNode;
             if (showUnread) {
               rightSection = (
-                <Badge size="sm" variant="filled" color="brand" aria-label="mesaje necitite">
+                <Badge size="sm" circle variant="filled" color="brand.5" c="white" aria-label="mesaje necitite">
                   {badgeText(count)}
                 </Badge>
               );
@@ -97,12 +97,12 @@ export function DashboardNav({
               rightSection = (
                 <Group gap={4} wrap="nowrap">
                   {pendingCount > 0 && (
-                    <Badge size="sm" variant="filled" color="brand" aria-label="comenzi noi">
+                    <Badge size="sm" circle variant="filled" color="brand.5" c="white" aria-label="comenzi noi">
                       {badgeText(pendingCount)}
                     </Badge>
                   )}
                   {inProgressCount > 0 && (
-                    <Badge size="sm" variant="light" color="cyan" aria-label="comenzi în lucru">
+                    <Badge size="sm" circle variant="filled" color="brand.7" aria-label="comenzi în lucru">
                       {badgeText(inProgressCount)}
                     </Badge>
                   )}
