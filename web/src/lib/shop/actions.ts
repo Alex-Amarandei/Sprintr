@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveShopId, ACTIVE_SHOP_COOKIE } from "./active";
+import { bucharestDateKey } from "./schedule";
 import type { ShopProfileInput } from "./types";
 import type { Database, Json } from "@/types/database";
 
@@ -125,7 +126,8 @@ export async function setShopPause(
   const overrides: Record<string, Json> = {
     ...((shop?.schedule_overrides as Record<string, Json> | null) ?? {}),
   };
-  const today = new Date().toISOString().slice(0, 10);
+  // Bucharest calendar "today" so the pause range agrees with the (Bucharest-aware) reader.
+  const today = bucharestDateKey();
 
   // Clear any existing pause first (closed entries from today onward), then re-apply.
   for (const key of Object.keys(overrides)) {

@@ -36,9 +36,55 @@ export const SAMPLE_SCHEDULE: WeeklySchedule = {
   sun: null,
 };
 
-/** JS `getDay()` (0 = Sun) → our Monday-first key. */
+/**
+ * Romania's timezone. All open/closed math is wall-clock in Bucharest regardless of where the
+ * code runs — Vercel/SSR is UTC and a browser is the visitor's own zone, so the raw `Date` parts
+ * (`getHours`/`getDay`) can't be trusted. We derive the Bucharest wall-clock via `Intl` instead
+ * (full timezone data ships with Node + every browser).
+ */
+const TZ = "Europe/Bucharest";
+
+const WEEKDAY_FROM_SHORT: Record<string, WeekdayKey> = {
+  Mon: "mon", Tue: "tue", Wed: "wed", Thu: "thu", Fri: "fri", Sat: "sat", Sun: "sun",
+};
+
+/** The wall-clock "now" in Bucharest, split into the parts the schedule math needs. */
+function bucharestNow(now: Date): { key: WeekdayKey; minutes: number; dateKey: string } {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TZ,
+    weekday: "short",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23", // 00–23 (avoids the "24:00" midnight quirk of hour12:false)
+  }).formatToParts(now);
+  const get = (t: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === t)?.value ?? "";
+  return {
+    key: WEEKDAY_FROM_SHORT[get("weekday")] ?? "mon",
+    minutes: Number(get("hour")) * 60 + Number(get("minute")),
+    dateKey: `${get("year")}-${get("month")}-${get("day")}`,
+  };
+}
+
+/** Add whole days to a YYYY-MM-DD key (anchored at noon UTC so DST never shifts the date). */
+function addDaysToKey(dateKey: string, offset: number): string {
+  const d = new Date(`${dateKey}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + offset);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Today's Monday-first key, in Bucharest wall-clock. */
 export function todayKey(now: Date = new Date()): WeekdayKey {
-  return DAY_ORDER[(now.getDay() + 6) % 7];
+  return bucharestNow(now).key;
+}
+
+/** Today's date (YYYY-MM-DD) in Bucharest — for stamping/clearing `schedule_overrides` keys so
+ *  the writer agrees with the reader near midnight (override keys are Bucharest calendar dates). */
+export function bucharestDateKey(now: Date = new Date()): string {
+  return bucharestNow(now).dateKey;
 }
 
 function toMinutes(hhmm: string): number {
@@ -108,15 +154,13 @@ export function getScheduleStatus(
   overrides: Record<string, { open: string; close: string } | null> = {},
   now: Date = new Date(),
 ): ScheduleStatus {
-  const today = todayKey(now);
-  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const { key: today, minutes: nowMin, dateKey: todayDateKey } = bucharestNow(now);
 
   // Effective hours for the day `offset` days from now: a date-specific override (incl. a
   // `null` "closed" entry from a temporary pause) wins over the recurring weekly schedule.
+  // Dates are Bucharest calendar dates (override keys are stored as local YYYY-MM-DD).
   const hoursFor = (offset: number, weekday: WeekdayKey): { open: string; close: string } | null => {
-    const d = new Date(now);
-    d.setUTCDate(d.getUTCDate() + offset);
-    const dateKey = d.toISOString().slice(0, 10);
+    const dateKey = addDaysToKey(todayDateKey, offset);
     if (dateKey in overrides) return overrides[dateKey];
     return schedule[weekday];
   };

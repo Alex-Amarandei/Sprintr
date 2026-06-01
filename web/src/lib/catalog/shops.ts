@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getShopRatings } from "@/lib/reviews/queries";
 import { parseDocument, type Category, type Item } from "./schema";
 import { shopAssetUrl } from "@/lib/storage/shopAssets";
+import { getScheduleStatus, type WeeklySchedule } from "@/lib/shop/schedule";
 import type { SampleShop, ShopCategory } from "./samples";
 
 /**
@@ -14,8 +15,6 @@ import type { SampleShop, ShopCategory } from "./samples";
 type ScheduleDay = { open: string; close: string } | null;
 type Schedule = Record<string, ScheduleDay>;
 
-const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
-
 function deriveCategory(name: string): ShopCategory {
   const n = name.toLowerCase();
   if (/copy|copie|copiere/.test(n)) return "copy";
@@ -24,20 +23,17 @@ function deriveCategory(name: string): ShopCategory {
   return "print";
 }
 
-/** Open-now per CLAUDE.md: overrides[today] wins, else weekly schedule[weekday]. */
+/**
+ * Open-now per CLAUDE.md: overrides[today] wins, else weekly schedule[weekday]. Delegates to the
+ * shared, Bucharest-aware `getScheduleStatus` so the served `isOpen` flag and the storefront
+ * badge always agree (and the time is Romanian wall-clock, not the UTC server clock).
+ */
 function isOpenNow(
   schedule: Schedule | null,
   overrides: Record<string, ScheduleDay> | null
 ): boolean | undefined {
   if (!schedule && !overrides) return undefined;
-  const now = new Date();
-  const dateKey = now.toISOString().slice(0, 10);
-  let hours: ScheduleDay | undefined;
-  if (overrides && dateKey in overrides) hours = overrides[dateKey];
-  else hours = schedule?.[DAY_KEYS[now.getDay()]];
-  if (!hours) return false;
-  const cur = now.toTimeString().slice(0, 5);
-  return cur >= hours.open && cur <= hours.close;
+  return getScheduleStatus((schedule ?? {}) as WeeklySchedule, overrides ?? {}).open;
 }
 
 function toView(row: {
