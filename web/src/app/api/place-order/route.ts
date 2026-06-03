@@ -10,6 +10,7 @@ import {
   type OfferRow,
 } from "@/lib/catalog/offers";
 import { FILE_TYPES } from "@/lib/catalog/fileTypes";
+import { haversineKm, MAX_DELIVERY_KM } from "@/lib/geo/geocode";
 import type { FileTypeKey } from "@/lib/catalog/schema";
 
 export const dynamic = "force-dynamic";
@@ -165,10 +166,29 @@ export async function POST(req: NextRequest) {
     // Load active catalog + shipping fee
     const { data: shop } = await db
       .from("shops")
-      .select("active_version_id, delivery_fee, commission_rate, default_eta_minutes")
+      .select("active_version_id, delivery_fee, commission_rate, default_eta_minutes, lat, lng")
       .eq("id", shop_id)
       .single();
     if (!shop?.active_version_id) return err("Shop has no active catalog", 422);
+
+    // Delivery radius: block when the drop-off is farther than MAX_DELIVERY_KM from the shop.
+    // Enforced only when both points have coordinates (else allowed — the FE check mirrors this).
+    if (
+      fulfilment === "delivery" &&
+      shop.lat != null &&
+      shop.lng != null &&
+      deliveryLat != null &&
+      deliveryLng != null &&
+      haversineKm(
+        { lat: deliveryLat, lng: deliveryLng },
+        { lat: shop.lat, lng: shop.lng },
+      ) > MAX_DELIVERY_KM
+    ) {
+      return err(
+        "Magazinul nu livrează în zona ta. Alege un magazin mai aproape de tine.",
+        422,
+      );
+    }
 
     const { data: version } = await db
       .from("catalog_versions")

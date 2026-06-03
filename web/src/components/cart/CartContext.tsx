@@ -44,6 +44,9 @@ export interface CartShop {
   open: boolean;
   /** The shop's per-order delivery fee in lei (shown in checkout when delivery is chosen). */
   deliveryFee: number;
+  /** Shop coordinates (owner-set) — drive the delivery-radius check at checkout. */
+  lat: number | null;
+  lng: number | null;
 }
 
 interface CartContextValue {
@@ -54,6 +57,9 @@ interface CartContextValue {
   shopOpen: boolean;
   /** The cart shop's delivery fee in lei (0 when empty). */
   deliveryFee: number;
+  /** Cart shop coordinates (null when empty or the shop hasn't set them). */
+  shopLat: number | null;
+  shopLng: number | null;
   count: number;
   /** Pre-discount subtotal (sum of line totals). */
   total: number;
@@ -138,6 +144,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       shopName: shop?.name ?? null,
       shopOpen: shop?.open ?? true,
       deliveryFee: shop?.deliveryFee ?? 0,
+      shopLat: shop?.lat ?? null,
+      shopLng: shop?.lng ?? null,
       count: lines.length,
       total,
       discount,

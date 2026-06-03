@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveShopId, ACTIVE_SHOP_COOKIE } from "./active";
 import { bucharestDateKey } from "./schedule";
+import { forwardGeocode } from "@/lib/geo/geocode";
 import type { ShopProfileInput } from "./types";
 import type { Database, Json } from "@/types/database";
 
@@ -47,6 +48,22 @@ export async function updateShopProfile(
   input: ShopProfileInput
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient();
+
+  // Geocode the address → coordinates (for the delivery-radius check). Only when the address
+  // actually changed or the shop has no coords yet, to avoid re-geocoding (and rate-limiting
+  // Nominatim) on every save. On failure we leave the existing coords untouched.
+  let coords: { lat: number; lng: number } | null = null;
+  if (input.address?.trim()) {
+    const { data: current } = await supabase
+      .from("shops")
+      .select("address, lat, lng")
+      .eq("id", shopId)
+      .maybeSingle();
+    const changed = (current?.address ?? "").trim() !== input.address.trim();
+    const missing = current?.lat == null || current?.lng == null;
+    if (changed || missing) coords = await forwardGeocode(input.address);
+  }
+
   const { error } = await supabase
     .from("shops")
     .update({
@@ -55,6 +72,7 @@ export async function updateShopProfile(
       phone: input.phone || null,
       email: input.email || null,
       address: input.address || null,
+      ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
       schedule: input.schedule,
       // Only touch delivery_fee when provided, so saves that omit it don't reset it to 0.
       ...(input.deliveryFee !== undefined

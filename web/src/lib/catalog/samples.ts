@@ -23,6 +23,9 @@ export interface SampleShop {
   phone?: string;
   /** Per-order delivery fee in lei (0 = free). */
   deliveryFee?: number;
+  /** Shop coordinates (owner-set) — drive the delivery-radius check. Null when not set. */
+  lat?: number | null;
+  lng?: number | null;
   /** Real weekly hours from `shops.schedule` (null when the shop hasn't set any). */
   schedule?: WeeklySchedule | null;
   /** Date-keyed exceptions from `shops.schedule_overrides` (temporary pause etc.). */

@@ -23,7 +23,9 @@ export function ReorderButton({ orderId }: { orderId: string }) {
       return;
     }
     clear();
-    const shop = { id: p.shopId, name: p.shopName, open: p.shopOpen, deliveryFee: p.deliveryFee };
+    // Coords unknown here (the reorder lands on the shop page, where adding any item refreshes
+    // them); the server still enforces the delivery radius at placement regardless.
+    const shop = { id: p.shopId, name: p.shopName, open: p.shopOpen, deliveryFee: p.deliveryFee, lat: null, lng: null };
     for (const l of p.lines) {
       addLine(
         { lineId: crypto.randomUUID(), itemId: l.itemId, title: l.title, kind: l.kind, answers: l.answers, total: l.total, files: [] },

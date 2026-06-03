@@ -269,17 +269,21 @@ export async function getShopOrderCounts(): Promise<{ pending: number; inProgres
   const supabase = await createClient();
   const shopId = await getActiveShopId();
   if (!shopId) return { pending: 0, inProgress: 0 };
+  // Same visibility rule as getShopOrders: count only placed orders (hide unpaid online).
+  const placed = "payment_method.neq.online,payment_status.eq.paid";
   const [pendingRes, progressRes] = await Promise.all([
     supabase
       .from("orders")
       .select("id", { count: "exact", head: true })
       .eq("shop_id", shopId)
-      .eq("status", "pending"),
+      .eq("status", "pending")
+      .or(placed),
     supabase
       .from("orders")
       .select("id", { count: "exact", head: true })
       .eq("shop_id", shopId)
-      .in("status", ["accepted", "in_progress", "in_delivery"]),
+      .in("status", ["accepted", "in_progress", "in_delivery"])
+      .or(placed),
   ]);
   return { pending: pendingRes.count ?? 0, inProgress: progressRes.count ?? 0 };
 }
@@ -298,9 +302,11 @@ export async function getShopOrders(): Promise<SampleOrder[]> {
     .from("orders")
     .select(ORDER_SELECT)
     .eq("shop_id", shopId)
-    // Show ALL of the shop's orders (incl. unpaid online) — the row carries a payment-status
-    // badge, and online orders flip to "paid" via the Stripe confirmation (webhook or the
-    // confirmOrderPayment fallback). The shop can advance an order's status regardless.
+    // An order reaches the shop only once it's actually placed: cash orders immediately, but
+    // ONLINE orders only after payment succeeds (payment_status='paid'). An unpaid online order
+    // is an abandoned/incomplete checkout — it must NOT appear in the queue or fire a "new order"
+    // alert. Online orders flip to 'paid' via the Stripe webhook or the confirmOrderPayment fallback.
+    .or("payment_method.neq.online,payment_status.eq.paid")
     .order("created_at", { ascending: false });
   if (error || !data) return [];
 

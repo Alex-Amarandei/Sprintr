@@ -29,6 +29,8 @@ export function ShopCatalogTabs({
   shopName,
   shopOpen,
   shopDeliveryFee,
+  shopLat,
+  shopLng,
 }: {
   items: Item[];
   categories: Category[];
@@ -36,6 +38,8 @@ export function ShopCatalogTabs({
   shopName: string;
   shopOpen: boolean;
   shopDeliveryFee: number;
+  shopLat: number | null;
+  shopLng: number | null;
 }) {
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
@@ -65,6 +69,8 @@ export function ShopCatalogTabs({
             shopName={shopName}
             shopOpen={shopOpen}
             shopDeliveryFee={shopDeliveryFee}
+            shopLat={shopLat}
+            shopLng={shopLng}
           />
         </div>
       ))}

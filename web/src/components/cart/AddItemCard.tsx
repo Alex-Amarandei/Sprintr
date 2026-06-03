@@ -32,12 +32,16 @@ export function AddItemCard({
   shopName,
   shopOpen,
   shopDeliveryFee,
+  shopLat,
+  shopLng,
 }: {
   item: Item;
   shopId: string;
   shopName: string;
   shopOpen: boolean;
   shopDeliveryFee: number;
+  shopLat: number | null;
+  shopLng: number | null;
 }) {
   const {
     addLine,
@@ -73,7 +77,14 @@ export function AddItemCard({
     return () => ro.disconnect();
   }, [item.description]);
 
-  const shop = { id: shopId, name: shopName, open: shopOpen, deliveryFee: shopDeliveryFee };
+  const shop = {
+    id: shopId,
+    name: shopName,
+    open: shopOpen,
+    deliveryFee: shopDeliveryFee,
+    lat: shopLat,
+    lng: shopLng,
+  };
 
   /** Adds the line, unless the cart already holds items from a different shop. */
   function tryAdd(line: CartLine) {

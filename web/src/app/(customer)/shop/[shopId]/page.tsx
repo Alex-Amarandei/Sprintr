@@ -201,6 +201,8 @@ export default async function ShopDetailPage({ params }: Props) {
           shopName={shop.name}
           shopOpen={open}
           shopDeliveryFee={shop.deliveryFee ?? 0}
+          shopLat={shop.lat ?? null}
+          shopLng={shop.lng ?? null}
         />
       </Box>
 

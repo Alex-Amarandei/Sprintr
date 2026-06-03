@@ -759,6 +759,8 @@ export type Database = {
           description: string | null
           email: string | null
           id: string
+          lat: number | null
+          lng: number | null
           logo_path: string | null
           name: string
           phone: string | null
@@ -776,6 +778,8 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          lat?: number | null
+          lng?: number | null
           logo_path?: string | null
           name: string
           phone?: string | null
@@ -793,6 +797,8 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          lat?: number | null
+          lng?: number | null
           logo_path?: string | null
           name?: string
           phone?: string | null

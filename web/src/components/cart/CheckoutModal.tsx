@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { loadStripe } from "@stripe/stripe-js";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@stripe/react-stripe-js";
 import {
   Alert,
+  Anchor,
   Button,
   Checkbox,
   Divider,
@@ -41,7 +42,14 @@ import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils/format";
 import { phoneError, sanitizePhoneInput } from "@/lib/utils/validation";
 import { addAddress } from "@/lib/addresses/actions";
-import { getCurrentPosition, reverseGeocode, type LatLng } from "@/lib/geo/geocode";
+import {
+  getCurrentPosition,
+  reverseGeocode,
+  haversineKm,
+  MAX_DELIVERY_KM,
+  type LatLng,
+} from "@/lib/geo/geocode";
+import { findNearbyShops, type NearbyShop } from "@/lib/shop/nearby";
 import { useCart } from "./CartContext";
 import { createClient } from "@/lib/supabase/client";
 import { uploadOrderFiles } from "@/lib/storage/orderFiles";
@@ -107,6 +115,9 @@ function DeliveryStep({
   discount,
   freeShipping,
   deliveryFee,
+  shopId,
+  shopLat,
+  shopLng,
   onNext,
   loading,
 }: {
@@ -117,6 +128,10 @@ function DeliveryStep({
   /** A free-shipping offer is in effect (waives the delivery fee). */
   freeShipping: boolean;
   deliveryFee: number;
+  shopId: string;
+  /** Shop coordinates — drive the delivery-radius check (null = shop hasn't set them). */
+  shopLat: number | null;
+  shopLng: number | null;
   onNext: (values: DeliveryFormValues) => void;
   loading: boolean;
 }) {
@@ -159,6 +174,20 @@ function DeliveryStep({
 
   // Save the typed address to the book (if opted in) before continuing.
   const submit = async (values: DeliveryFormValues) => {
+    // Hard-block delivery outside the radius (the button is also disabled; Enter could bypass it).
+    if (
+      values.fulfilment === "delivery" &&
+      values.delivery_lat != null &&
+      values.delivery_lng != null &&
+      shopLat != null &&
+      shopLng != null &&
+      haversineKm(
+        { lat: values.delivery_lat, lng: values.delivery_lng },
+        { lat: shopLat, lng: shopLng },
+      ) > MAX_DELIVERY_KM
+    ) {
+      return;
+    }
     if (values.fulfilment === "delivery" && values.save_address && values.delivery_address.trim()) {
       await addAddress({
         address: values.delivery_address,
@@ -178,6 +207,34 @@ function DeliveryStep({
     Math.round((subtotal - discount + shipping + SERVICE_FEE) * 100) / 100;
 
   const [locating, setLocating] = useState(false);
+
+  // Delivery radius: distance from the shop to the chosen drop-off. Only computed for delivery
+  // when BOTH points are known — otherwise null (allowed); the server re-checks at placement.
+  const distanceKm = useMemo(() => {
+    const { delivery_lat: lat, delivery_lng: lng } = form.values;
+    if (pickup || lat == null || lng == null || shopLat == null || shopLng == null) return null;
+    return haversineKm({ lat, lng }, { lat: shopLat, lng: shopLng });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pickup, form.values.delivery_lat, form.values.delivery_lng, shopLat, shopLng]);
+  const tooFar = distanceKm != null && distanceKm > MAX_DELIVERY_KM;
+
+  // When the shop is too far, suggest closer shops within range of the drop-off.
+  const [nearby, setNearby] = useState<NearbyShop[]>([]);
+  useEffect(() => {
+    const { delivery_lat: lat, delivery_lng: lng } = form.values;
+    if (!tooFar || lat == null || lng == null) {
+      setNearby([]);
+      return;
+    }
+    let cancelled = false;
+    findNearbyShops(lat, lng, shopId)
+      .then((r) => !cancelled && setNearby(r))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tooFar, shopId]);
 
   // Apply a chosen point: store coords + best-effort reverse-geocode into the address field.
   // `setValues` (not two `setFieldValue`s) so a click/drag updates everything in one render.
@@ -314,6 +371,31 @@ function DeliveryStep({
               }
               onPick={applyPoint}
             />
+
+            {tooFar && (
+              <Alert color="red" icon={<AlertCircle size={18} />} title="Magazinul nu livrează în zona ta">
+                <Stack gap={6}>
+                  <Text fz="sm">
+                    Acest magazin este la ~{distanceKm!.toFixed(1)} km de adresa ta și livrează
+                    doar în raza de {MAX_DELIVERY_KM} km. Alege un magazin mai aproape de tine.
+                  </Text>
+                  {nearby.length > 0 && (
+                    <div>
+                      <Text fz="xs" fw={700} c="dimmed" mb={2}>
+                        Magazine mai apropiate:
+                      </Text>
+                      <Stack gap={2}>
+                        {nearby.map((s) => (
+                          <Anchor key={s.id} href={`/shop/${s.id}`} fz="sm" fw={500}>
+                            {s.name} · {s.distanceKm} km
+                          </Anchor>
+                        ))}
+                      </Stack>
+                    </div>
+                  )}
+                </Stack>
+              </Alert>
+            )}
           </Stack>
         )}
 
@@ -417,10 +499,12 @@ function DeliveryStep({
               {formatPrice(orderTotal)}
             </Text>
           </div>
-          <Button type="submit" size="md" loading={loading}>
-            {form.values.payment_method === "online"
-              ? "Continuă spre plată"
-              : "Plasează comanda"}
+          <Button type="submit" size="md" loading={loading} disabled={tooFar}>
+            {tooFar
+              ? "În afara zonei de livrare"
+              : form.values.payment_method === "online"
+                ? "Continuă spre plată"
+                : "Plasează comanda"}
           </Button>
         </Group>
       </Stack>
@@ -435,11 +519,13 @@ function StripePaymentStep({
   orderId,
   total,
   onSuccess,
+  onCancel,
 }: {
   clientSecret: string;
   orderId: string;
   total: number;
   onSuccess: () => void;
+  onCancel: () => void;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -491,6 +577,11 @@ function StripePaymentStep({
           Plătește {formatPrice(total)}
         </Button>
 
+        {/* Back out of payment (disabled only while a charge is actually in flight). */}
+        <Button variant="subtle" color="gray" onClick={onCancel} disabled={loading}>
+          Renunță
+        </Button>
+
         <Text size="xs" c="dimmed" ta="center">
           Plata procesată securizat de Stripe. Cardul nu este stocat pe serverele noastre.
         </Text>
@@ -531,15 +622,18 @@ interface CheckoutModalProps {
 type Step = "delivery" | "payment" | "success";
 
 export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
-  const { lines, shopId, total, discount, freeShipping, deliveryFee, clear } = useCart();
+  const { lines, shopId, total, discount, freeShipping, deliveryFee, shopLat, shopLng, clear } =
+    useCart();
   const [step, setStep] = useState<Step>("delivery");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PlaceOrderResult | null>(null);
 
   function handleClose() {
-    // Don't allow closing mid-payment
-    if (step === "payment") return;
+    // Closable at every step (incl. payment) — the customer can back out of the card form.
+    // The order was already created as "pending/unpaid"; closing just abandons payment, and the
+    // cart is kept so they can retry. (Click-outside stays disabled on the payment step below so
+    // a stray click doesn't dismiss the card form mid-entry.)
     onClose();
     // Reset state after close animation
     setTimeout(() => {
@@ -642,7 +736,7 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
       padding="xl"
       centered
       closeOnClickOutside={step !== "payment"}
-      closeOnEscape={step !== "payment"}
+      closeOnEscape
       styles={{
         // Solid surface — the modal was reading semi-transparent over the page.
         content: { backgroundColor: "light-dark(#ffffff, var(--mantine-color-dark-7))" },
@@ -661,6 +755,9 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
           discount={discount}
           freeShipping={freeShipping}
           deliveryFee={deliveryFee}
+          shopId={shopId ?? ""}
+          shopLat={shopLat}
+          shopLng={shopLng}
           onNext={handleDeliverySubmit}
           loading={loading}
         />
@@ -680,6 +777,7 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
             orderId={result.order_id}
             total={result.total}
             onSuccess={handlePaymentSuccess}
+            onCancel={handleClose}
           />
         </Elements>
       )}
