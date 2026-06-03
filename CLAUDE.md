@@ -129,9 +129,22 @@ self-contained record — it never changes when the catalog is later edited.
   is **owner-immutable** (trigger `shops_guard_commission`, admin-only) and **invisible to the
   customer** and to the shop except on its own order breakdown (`payout` line). Analytics +
   reports/CSV reflect commission/payout.
-- **Stripe:** `/api/stripe-webhook` (raw-body signature verify) flips `payment_status`. Keys are
-  Vercel server env only (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`; publishable is `NEXT_PUBLIC_`).
-  Local: `stripe listen --forward-to localhost:3000/api/stripe-webhook`; test card `4242…`.
+- **Stripe:** `/api/stripe-webhook` (raw-body signature verify + `stripe_events` idempotency) flips
+  `payment_status`; PI created at place-order (idempotency key `pi_<orderId>`, order rolled back if PI
+  fails); `confirmOrderPayment` (`lib/orders/payment.ts`) is a client fallback. Keys are Vercel server env
+  only (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`; publishable is `NEXT_PUBLIC_`). Local:
+  `stripe listen --forward-to localhost:3000/api/stripe-webhook`; test card `4242…`. **Prod gaps (see
+  TASKS.md "🚀 Production launch"): NO Stripe Connect** — the platform collects everything and shop
+  `payout` is only a stored number (pay shops manually via CSV, or add Connect) — and **no refunds yet.**
+- **Couriers (Glovo LaaS) — built, GATED OFF by default** (`lib/delivery/{glovo,dispatch,actions,types}.ts`).
+  Active only when `GLOVO_API_KEY`+`SECRET` are set, or `GLOVO_API_ENV=mock` (realistic fake data for
+  testing — no account). Flow: checkout shows a live quote (`quoteDelivery`) as the delivery fee — **pricing
+  model A = the customer pays the courier cost** — and place-order re-quotes authoritatively
+  (`baseShipping = quote.fee`); for a courier delivery the shop's `payout` EXCLUDES that fee (the platform
+  pays Glovo). `advanceOrderStatus → in_delivery` dispatches a courier, `→ rejected` cancels it. Webhook
+  `/api/glovo-webhook`; courier shown on both order details; `orders.courier_*` columns. **3 `TODO(glovo)`
+  spots need real sandbox creds to confirm: auth header, price units (`/100`), webhook signature/fields.**
+  Supersedes the old WhatsApp-ping idea. Full launch plan: TASKS.md.
 - **Order files:** customer attaches at checkout → uploaded to private `order-files` bucket under
   `{uid}/…` (own-folder RLS); paths frozen into `order_items.files`. Shop downloads via service-role
   **signed URLs** (`GET /api/orders/[id]/files`).
@@ -175,7 +188,9 @@ self-contained record — it never changes when the catalog is later edited.
   timeline display is FE polish (C3/C2).
 - Customer identity for shops now resolvable (`profiles_select_shop_customer`); still falls back
   to "Client" if a profile has no `full_name`.
-- WhatsApp courier ping not built yet (server-side, on accept).
+- Courier delivery: **superseded by the Glovo LaaS integration** (built + gated — see Money & flows and
+  TASKS.md "🚀 Production launch"). Glovo dispatches the courier on `in_delivery`; the old WhatsApp-ping
+  idea is dropped. Needs real Glovo sandbox creds to finish (3 `TODO(glovo)` spots).
 - Inventory (Phase 2: `inventory_items`, `consumes`) deferred — `in_stock` flag is the simple gate for now.
 
 ## Gotchas

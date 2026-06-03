@@ -329,3 +329,92 @@ Captured here as they come up; not yet assigned to a lane.
   5. Reconnect integrations: **Vercel** project → new repo (redeploy); GitHub secrets/Actions if any.
      Supabase + the MCP are unaffected (DB is separate). Update any hardcoded repo URLs.
   6. Archive/delete the old public fork. Note: stars/PRs/issues don't carry over.
+
+---
+
+## 🚀 Production launch — Stripe & Glovo (the last mile)
+
+> Goal: make **payments** + **courier delivery** production-ready — the last big steps before launch.
+> Most of the code already exists; the blockers are (a) two decisions, (b) real accounts/keys, and
+> (c) a few finishing pieces. **Legend: 👤 = a human does it** (accounts, keys, dashboard config,
+> decisions) · **⌨️ = code to write.**
+
+### ✅ Already built (the baseline you're finishing)
+- **Stripe:** PaymentIntent at place-order (RON, `amount×100`, idempotency key `pi_<orderId>`, order is
+  rolled back if PI creation fails), `/api/stripe-webhook` (raw-body signature verify + `stripe_events`
+  idempotency; handles `payment_intent.succeeded` → paid and `payment_intent.payment_failed` → failed),
+  and a `confirmOrderPayment` client fallback (`lib/orders/payment.ts`). Running on **test keys**.
+- **Glovo (LaaS courier):** full client + dispatch + cancel + an estimate wired into checkout AND
+  place-order (pricing **model A** + the payout fix), `/api/glovo-webhook`, courier display on both order
+  details, `orders.courier_*` columns. **Gated OFF until keys**; `GLOVO_API_ENV=mock` runs the whole flow
+  with realistic fake data (no account needed). Everything lives in `lib/delivery/*`.
+
+### 🔑 Decisions needed FIRST (these shape the remaining work)
+- [ ] **Payouts — how do shops actually get paid?** The platform currently collects the FULL amount and
+  `orders.payout` is just a stored number; nothing moves money to shops yet. Pick one:
+  - **Option 1 — Manual (MVP):** pay each shop by bank transfer periodically using the CSV export
+    (Total / Comision / Încasări). **No new payment code.** ⚠️ Confirm the EU/RO regulatory implications of
+    redistributing collected funds (may need a payment licence — Stripe Connect offloads this).
+  - **Option 2 — Stripe Connect (marketplace standard):** an Express account per shop, auto-split via
+    `transfer_data` + `application_fee_amount`, Connect onboarding + `account.updated` webhooks. Compliant,
+    but **large**. _Recommendation: launch on Option 1, migrate to Connect at scale — pending the legal check._
+- [ ] **Auto-refund a PAID online order when it's rejected/cancelled?** (recommended: yes.)
+
+### 👤 STRIPE — you do
+- [ ] Finish the Stripe account: business verification, RON bank account, statement descriptor, tax/VAT.
+- [ ] Get **live** keys (`sk_live_…`, `pk_live_…`).
+- [ ] Stripe Dashboard → create a **live webhook** → `https://<prod-domain>/api/stripe-webhook`; enable
+  `payment_intent.succeeded`, `payment_intent.payment_failed`, and (for refunds) `charge.refunded`. Copy
+  the **live `whsec_…`**.
+- [ ] Set in **Vercel** env: `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` (server-only) and
+  `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`.
+
+### ⌨️ STRIPE — code to write
+- [ ] **Refunds** (needed either way) — `refundOrder` action (Stripe refund by `payment_ref`) wired into
+  reject/cancel of a paid online order + a `charge.refunded` webhook branch → `payment_status='refunded'`.
+  _(supersedes the parked "Refunds + cancel order" item above.)_
+- [ ] **If Option 1 (manual):** a "paid out" marker per order/period + tighten the report/CSV for clean
+  reconciliation. _(small)_
+- [ ] **If Option 2 (Connect):** Express-account onboarding (account links), `shops.stripe_account_id`,
+  `transfer_data` + `application_fee_amount` on the PaymentIntent, `account.updated` webhook, payout view in
+  the dashboard. _(large)_
+- [ ] Hardening: graceful UI for PI `requires_action`/`processing` states + the `/orders?paid=…` 3DS return;
+  optional Apple/Google Pay domain-association file.
+- [ ] _(Optional)_ create the order AFTER payment succeeds so abandoned online checkouts leave no orphaned
+  `pending` rows (currently they exist but are invisible to the shop until paid).
+
+### 👤 GLOVO — you do
+- [ ] **(Now)** validate the whole flow in **mock mode** (`GLOVO_API_ENV=mock`) — no account/keys needed.
+- [ ] Get a **sandbox** Glovo Business / On-Demand account (`business.testglovo.com`) → **API key + secret**
+  + the real API docs. Send the **auth + webhook** sections and one sample `/orders/estimate` response.
+- [ ] **Production:** sign the Glovo On-Demand/B2B agreement, add a billing card, get production credentials.
+- [ ] Register the Glovo webhook → `https://<prod-domain>/api/glovo-webhook`.
+- [ ] Set `GLOVO_API_ENV` / `GLOVO_API_KEY` / `GLOVO_API_SECRET` locally (sandbox) then on Vercel (prod).
+- [ ] Make sure shops **save their profile** (auto-geocodes the address → `shops.lat/lng`, which the
+  dispatch + quote require).
+
+### ⌨️ GLOVO — code to write (once sandbox creds land — one small pass)
+- [ ] Confirm/fix the **3 isolated `TODO(glovo)` spots** in `lib/delivery/glovo.ts`: the **auth header**
+  scheme, the **price units** (the `/100` in `glovoEstimate`), and the **webhook signature header + payload
+  field names** (`/api/glovo-webhook`).
+- [ ] Verify/extend `courierStatusLabel` (`lib/delivery/types.ts`) against Glovo's real status strings.
+- [ ] **Auto-advance the order → `done`** when Glovo's webhook reports *delivered*. _(small)_
+- [ ] _(Optional)_ use Glovo's `/working-areas` for precise coverage instead of the flat 12 km radius.
+- [ ] _(Optional)_ a `glovoTrack` poll fallback if webhooks prove flaky.
+- [ ] Sandbox end-to-end test pass + adjustments.
+
+### Recommended sequence
+1. Decide **Payouts** + **Refunds** → start **refunds** immediately (it's needed either way).
+2. Get **Glovo sandbox creds** in parallel (cheap to verify; mock-test until they arrive).
+3. Build: refunds → (manual payout tracking _or_ Connect) → Glovo verification + auto-done.
+4. Switch to **live keys + register both webhooks + all Vercel env**; deploy to a staging URL.
+5. **Dress rehearsal** (Stripe test mode + Glovo sandbox), then flip to live and run one real low-value
+   order each way.
+
+### Pre-launch checklist
+- [ ] Vercel env: Supabase (url / anon / **service role**), Stripe (live sk / pk / whsec), Glovo
+  (env / key / secret), `NEXT_PUBLIC_APP_URL`.
+- [ ] Both webhooks registered at the prod domain + verified (Stripe "send test event"; one sandbox Glovo dispatch).
+- [ ] Refund path tested (reject a paid order → customer is refunded).
+- [ ] Shops have coordinates; the 12 km gate and Glovo coverage agree.
+- [ ] One real end-to-end each: online-pay delivery (paid → dispatched → delivered → done) + pickup/cash.
