@@ -128,9 +128,11 @@ export function ShopOrderQueue({
 
   const isPrep = (s: OrderStatus) => s === "accepted" || s === "in_progress" || s === "in_delivery";
   const q = query.trim().toLowerCase();
+  // Search the VISIBLE order number (short #id), client + products — never the raw internal
+  // UUID, which isn't shown anywhere and shouldn't be a search term.
   const matchesQuery = (o: SampleOrder) =>
     !q ||
-    `#${short(o.id)} ${o.id} ${o.customerName} ${o.customerEmail ?? ""} ${o.customerPhone ?? ""} ${o.lines
+    `#${short(o.id)} ${o.customerName} ${o.customerEmail ?? ""} ${o.customerPhone ?? ""} ${o.lines
       .map((l) => l.title)
       .join(" ")}`
       .toLowerCase()
