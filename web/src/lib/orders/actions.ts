@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getActiveShopId } from "@/lib/shop/active";
 import { getShopCatalog, getShopView } from "@/lib/catalog/shops";
 import { cancelCourierForOrder, dispatchCourierForOrder } from "@/lib/delivery/dispatch";
+import { refundOrder } from "./refund";
 import type { OrderStatus } from "@/lib/design/status";
 import type { ExportRow } from "./sample";
 
@@ -152,6 +153,9 @@ export async function advanceOrderStatus(
   } else if (status === "rejected") {
     // Cancel any already-dispatched courier so it isn't left hanging (gated + best-effort).
     await cancelCourierForOrder(orderId);
+    // Refund a paid online order — the customer must get their money back on rejection. Best-effort
+    // (logs on failure; the charge.refunded webhook + a manual Stripe refund are the safety net).
+    await refundOrder(orderId);
   }
 
   revalidatePath("/dashboard");

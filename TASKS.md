@@ -313,8 +313,9 @@ Captured here as they come up; not yet assigned to a lane.
   revealing the already-loaded list to keep the DOM light + an "X din Y" counter. No user knob:
   data is fetched server-side in one go, so a "load N" control would be misleading. (Full page
   only; dashboard preview keeps its `limit`. True server-side paging deferred until volume needs it.)
-- [ ] **Refunds + cancel order** — `payment_status='refunded'` enum exists but no refund table,
-  no `charge.refunded` webhook handler, no customer-cancel / shop-refund UI. (Parked.)
+- [~] **Refunds + cancel order** — ✅ DONE: auto-refund a paid online order when the shop rejects it
+  (`lib/orders/refund.ts` + `charge.refunded` webhook → `payment_status='refunded'`). See "🚀 Production
+  launch" below. Still parked: a **customer-initiated** cancel/refund UI/flow.
 - [ ] **Shop ops — deferred** (parked): bulk order actions (multi-select accept/advance),
   printable packing slip, analytics date-range selector + MoM/YoY deltas, consumables inventory
   (stock table + per-item consumption + decrement-on-order + low-stock).
@@ -349,16 +350,13 @@ Captured here as they come up; not yet assigned to a lane.
   details, `orders.courier_*` columns. **Gated OFF until keys**; `GLOVO_API_ENV=mock` runs the whole flow
   with realistic fake data (no account needed). Everything lives in `lib/delivery/*`.
 
-### 🔑 Decisions needed FIRST (these shape the remaining work)
-- [ ] **Payouts — how do shops actually get paid?** The platform currently collects the FULL amount and
-  `orders.payout` is just a stored number; nothing moves money to shops yet. Pick one:
-  - **Option 1 — Manual (MVP):** pay each shop by bank transfer periodically using the CSV export
-    (Total / Comision / Încasări). **No new payment code.** ⚠️ Confirm the EU/RO regulatory implications of
-    redistributing collected funds (may need a payment licence — Stripe Connect offloads this).
-  - **Option 2 — Stripe Connect (marketplace standard):** an Express account per shop, auto-split via
-    `transfer_data` + `application_fee_amount`, Connect onboarding + `account.updated` webhooks. Compliant,
-    but **large**. _Recommendation: launch on Option 1, migrate to Connect at scale — pending the legal check._
-- [ ] **Auto-refund a PAID online order when it's rejected/cancelled?** (recommended: yes.)
+### 🔑 Decisions — DECIDED (MVP = easiest path, 2026-06-03)
+- [x] **Payouts → Option 1 (Manual).** Platform collects the full amount; shops are paid by bank transfer
+  periodically using the CSV export (Total / Comision / Încasări). **No payment-splitting code.** Stripe
+  Connect (Option 2 — Express accounts, `transfer_data` + `application_fee_amount`, onboarding +
+  `account.updated` webhooks) is the scale path, **deferred**. ⚠️ Confirm the EU/RO regulatory implications
+  of redistributing collected funds before real volume (Connect offloads this).
+- [x] **Auto-refund a paid online order on reject → YES.** ✅ Built (see ⌨️ STRIPE below).
 
 ### 👤 STRIPE — you do
 - [ ] Finish the Stripe account: business verification, RON bank account, statement descriptor, tax/VAT.
@@ -369,19 +367,19 @@ Captured here as they come up; not yet assigned to a lane.
 - [ ] Set in **Vercel** env: `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` (server-only) and
   `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`.
 
-### ⌨️ STRIPE — code to write
-- [ ] **Refunds** (needed either way) — `refundOrder` action (Stripe refund by `payment_ref`) wired into
-  reject/cancel of a paid online order + a `charge.refunded` webhook branch → `payment_status='refunded'`.
-  _(supersedes the parked "Refunds + cancel order" item above.)_
-- [ ] **If Option 1 (manual):** a "paid out" marker per order/period + tighten the report/CSV for clean
-  reconciliation. _(small)_
-- [ ] **If Option 2 (Connect):** Express-account onboarding (account links), `shops.stripe_account_id`,
-  `transfer_data` + `application_fee_amount` on the PaymentIntent, `account.updated` webhook, payout view in
-  the dashboard. _(large)_
-- [ ] Hardening: graceful UI for PI `requires_action`/`processing` states + the `/orders?paid=…` 3DS return;
-  optional Apple/Google Pay domain-association file.
-- [ ] _(Optional)_ create the order AFTER payment succeeds so abandoned online checkouts leave no orphaned
-  `pending` rows (currently they exist but are invisible to the shop until paid).
+### ⌨️ STRIPE — code
+- [x] **Refunds — DONE.** `refundOrder` (`lib/orders/refund.ts`, service role, idempotency key
+  `refund_<orderId>`) auto-refunds a paid online order when the shop **rejects** it (wired in
+  `advanceOrderStatus`); the **`charge.refunded` webhook branch** also catches refunds issued manually from
+  the Stripe dashboard → `payment_status='refunded'`. No migration (the `refunded` enum already existed).
+  Best-effort: a failed auto-refund logs + is recoverable via a manual Stripe refund (the webhook then flips
+  the status). **Still NOT built:** customer-initiated cancel/refund (parked).
+- [x] **Payouts = manual → no code needed.** The CSV export is the settlement record. A per-order
+  "paid out" marker / payout-tracker is **deferred** until volume needs it.
+- [ ] _Deferred:_ **Stripe Connect (Option 2)** — Express onboarding, `shops.stripe_account_id`,
+  `transfer_data` + `application_fee_amount`, `account.updated` webhook, payout view. _(large; do at scale)_
+- [ ] _Deferred (optional):_ graceful UI for PI `requires_action`/`processing` + the 3DS `/orders?paid=…`
+  return; Apple/Google Pay domain-association file; create the order AFTER payment (no orphaned `pending` rows).
 
 ### 👤 GLOVO — you do
 - [ ] **(Now)** validate the whole flow in **mock mode** (`GLOVO_API_ENV=mock`) — no account/keys needed.

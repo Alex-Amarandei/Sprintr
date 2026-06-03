@@ -61,8 +61,9 @@ self-contained record — it never changes when the catalog is later edited.
   `can_read_customer(uuid)`, no orders-RLS recursion).
 - **`shops`** = public-readable storefront: `id, name, description, logo_path, banner_path, phone,
   email, address, schedule (jsonb), schedule_overrides (jsonb), delivery_fee, commission_rate,
-  default_eta_minutes, active_version_id, created_at`. Storage **paths** not URLs. No `owner_id`,
-  no `city`. `commission_rate` owner-immutable (admin-only, trigger `shops_guard_commission`);
+  default_eta_minutes, lat, lng, active_version_id, created_at`. Storage **paths** not URLs. No `owner_id`,
+  no `city`. `lat/lng` = shop coords, **auto-geocoded from `address` on profile save** (`forwardGeocode`,
+  Iași-bounded) — drive the delivery-radius check + courier pickup. `commission_rate` owner-immutable (admin-only, trigger `shops_guard_commission`);
   `default_eta_minutes` seeds new orders' ETA. **No `is_active` column** — "temporary pause" =
   `schedule_overrides` day-entries set to `null` (closed) via the `setShopPause` action;
   `isOpenNow` honours overrides over the weekly `schedule`, flipping the open badge + checkout gate.
@@ -77,8 +78,10 @@ self-contained record — it never changes when the catalog is later edited.
   item_title, quantity, answers (jsonb), price_breakdown (jsonb), line_total, files (jsonb)`.
   Orders carry `total, subtotal, discount, shipping_fee, service_fee, commission, payout,
   eta_minutes, applied_offers (jsonb), status, payment_method, payment_status, payment_ref, paid_at,
-  catalog_version_id, handled_by, completed_at, archived_at`. `eta_minutes` = per-order estimate
-  (visible both sides; shop-editable via `setOrderEta`; seeded from `shops.default_eta_minutes`).
+  catalog_version_id, handled_by, completed_at, archived_at`, plus `delivery_lat/lng` (drop-off coords
+  from the checkout map/geolocation) and `courier_provider/ref/status/tracking_url/name/phone` (external
+  courier dispatch — Glovo). `eta_minutes` = per-order estimate (visible both sides; shop-editable via
+  `setOrderEta`; seeded from `shops.default_eta_minutes`).
   **No client insert** — only the place-order Server Action (service role).
 - **`shop_invitations`** `(shop_id, email, role)` = pre-authorized members without an account yet.
   Owner-only SECURITY DEFINER RPCs manage the team (`add_shop_member` → 'added' if the email has a
@@ -119,6 +122,17 @@ self-contained record — it never changes when the catalog is later edited.
 - **Place order** (`/api/place-order` route handler / Server Action): requires auth, reloads the live
   catalog, **reprices every line server-side**, rejects on >1¢ mismatch or OOS line, applies offers,
   inserts via service role. Online payment → creates Stripe PaymentIntent (RON), returns `client_secret`.
+- **Delivery location & 12 km radius:** checkout has a **Leaflet map picker** (`components/cart/LocationPicker`,
+  loaded `ssr:false`) + "use current location" + reverse-geocode (free OSM Nominatim) → freezes
+  `orders.delivery_lat/lng`; on open it tries to prefill the address from geolocation. A delivery order whose
+  drop-off is **> `MAX_DELIVERY_KM` (12 km)** from the shop is **blocked** — client alert + nearby-shop
+  suggestions (`findNearbyShops`) AND a server reject in place-order. Degrades to *allowed* when either side
+  has no coords. Helpers in `lib/geo/geocode.ts` (haversine, forward/reverse geocode, Google-maps link); the
+  shop+order detail render the address as a maps link. Dep: `leaflet` (+`@types/leaflet`).
+- **Cart discount preview:** `CartContext` loads the shop's live automatic offers and runs the shared
+  `applyOffers` engine for a live preview (`discount`/`payable`/`freeShipping`/per-line strikethrough);
+  checkout mirrors it and the server reprices authoritatively. Delivery fee preview comes from `quoteDelivery`
+  (Glovo) when enabled, else the shop's flat `delivery_fee`.
 - **`total = subtotal − discount + shipping_fee + service_fee`.** `service_fee` = flat 2 lei
   (checkout only). The customer is **not** charged a platform fee (the old +6% is removed).
 - **Platform commission (deducted from payout, not added to the customer):** per-shop
@@ -133,9 +147,14 @@ self-contained record — it never changes when the catalog is later edited.
   `payment_status`; PI created at place-order (idempotency key `pi_<orderId>`, order rolled back if PI
   fails); `confirmOrderPayment` (`lib/orders/payment.ts`) is a client fallback. Keys are Vercel server env
   only (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`; publishable is `NEXT_PUBLIC_`). Local:
-  `stripe listen --forward-to localhost:3000/api/stripe-webhook`; test card `4242…`. **Prod gaps (see
-  TASKS.md "🚀 Production launch"): NO Stripe Connect** — the platform collects everything and shop
-  `payout` is only a stored number (pay shops manually via CSV, or add Connect) — and **no refunds yet.**
+  `stripe listen --forward-to localhost:3000/api/stripe-webhook`; test card `4242…`.
+- **Refunds (done):** a paid online order is auto-refunded when the shop **rejects** it
+  (`lib/orders/refund.ts` → Stripe refund, wired in `advanceOrderStatus`; `charge.refunded` webhook also
+  catches manual dashboard refunds) → `payment_status='refunded'`. Customer-initiated cancel/refund: not built.
+- **Payouts = MANUAL (MVP choice):** the platform collects everything; shop `payout` is just a stored number
+  — shops are paid by bank transfer using the CSV export. **No Stripe Connect** (deferred to scale; would be
+  Express accounts + `transfer_data`/`application_fee_amount`). Full plan + the deferred items: TASKS.md
+  "🚀 Production launch".
 - **Couriers (Glovo LaaS) — built, GATED OFF by default** (`lib/delivery/{glovo,dispatch,actions,types}.ts`).
   Active only when `GLOVO_API_KEY`+`SECRET` are set, or `GLOVO_API_ENV=mock` (realistic fake data for
   testing — no account). Flow: checkout shows a live quote (`quoteDelivery`) as the delivery fee — **pricing
@@ -153,7 +172,12 @@ self-contained record — it never changes when the catalog is later edited.
 - **Status:** `pending → accepted | rejected → in_progress → in_delivery → done`. `in_delivery` is
   delivery-only (pickup skips it). `completed_at` set on `done`/`rejected`; `pg_cron` sets
   `archived_at` ~1 day later. `advanceOrderStatus(orderId, status)` Server Action; stamps `handled_by`
-  on accept.
+  on accept; on `in_delivery` dispatches the Glovo courier, on `rejected` cancels it + refunds (if paid).
+- **Order visibility (shop):** an order reaches the shop (queue + the "Comandă nouă" notification) only
+  once it's actually placed — **cash on insert, online ONLY when `payment_status='paid'`.** Enforced by the
+  `notify_new_order`/`notify_paid_order` triggers + the `payment_method.neq.online,payment_status.eq.paid`
+  filter in `getShopOrders`/`getShopOrderCounts`. So an **abandoned/unpaid online checkout is invisible** to
+  the shop (no order received, no notification) until payment succeeds.
 
 ## Routing
 - Customer: `/browse`, `/orders`, `/shop/[shopId]`, `/order/[orderId]` (public: `/browse`, `/shop/[id]`).
@@ -215,3 +239,26 @@ self-contained record — it never changes when the catalog is later edited.
   In recharts 3 the Pie `activeIndex` prop is gone — drive the hover-active sector via `activeShape` +
   the `Tooltip`. `valueFormatter`/`activeShape` are functions → keep charts in a `"use client"` wrapper
   (`components/dashboard/AnalyticsCharts.tsx`), pass only serializable data from the Server Component.
+- **Schedule (open/closed) is Bucharest wall-clock:** all open/closed + temporary-pause math runs in
+  `Europe/Bucharest` via `Intl` (`lib/shop/schedule.ts` `bucharestNow`/`bucharestDateKey`), NOT raw `Date`
+  parts — Vercel/SSR is UTC and a browser is the visitor's zone, so `getHours()/getDay()` would be 2–3 h off.
+  `isOpenNow` (`catalog/shops.ts`) delegates to `getScheduleStatus`; `setShopPause` stamps override keys with
+  the Bucharest date so writer + reader agree across midnight.
+- **Cart files don't persist:** `CartLine.files` are in-memory `File`s, stripped when the cart saves to
+  localStorage → after a reload a requires-upload item has no file. The line carries a serializable
+  `requiresUpload` flag; `CartBar` detects the gap, shows a **re-attach** picker (`attachFiles`), and blocks
+  checkout until it's re-added (defense guard in `CheckoutModal` too). Reorder sets `requiresUpload` as well.
+- **Shipping/courier money parity:** the place-order reprice must mirror the checkout preview. Shipping is
+  fulfilment-aware (`baseShipping = pickup ? 0 : delivery_fee`, or the Glovo quote when enabled); for a
+  courier delivery the shop's `payout` EXCLUDES that fee (the platform pays the courier — pricing model A).
+
+## Shipped this iteration (delivery + payments push, ~2026-06-03)
+> Condensed record; durable details are integrated into the sections above, full task checklist in TASKS.md.
+- **Delivery location:** checkout Leaflet map picker + geolocation prefill + reverse-geocode → `orders.delivery_lat/lng`; shops auto-geocode their address → `shops.lat/lng`. (`components/cart/LocationPicker`, `lib/geo/geocode.ts`)
+- **12 km delivery radius:** blocks far delivery orders (client alert + nearby suggestions + server reject); degrades to allowed without coords.
+- **Cart/checkout pricing:** live discount preview (offers engine in the cart), fixed pickup-vs-delivery shipping + parity bugs.
+- **Order visibility:** online orders reach the shop (queue + notification) ONLY when paid; cash immediately (triggers + `getShopOrders` filter).
+- **Payments:** refunds auto-on-reject + `charge.refunded` webhook (`lib/orders/refund.ts`); **payouts = manual via CSV** (no Connect — MVP).
+- **Glovo courier (gated/mock):** estimate→fee (model A), dispatch on `in_delivery`, cancel on reject, webhook, courier display. `lib/delivery/*`. Needs sandbox creds to finish 3 `TODO(glovo)` spots.
+- **Schedule timezone:** open/closed now Bucharest wall-clock (was UTC).
+- **UX/polish:** schedule + maps links (address→Google Maps, phone→tel), catalog card image thumbnail + description tooltip, configurator image preview, catalog-builder cancel-edit + publish-when-changed + confirm modal, messages show order #+status, dirty-aware save buttons, file re-attach, search no longer matches raw UUIDs, dark-mode "Respinge" fix, closable card-payment modal.

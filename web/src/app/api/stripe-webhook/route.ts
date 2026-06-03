@@ -70,6 +70,17 @@ export async function POST(req: NextRequest) {
     if (orderId) {
       await db.from("orders").update({ payment_status: "failed" }).eq("id", orderId);
     }
+  } else if (event.type === "charge.refunded") {
+    // Catches refunds issued either by our reject flow (refundOrder) or manually from the Stripe
+    // dashboard — match the order by its PaymentIntent and mark it refunded.
+    const charge = event.data.object as Stripe.Charge;
+    const pi =
+      typeof charge.payment_intent === "string"
+        ? charge.payment_intent
+        : charge.payment_intent?.id;
+    if (pi) {
+      await db.from("orders").update({ payment_status: "refunded" }).eq("payment_ref", pi);
+    }
   }
 
   return NextResponse.json({ received: true });
