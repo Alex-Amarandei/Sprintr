@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { getOrderDetail, getShopOrders } from "@/lib/orders/queries";
 import { mapsLink } from "@/lib/geo/geocode";
+import { courierStatusLabel } from "@/lib/delivery/types";
 import { createClient } from "@/lib/supabase/server";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { ChatPanel } from "@/components/order/ChatPanel";
@@ -141,6 +142,39 @@ export default async function ShopOrderDetailPage({ params }: Props) {
                   order.deliveryAddress
                 );
               })()}
+            />
+          )}
+          {order.courierProvider && (
+            <InfoRow
+              icon={<Truck size={15} />}
+              label="Curier"
+              value={
+                <>
+                  {order.courierName ?? "Curier extern"}
+                  {order.courierPhone && (
+                    <>
+                      {" · "}
+                      <Anchor href={`tel:${order.courierPhone.replace(/\s+/g, "")}`} inherit>
+                        {order.courierPhone}
+                      </Anchor>
+                    </>
+                  )}
+                  {order.courierStatus && (
+                    <Text span c="dimmed">
+                      {" · "}
+                      {courierStatusLabel(order.courierStatus)}
+                    </Text>
+                  )}
+                  {order.courierTrackingUrl && (
+                    <>
+                      {" · "}
+                      <Anchor href={order.courierTrackingUrl} target="_blank" rel="noopener noreferrer">
+                        Urmărește
+                      </Anchor>
+                    </>
+                  )}
+                </>
+              }
             />
           )}
           {order.paymentMethod && (

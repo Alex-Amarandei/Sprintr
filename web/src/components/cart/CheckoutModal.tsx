@@ -50,6 +50,7 @@ import {
   type LatLng,
 } from "@/lib/geo/geocode";
 import { findNearbyShops, type NearbyShop } from "@/lib/shop/nearby";
+import { quoteDelivery } from "@/lib/delivery/actions";
 import { useCart } from "./CartContext";
 import { createClient } from "@/lib/supabase/client";
 import { uploadOrderFiles } from "@/lib/storage/orderFiles";
@@ -202,11 +203,34 @@ function DeliveryStep({
   // Live total preview, mirroring the server's authoritative reprice:
   //   total = (subtotal − discount) + shipping + service fee
   // Shipping applies only to delivery, and a free-shipping offer waives it.
-  const shipping = pickup || freeShipping ? 0 : deliveryFee;
+  // When a courier provider (Glovo) is configured, its live quote for the chosen drop-off
+  // replaces the shop's flat fee; otherwise we use the shop's own delivery_fee. `glovoFee` is
+  // null until the quote returns (and whenever there's no provider). The server re-quotes
+  // authoritatively at placement, so this is a preview.
+  const [glovoFee, setGlovoFee] = useState<number | null>(null);
+  const effectiveDeliveryFee = glovoFee ?? deliveryFee;
+  const shipping = pickup || freeShipping ? 0 : effectiveDeliveryFee;
   const orderTotal =
     Math.round((subtotal - discount + shipping + SERVICE_FEE) * 100) / 100;
 
   const [locating, setLocating] = useState(false);
+
+  // Fetch a live courier quote for the drop-off (gated to a configured provider; no-op otherwise).
+  useEffect(() => {
+    const { delivery_lat: lat, delivery_lng: lng } = form.values;
+    if (pickup || lat == null || lng == null) {
+      setGlovoFee(null);
+      return;
+    }
+    let cancelled = false;
+    quoteDelivery(shopId, lat, lng)
+      .then((q) => !cancelled && setGlovoFee(q?.fee ?? null))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pickup, form.values.delivery_lat, form.values.delivery_lng, shopId]);
 
   // Delivery radius: distance from the shop to the chosen drop-off. Only computed for delivery
   // when BOTH points are known — otherwise null (allowed); the server re-checks at placement.
@@ -474,7 +498,7 @@ function DeliveryStep({
           )}
           {!pickup && (
             <Group justify="space-between">
-              <Text fz="sm" c="dimmed">Livrare</Text>
+              <Text fz="sm" c="dimmed">{glovoFee != null ? "Livrare (Glovo)" : "Livrare"}</Text>
               <Text
                 fz="sm"
                 c={shipping === 0 ? "brand" : undefined}

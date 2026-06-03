@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
+  Anchor,
   Box,
   Card,
   Divider,
@@ -8,10 +9,12 @@ import {
   Group,
   Stack,
   Text,
+  ThemeIcon,
   Title,
 } from "@mantine/core";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Truck } from "lucide-react";
 import { getOrderDetail } from "@/lib/orders/queries";
+import { courierStatusLabel } from "@/lib/delivery/types";
 import { getMyShopReview } from "@/lib/reviews/queries";
 import { createClient } from "@/lib/supabase/server";
 import { isTerminalStatus } from "@/lib/design/status";
@@ -170,6 +173,41 @@ export default async function OrderDetailPage({ params }: Props) {
               </Group>
             </Stack>
           </Card>
+
+          {order.courierProvider && (
+            <Card>
+              <Group justify="space-between" wrap="nowrap" gap="md">
+                <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+                  <ThemeIcon variant="light" color="grape" size={40} radius="md">
+                    <Truck size={18} />
+                  </ThemeIcon>
+                  <div style={{ minWidth: 0 }}>
+                    <Text fw={700} fz="sm">
+                      Curier
+                    </Text>
+                    <Text fz="sm" c="dimmed" truncate>
+                      {order.courierName ?? "Curier Glovo"}
+                      {courierStatusLabel(order.courierStatus)
+                        ? ` · ${courierStatusLabel(order.courierStatus)}`
+                        : ""}
+                    </Text>
+                  </div>
+                </Group>
+                <Group gap="sm" wrap="nowrap">
+                  {order.courierPhone && (
+                    <Anchor href={`tel:${order.courierPhone.replace(/\s+/g, "")}`} fz="sm" fw={600}>
+                      Sună
+                    </Anchor>
+                  )}
+                  {order.courierTrackingUrl && (
+                    <Anchor href={order.courierTrackingUrl} target="_blank" rel="noopener noreferrer" fz="sm" fw={600}>
+                      Urmărește
+                    </Anchor>
+                  )}
+                </Group>
+              </Group>
+            </Card>
+          )}
 
           {order.status === "done" && (
             <ReviewForm

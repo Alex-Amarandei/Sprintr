@@ -378,6 +378,12 @@ export type Database = {
           commission: number
           completed_at: string | null
           contact_phone: string | null
+          courier_name: string | null
+          courier_phone: string | null
+          courier_provider: string | null
+          courier_ref: string | null
+          courier_status: string | null
+          courier_tracking_url: string | null
           created_at: string
           customer_id: string
           delivery_address: string | null
@@ -410,6 +416,12 @@ export type Database = {
           commission?: number
           completed_at?: string | null
           contact_phone?: string | null
+          courier_name?: string | null
+          courier_phone?: string | null
+          courier_provider?: string | null
+          courier_ref?: string | null
+          courier_status?: string | null
+          courier_tracking_url?: string | null
           created_at?: string
           customer_id: string
           delivery_address?: string | null
@@ -442,6 +454,12 @@ export type Database = {
           commission?: number
           completed_at?: string | null
           contact_phone?: string | null
+          courier_name?: string | null
+          courier_phone?: string | null
+          courier_provider?: string | null
+          courier_ref?: string | null
+          courier_status?: string | null
+          courier_tracking_url?: string | null
           created_at?: string
           customer_id?: string
           delivery_address?: string | null

@@ -11,6 +11,7 @@ import {
 } from "@/lib/catalog/offers";
 import { FILE_TYPES } from "@/lib/catalog/fileTypes";
 import { haversineKm, MAX_DELIVERY_KM } from "@/lib/geo/geocode";
+import { glovoEstimate, isGlovoEnabled } from "@/lib/delivery/glovo";
 import type { FileTypeKey } from "@/lib/catalog/schema";
 
 export const dynamic = "force-dynamic";
@@ -166,7 +167,7 @@ export async function POST(req: NextRequest) {
     // Load active catalog + shipping fee
     const { data: shop } = await db
       .from("shops")
-      .select("active_version_id, delivery_fee, commission_rate, default_eta_minutes, lat, lng")
+      .select("active_version_id, delivery_fee, commission_rate, default_eta_minutes, lat, lng, address")
       .eq("id", shop_id)
       .single();
     if (!shop?.active_version_id) return err("Shop has no active catalog", 422);
@@ -264,7 +265,29 @@ export async function POST(req: NextRequest) {
 
     // Shipping only applies to delivery — pickup has no delivery fee. Passing the correct
     // baseShipping also makes a free-shipping offer score correctly (it saves nothing on pickup).
-    const baseShipping = fulfilment === "pickup" ? 0 : (shop.delivery_fee ?? 0);
+    let baseShipping = fulfilment === "pickup" ? 0 : (shop.delivery_fee ?? 0);
+    // When a courier provider (Glovo) is configured, its live quote is the authoritative delivery
+    // fee (mirrors the checkout preview). Best-effort: falls back to the shop's flat fee on failure.
+    // `courierDelivery` marks that the PLATFORM pays the courier — so the customer's delivery fee
+    // must NOT also be credited to the shop's payout (it offsets the Glovo charge instead).
+    let courierDelivery = false;
+    if (
+      fulfilment === "delivery" &&
+      isGlovoEnabled() &&
+      shop.lat != null &&
+      shop.lng != null &&
+      deliveryLat != null &&
+      deliveryLng != null
+    ) {
+      const quote = await glovoEstimate(
+        { lat: shop.lat, lng: shop.lng, address: shop.address ?? "" },
+        { lat: deliveryLat, lng: deliveryLng, address: delivery_address ?? "" },
+      );
+      if (quote) {
+        baseShipping = quote.fee;
+        courierDelivery = true;
+      }
+    }
     const offers = applyOffers(cartLines, engineOffers, baseShipping);
     const discount = offers.discount;
     const shippingFee = offers.shippingFee;
@@ -276,7 +299,9 @@ export async function POST(req: NextRequest) {
     const commission =
       goods >= COMMISSION_FREE_BELOW ? round2(goods * Number(shop.commission_rate ?? 0)) : 0;
     const total = round2(goods + shippingFee + serviceFee);
-    const payout = round2(goods - commission + shippingFee);
+    // Shop keeps the delivery fee only when it delivers itself; for a platform-paid courier
+    // (Glovo) the fee offsets the courier charge, so the shop is paid for goods only.
+    const payout = round2(goods - commission + (courierDelivery ? 0 : shippingFee));
 
     // Insert order
     const { data: order, error: orderErr } = await db

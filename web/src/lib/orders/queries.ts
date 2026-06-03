@@ -76,7 +76,7 @@ export function summarize(answers: Record<string, unknown> | null, item?: Item):
 }
 
 const ORDER_SELECT =
-  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, delivery_lat, delivery_lng, contact_phone, notes, subtotal, discount, shipping_fee, service_fee, total, commission, payout, eta_minutes, payment_method, payment_status, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
+  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, delivery_lat, delivery_lng, contact_phone, notes, subtotal, discount, shipping_fee, service_fee, total, commission, payout, eta_minutes, payment_method, payment_status, courier_provider, courier_name, courier_phone, courier_status, courier_tracking_url, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
 
 /** Format an ETA in minutes as a short label (e.g. "~30 min", "~1 h 20 min"). */
 function etaLabel(min: number | null | undefined): string | undefined {
@@ -424,6 +424,11 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
     deliveryAddress: order.delivery_address ?? undefined,
     deliveryLat: order.delivery_lat ?? undefined,
     deliveryLng: order.delivery_lng ?? undefined,
+    courierProvider: order.courier_provider ?? undefined,
+    courierName: order.courier_name ?? undefined,
+    courierPhone: order.courier_phone ?? undefined,
+    courierStatus: order.courier_status ?? undefined,
+    courierTrackingUrl: order.courier_tracking_url ?? undefined,
     fulfilment: order.fulfilment ?? undefined,
     paymentMethod: PAYMENT_LABEL[order.payment_method] ?? order.payment_method,
     paymentStatus: order.payment_status,

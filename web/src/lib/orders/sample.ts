@@ -71,6 +71,12 @@ export interface SampleOrder {
   deliveryLat?: number;
   deliveryLng?: number;
   fulfilment?: "delivery" | "pickup";
+  // External courier dispatch (e.g. Glovo), when an order is sent out via a courier provider.
+  courierProvider?: string;
+  courierName?: string;
+  courierPhone?: string;
+  courierStatus?: string;
+  courierTrackingUrl?: string;
   paymentMethod?: string;
   /** Payment state: pending | paid | failed | refunded (drives the shop's payment badge). */
   paymentStatus?: "pending" | "paid" | "failed" | "refunded";

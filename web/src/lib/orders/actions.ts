@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveShopId } from "@/lib/shop/active";
 import { getShopView } from "@/lib/catalog/shops";
+import { cancelCourierForOrder, dispatchCourierForOrder } from "@/lib/delivery/dispatch";
 import type { OrderStatus } from "@/lib/design/status";
 import type { ExportRow } from "./sample";
 
@@ -133,6 +134,16 @@ export async function advanceOrderStatus(
   if (error) return { ok: false, error: error.message };
   if (!data || data.length === 0)
     return { ok: false, error: "Comanda a fost deja actualizată de altcineva." };
+
+  // Order is packed + going out → request an external courier (Glovo) for the delivery leg.
+  // Fully gated (no-op unless a provider is configured) + best-effort (never throws), so it can't
+  // block or break the status change — the shop just falls back to its own delivery on failure.
+  if (status === "in_delivery") {
+    await dispatchCourierForOrder(orderId);
+  } else if (status === "rejected") {
+    // Cancel any already-dispatched courier so it isn't left hanging (gated + best-effort).
+    await cancelCourierForOrder(orderId);
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/orders");
