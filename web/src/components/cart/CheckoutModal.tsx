@@ -669,6 +669,13 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
 
   async function handleDeliverySubmit(values: DeliveryFormValues) {
     if (!shopId) return;
+    // Guard: a required upload whose file is missing (e.g. lost on reload) — fail fast with a clear
+    // message instead of a confusing server rejection after creating an order.
+    const missing = lines.find((l) => l.requiresUpload && !(l.files?.length));
+    if (missing) {
+      setError(`„${missing.title}" necesită un fișier atașat. Re-atașează-l din coș și reia comanda.`);
+      return;
+    }
     setLoading(true);
     setError(null);
 

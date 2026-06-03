@@ -74,6 +74,8 @@ interface CartContextValue {
   lineFinal: (lineId: string) => number;
   addLine: (line: CartLine, shop: CartShop) => void;
   removeLine: (lineId: string) => void;
+  /** Re-attach files to a line (e.g. a required upload lost after a reload). */
+  attachFiles: (lineId: string, files: File[]) => void;
   clear: () => void;
 }
 
@@ -166,6 +168,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           if (next.length === 0) setShop(null);
           return next;
         }),
+      attachFiles: (lineId, files) =>
+        setLines((prev) => prev.map((l) => (l.lineId === lineId ? { ...l, files } : l))),
       clear: () => {
         setLines([]);
         setShop(null);

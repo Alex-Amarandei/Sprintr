@@ -15,6 +15,9 @@ export interface CartLine {
   /** Multiplier quantity (for bx-gy offer previews). Optional for legacy stored carts. */
   quantity?: number;
   total: number;
+  /** The item requires a file upload. Frozen on the line (serializable) so a reloaded cart — whose
+   *  in-memory `files` were stripped on persist — can still detect a now-missing required file. */
+  requiresUpload?: boolean;
   /** Attached files, held in memory until checkout (uploaded to storage there). */
   files: File[];
 }
@@ -51,6 +54,7 @@ export function buildCartLine(
     answers,
     quantity,
     total,
+    requiresUpload: item.requires_upload,
     files,
   };
 }

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveShopId } from "@/lib/shop/active";
-import { getShopView } from "@/lib/catalog/shops";
+import { getShopCatalog, getShopView } from "@/lib/catalog/shops";
 import { cancelCourierForOrder, dispatchCourierForOrder } from "@/lib/delivery/dispatch";
 import type { OrderStatus } from "@/lib/design/status";
 import type { ExportRow } from "./sample";
@@ -19,6 +19,8 @@ export interface ReorderPayload {
     kind: "service" | "product";
     answers: Record<string, unknown>;
     total: number;
+    /** Whether the item requires a file upload (so the cart can prompt to re-attach it). */
+    requiresUpload: boolean;
   }[];
 }
 
@@ -41,8 +43,14 @@ export async function getReorderPayload(orderId: string): Promise<ReorderPayload
     .maybeSingle();
   if (!order) return null;
 
-  const shop = await getShopView(order.shop_id);
+  const [shop, catalog] = await Promise.all([
+    getShopView(order.shop_id),
+    getShopCatalog(order.shop_id),
+  ]);
   if (!shop) return null;
+  // Map current catalog items → whether they require an upload, so a reordered requires-upload
+  // line carries the flag (the cart then prompts to re-attach the file, which isn't restored).
+  const requiresUpload = new Map(catalog.items.map((i) => [i.id, i.requires_upload]));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const items = (order.order_items ?? []) as any[];
@@ -57,6 +65,7 @@ export async function getReorderPayload(orderId: string): Promise<ReorderPayload
       kind: it.kind,
       answers: (it.answers ?? {}) as Record<string, unknown>,
       total: Number(it.line_total),
+      requiresUpload: requiresUpload.get(it.item_id) ?? false,
     })),
   };
 }

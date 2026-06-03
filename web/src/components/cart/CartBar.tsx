@@ -7,6 +7,7 @@ import {
   Button,
   Divider,
   Drawer,
+  FileButton,
   Group,
   Indicator,
   Paper,
@@ -21,6 +22,7 @@ import {
   Package,
   ShoppingCart,
   Trash2,
+  Upload,
 } from "lucide-react";
 import { formatPrice, roCount } from "@/lib/utils/format";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -39,10 +41,17 @@ export function CartBar() {
     shopOpen,
     shopName,
     removeLine,
+    attachFiles,
     clear,
   } = useCart();
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
   const [checkoutOpened, { open: openCheckout, close: closeCheckout }] = useDisclosure(false);
+
+  // A required-upload line whose file went missing (e.g. stripped on reload — File objects can't
+  // persist). Block checkout until it's re-attached, with an inline file picker per affected line.
+  const needsFile = (l: (typeof lines)[number]) =>
+    Boolean(l.requiresUpload) && !(l.files?.length);
+  const anyMissingFile = lines.some(needsFile);
 
   return (
     <>
@@ -99,6 +108,7 @@ export function CartBar() {
                 const Icon = l.kind === "service" ? FileText : Package;
                 const finalTotal = lineFinal(l.lineId);
                 const discounted = finalTotal < l.total - 0.001;
+                const missing = needsFile(l);
                 return (
                   <Paper key={l.lineId} withBorder radius="md" p="sm">
                     <Group justify="space-between" wrap="nowrap" align="flex-start">
@@ -110,14 +120,21 @@ export function CartBar() {
                           <Text fw={600} fz="sm" truncate>
                             {l.title}
                           </Text>
-                          <Text fz="xs" c="dimmed" truncate>
-                            {l.files?.length
-                              ? l.files.length === 1
-                                ? l.files[0].name
-                                : `${l.files.length} fișiere`
-                              : l.kind === "service"
-                                ? "Serviciu"
-                                : "Produs"}
+                          <Text
+                            fz="xs"
+                            c={missing ? "orange" : "dimmed"}
+                            fw={missing ? 600 : undefined}
+                            truncate
+                          >
+                            {missing
+                              ? "Necesită un fișier atașat"
+                              : l.files?.length
+                                ? l.files.length === 1
+                                  ? l.files[0].name
+                                  : `${l.files.length} fișiere`
+                                : l.kind === "service"
+                                  ? "Serviciu"
+                                  : "Produs"}
                           </Text>
                         </div>
                       </Group>
@@ -147,6 +164,22 @@ export function CartBar() {
                         </ActionIcon>
                       </Group>
                     </Group>
+                    {missing && (
+                      <FileButton onChange={(f) => f && attachFiles(l.lineId, [f])}>
+                        {(props) => (
+                          <Button
+                            {...props}
+                            size="compact-sm"
+                            variant="light"
+                            color="orange"
+                            leftSection={<Upload size={14} />}
+                            mt="xs"
+                          >
+                            Atașează fișierul
+                          </Button>
+                        )}
+                      </FileButton>
+                    )}
                   </Paper>
                 );
               })}
@@ -198,17 +231,27 @@ export function CartBar() {
                 în coș și finaliza comanda când se redeschide.
               </Alert>
             )}
+            {anyMissingFile && (
+              <Alert variant="light" color="orange" icon={<Upload size={18} />} title="Fișier necesar">
+                Un produs din coș are nevoie de un fișier atașat — re-atașează-l mai sus pentru a
+                finaliza comanda. (Fișierele nu se păstrează după reîncărcarea paginii.)
+              </Alert>
+            )}
             <Button
               size="md"
               fullWidth
               rightSection={<ArrowRight size={16} />}
-              disabled={!shopOpen}
+              disabled={!shopOpen || anyMissingFile}
               onClick={() => {
                 closeDrawer();
                 openCheckout();
               }}
             >
-              {shopOpen ? "Finalizează comanda" : "Magazin închis"}
+              {!shopOpen
+                ? "Magazin închis"
+                : anyMissingFile
+                  ? "Atașează fișierul necesar"
+                  : "Finalizează comanda"}
             </Button>
             <Button variant="subtle" color="gray" fullWidth onClick={clear}>
               Golește coșul

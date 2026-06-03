@@ -28,7 +28,16 @@ export function ReorderButton({ orderId }: { orderId: string }) {
     const shop = { id: p.shopId, name: p.shopName, open: p.shopOpen, deliveryFee: p.deliveryFee, lat: null, lng: null };
     for (const l of p.lines) {
       addLine(
-        { lineId: crypto.randomUUID(), itemId: l.itemId, title: l.title, kind: l.kind, answers: l.answers, total: l.total, files: [] },
+        {
+          lineId: crypto.randomUUID(),
+          itemId: l.itemId,
+          title: l.title,
+          kind: l.kind,
+          answers: l.answers,
+          total: l.total,
+          requiresUpload: l.requiresUpload,
+          files: [],
+        },
         shop
       );
     }
