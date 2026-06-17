@@ -471,3 +471,7 @@ Captured here as they come up; not yet assigned to a lane.
 ### Bugs
 - [ ] **Reorder ("Comandă din nou") file types** — from the basket view I can attach **any** file
       type, bypassing the shop's `accepted_file_types` restriction. Enforce the shop's allowed types.
+
+### More small UI (added later 2026-06-17)
+- [ ] **"Disponibil" switch** → use `cursor: pointer` on hover.
+- [ ] **"RON" everywhere instead of "lei"** — replace the currency suffix app-wide (use `formatPrice`).
