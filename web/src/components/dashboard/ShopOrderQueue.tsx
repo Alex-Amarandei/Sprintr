@@ -330,9 +330,9 @@ export function ShopOrderQueue({
           </Group>
         </Group>
 
-        {/* Mobile: status + actions on their own row */}
-        <Group justify="space-between" hiddenFrom="sm" mt="sm" wrap="nowrap">
-          <Group gap="xs" wrap="nowrap">
+        {/* Mobile: status + actions on their own row (wraps if the action buttons don't fit). */}
+        <Group justify="space-between" hiddenFrom="sm" mt="sm" gap="sm" wrap="wrap">
+          <Group gap="xs" wrap="wrap">
             <StatusBadge status={o.status} />
             <Badge
               variant={pb.variant ?? "light"}

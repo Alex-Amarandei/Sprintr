@@ -27,6 +27,7 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import {
   AlertCircle,
@@ -309,7 +310,7 @@ function DeliveryStep({
             form.setFieldValue("payment_method", f === "delivery" ? "online" : "cash_in_store");
           }}
         >
-          <SimpleGrid cols={2} spacing="sm" mt="xs">
+          <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm" mt="xs">
             <Radio.Card value="delivery" radius="md" p="md">
               <Group gap="sm" wrap="nowrap" align="flex-start">
                 <Radio.Indicator />
@@ -646,6 +647,8 @@ interface CheckoutModalProps {
 type Step = "delivery" | "payment" | "success";
 
 export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
+  // Full-screen on phones — the multi-step checkout form is cramped in a centered dialog.
+  const isMobile = useMediaQuery("(max-width: 48em)");
   const { lines, shopId, total, discount, freeShipping, deliveryFee, shopLat, shopLng, clear } =
     useCart();
   const [step, setStep] = useState<Step>("delivery");
@@ -766,6 +769,7 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
       size="lg"
       padding="xl"
       centered
+      fullScreen={isMobile}
       closeOnClickOutside={step !== "payment"}
       closeOnEscape
       styles={{

@@ -200,6 +200,7 @@ export function MembersManager({
             Niciun membru.
           </Text>
         ) : (
+          <Table.ScrollContainer minWidth={420}>
           <Table verticalSpacing="sm" highlightOnHover>
             <Table.Thead>
               <Table.Tr>
@@ -261,6 +262,7 @@ export function MembersManager({
               ))}
             </Table.Tbody>
           </Table>
+          </Table.ScrollContainer>
         )}
       </Card>
 

@@ -83,7 +83,14 @@ function DonutTooltip({ active, payload }: any) {
 
 export function StatusDonut({ data, label }: { data: Seg[]; label: string }) {
   return (
-    <div style={{ position: "relative", width: 240, height: 240 }}>
+    <div
+      style={{
+        position: "relative",
+        width: "min(240px, 100%)",
+        aspectRatio: "1 / 1",
+        marginInline: "auto",
+      }}
+    >
       {/* Rendered before the chart so the hover tooltip paints above it; the label
           still shows through the donut's transparent center hole. */}
       <div

@@ -42,6 +42,9 @@ export const metadata: Metadata = {
 
 export const viewport = {
   themeColor: "#ea6c1f",
+  // Extend under the notch/home-indicator so `env(safe-area-inset-*)` has real values
+  // (sticky bars use them); harmless in a normal browser tab.
+  viewportFit: "cover" as const,
 };
 
 export default function RootLayout({

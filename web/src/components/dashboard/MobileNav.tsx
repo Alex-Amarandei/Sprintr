@@ -34,6 +34,8 @@ export function MobileNav({
         zIndex: 50,
         backdropFilter: "blur(14px)",
         WebkitBackdropFilter: "blur(14px)",
+        // Sit below the notch / status bar when installed as a PWA (0 in a normal browser).
+        paddingTop: "env(safe-area-inset-top)",
       }}
     >
       <Group justify="space-between" align="center" wrap="nowrap" p="md">

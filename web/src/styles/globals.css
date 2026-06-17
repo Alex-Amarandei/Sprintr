@@ -8,6 +8,18 @@ body {
      break the sticky headers. */
   overflow-x: clip;
   max-width: 100%;
+  /* Stop iOS from inflating font sizes on orientation change. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  /* Remove the grey tap-flash on touch + avoid the legacy 300ms tap delay on mobile. */
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
 }
 
 :root {
@@ -124,6 +136,20 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .hero-blob {
     animation: none;
+  }
+}
+/* Mobile/tablet: animating a `blur(70px)` layer with `scale()` re-rasterizes the blur every
+   frame — the single biggest cause of jank + battery drain on phones. Make the aurora STATIC and
+   cheaper below the desktop breakpoint (drop the animation, un-promote the layers, lighten blur,
+   and hide the dot-grid layer entirely). The look is preserved; only the per-frame cost is gone. */
+@media (max-width: 1024px) {
+  .hero-blob {
+    animation: none;
+    will-change: auto;
+    filter: blur(55px);
+  }
+  .page-bg__grid {
+    display: none;
   }
 }
 

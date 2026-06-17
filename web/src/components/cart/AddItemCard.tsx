@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   Button,
   Group,
@@ -50,6 +50,7 @@ export function AddItemCard({
     shopId: cartShopId,
     shopName: cartShopName,
   } = useCart();
+  const isMobile = useMediaQuery("(max-width: 48em)");
   const [opened, { open, close }] = useDisclosure(false);
   const [conflict, { open: openConflict, close: closeConflict }] =
     useDisclosure(false);
@@ -240,6 +241,7 @@ export function AddItemCard({
           size="lg"
           padding="xl"
           centered
+          fullScreen={isMobile}
           styles={{
             // Solid surface — the modal was reading semi-transparent over the page.
             content: { backgroundColor: "light-dark(#ffffff, var(--mantine-color-dark-7))" },

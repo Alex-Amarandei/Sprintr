@@ -37,6 +37,8 @@ export default async function CustomerLayout({
             zIndex: 50,
             backdropFilter: "blur(14px)",
             WebkitBackdropFilter: "blur(14px)",
+            // Sit below the notch / status bar when installed as a PWA (0 in a normal browser).
+            paddingTop: "env(safe-area-inset-top)",
           }}
         >
           <Container size="lg" h={64}>

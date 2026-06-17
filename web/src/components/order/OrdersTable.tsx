@@ -52,6 +52,10 @@ function OrderRow({ order }: { order: SampleOrder }) {
             <Text fz="xs" c="dimmed" truncate>
               {order.shopName} · {order.placedAt}
             </Text>
+            {/* Status is hidden on the right on mobile → surface it here instead. */}
+            <Box hiddenFrom="sm" mt={6}>
+              <StatusBadge status={order.status} size="xs" />
+            </Box>
           </div>
         </Group>
 
@@ -59,7 +63,7 @@ function OrderRow({ order }: { order: SampleOrder }) {
           <Text fz="sm" c="dimmed" visibleFrom="sm">
             {roCount(order.itemsCount, "produs", "produse")}
           </Text>
-          <Text fw={700} fz="sm" w={90} ta="right">
+          <Text fw={700} fz="sm" w={90} ta="right" style={{ flexShrink: 0 }}>
             {order.total.toFixed(2)} lei
           </Text>
           <Box w={130} visibleFrom="sm">
