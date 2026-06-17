@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveShopId } from "@/lib/shop/active";
 import type { OrderStatus } from "@/lib/design/status";
 
 /** One chat thread in the shop inbox (an order that has messages). */
@@ -16,8 +17,10 @@ export interface ShopConversation {
 
 /** All conversations for the current user's shop, newest activity first. */
 export async function getShopConversations(): Promise<ShopConversation[]> {
+  const shopId = await getActiveShopId();
+  if (!shopId) return [];
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("shop_conversations");
+  const { data, error } = await supabase.rpc("shop_conversations", { p_shop_id: shopId });
   if (error || !data) return [];
   return data.map((c) => ({
     orderId: c.order_id,
@@ -33,8 +36,10 @@ export async function getShopConversations(): Promise<ShopConversation[]> {
 
 /** Total unread customer messages for the current user's shop (sidebar dot). */
 export async function getShopUnreadCount(): Promise<number> {
+  const shopId = await getActiveShopId();
+  if (!shopId) return 0;
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("shop_unread_count");
+  const { data, error } = await supabase.rpc("shop_unread_count", { p_shop_id: shopId });
   if (error || typeof data !== "number") return 0;
   return data;
 }

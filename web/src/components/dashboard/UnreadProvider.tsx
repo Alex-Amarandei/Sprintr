@@ -34,18 +34,30 @@ export const useUnread = () => useContext(UnreadContext);
  */
 export function UnreadProvider({
   initialCount,
+  shopId,
   children,
 }: {
   initialCount: number;
+  /** The active shop the badge is scoped to (null when the user belongs to no shop). */
+  shopId: string | null;
   children: React.ReactNode;
 }) {
   const supabase = useMemo(() => createClient(), []);
   const [count, setCount] = useState(initialCount);
 
   const refresh = useCallback(async () => {
-    const { data } = await supabase.rpc("shop_unread_count");
+    if (!shopId) {
+      setCount(0);
+      return;
+    }
+    const { data } = await supabase.rpc("shop_unread_count", { p_shop_id: shopId });
     if (typeof data === "number") setCount(data);
-  }, [supabase]);
+  }, [supabase, shopId]);
+
+  // Recompute when the active shop changes (shop switcher) so the badge re-scopes.
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   // Keep the count live: a new customer message (count up) OR a read in another tab — our own
   // `message_reads` row changing (count down) — both recompute. RLS scopes delivery to us.

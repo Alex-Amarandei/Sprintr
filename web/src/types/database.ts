@@ -1013,7 +1013,10 @@ export type Database = {
           total_spent: number
         }[]
       }
-      finalize_order_modification: { Args: { p_mod_id: string }; Returns: boolean }
+      finalize_order_modification: {
+        Args: { p_mod_id: string }
+        Returns: boolean
+      }
       is_admin: { Args: never; Returns: boolean }
       is_shop_member: {
         Args: {
@@ -1061,19 +1064,33 @@ export type Database = {
         }
         Returns: undefined
       }
-      shop_conversations: {
-        Args: never
-        Returns: {
-          customer_id: string
-          customer_name: string
-          last_at: string
-          last_body: string
-          last_sender: string
-          order_id: string
-          status: Database["public"]["Enums"]["order_status"]
-          unread: number
-        }[]
-      }
+      shop_conversations:
+        | {
+            Args: never
+            Returns: {
+              customer_id: string
+              customer_name: string
+              last_at: string
+              last_body: string
+              last_sender: string
+              order_id: string
+              status: Database["public"]["Enums"]["order_status"]
+              unread: number
+            }[]
+          }
+        | {
+            Args: { p_shop_id: string }
+            Returns: {
+              customer_id: string
+              customer_name: string
+              last_at: string
+              last_body: string
+              last_sender: string
+              order_id: string
+              status: Database["public"]["Enums"]["order_status"]
+              unread: number
+            }[]
+          }
       shop_revenue_daily: {
         Args: { p_days?: number; p_shop_id: string }
         Returns: {
@@ -1115,7 +1132,9 @@ export type Database = {
           title: string
         }[]
       }
-      shop_unread_count: { Args: never; Returns: number }
+      shop_unread_count:
+        | { Args: never; Returns: number }
+        | { Args: { p_shop_id: string }; Returns: number }
       validate_offer_code: {
         Args: { p_code: string; p_shop_id: string }
         Returns: {

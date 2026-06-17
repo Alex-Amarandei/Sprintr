@@ -10,6 +10,7 @@ import { MobileNav } from "@/components/dashboard/MobileNav";
 import { UnreadProvider } from "@/components/dashboard/UnreadProvider";
 import { createClient } from "@/lib/supabase/server";
 import { getShopUnreadCount } from "@/lib/messages/queries";
+import { getActiveShopId } from "@/lib/shop/active";
 import { getShopOrderCounts } from "@/lib/orders/queries";
 import { getViewerIdentity } from "@/lib/auth/identity";
 import { getMyNotifications } from "@/lib/notifications/queries";
@@ -35,13 +36,14 @@ export default async function ShopLayout({
     .maybeSingle();
   if (profile?.role !== "shop" && profile?.role !== "admin") redirect("/browse");
 
+  const activeShopId = await getActiveShopId();
   const unread = await getShopUnreadCount();
   const { pending, inProgress } = await getShopOrderCounts();
   const viewer = await getViewerIdentity();
   const notifs = await getMyNotifications();
 
   return (
-    <UnreadProvider initialCount={unread}>
+    <UnreadProvider initialCount={unread} shopId={activeShopId}>
     <Box mih="100vh" bg="var(--mantine-color-body)" style={{ isolation: "isolate" }}>
       <PageBackground />
       {/* Desktop fixed sidebar */}
