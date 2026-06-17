@@ -13,6 +13,7 @@ import {
 import { Trash2 } from "lucide-react";
 import { TEXT_MAX, type Category, type Item } from "@/lib/catalog/schema";
 import { itemImageUrl, mainImage } from "@/lib/catalog/images";
+import { HintLabel } from "@/components/ui/InfoHint";
 import { ItemImages } from "./ItemImages";
 import { ItemThumb } from "./ItemThumb";
 
@@ -86,7 +87,7 @@ export function ProductItemCard({ item, categories, onChange, onRemove, dragHand
             />
 
             <Switch
-              label="Disponibil"
+              label={<HintLabel text="Listat în catalog" hint="Dacă e oprit, produsul nu apare deloc în catalog (ca un draft sau scos din ofertă)." />}
               checked={item.is_active}
               onChange={(e) => patch({ is_active: e.currentTarget.checked })}
             />

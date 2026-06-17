@@ -7,7 +7,9 @@ import {
   Badge,
   Box,
   Button,
+  Checkbox,
   ColorInput,
+  Divider,
   Group,
   NumberInput,
   Paper,
@@ -16,8 +18,19 @@ import {
   Switch,
   Text,
   TextInput,
+  ThemeIcon,
+  UnstyledButton,
 } from "@mantine/core";
-import { ChevronUp, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  ChevronUp,
+  Hash,
+  List,
+  Pencil,
+  Plus,
+  ToggleLeft,
+  Trash2,
+  Type,
+} from "lucide-react";
 import {
   fieldTypes,
   TEXT_MAX,
@@ -25,20 +38,48 @@ import {
   type FieldOption,
   type FieldType,
 } from "@/lib/catalog/schema";
-import { newField, newOption } from "@/lib/catalog/factories";
+import { newField, newOption, nextKey } from "@/lib/catalog/factories";
+import { HintLabel } from "@/components/ui/InfoHint";
 import { PriceRuleInput } from "./PriceRuleInput";
 
+type NumberField = { key: string; label: string };
+
 const TYPE_LABELS: Record<FieldType, string> = {
-  single_select: "Selecție unică",
-  multi_select: "Selecție multiplă",
+  single_select: "Alegere (o variantă)",
+  multi_select: "Alegere (mai multe)",
   boolean: "Da / Nu",
-  number: "Număr",
+  number: "Cantitate",
   text: "Text liber",
 };
 
+const TYPE_ICONS: Record<FieldType, typeof List> = {
+  single_select: List,
+  multi_select: List,
+  boolean: ToggleLeft,
+  number: Hash,
+  text: Type,
+};
+
+const TYPE_HINTS: Record<FieldType, string> = {
+  single_select: "Clientul alege o singură variantă dintr-o listă (ex. tip de hârtie).",
+  multi_select: "Clientul poate bifa mai multe variante (ex. finisaje suplimentare).",
+  boolean: "O bifă simplă da/nu (ex. laminare).",
+  number: "Un număr introdus de client (ex. pagini, bucăți) — poate înmulți prețul.",
+  text: "Text liber scris de client (ex. mesaj personalizat).",
+};
+
+/** Small uppercase section label, tight to the content it heads. */
+function SectionLabel({ children, mt }: { children: ReactNode; mt?: string | number }) {
+  return (
+    <Text fz="xs" fw={700} c="dimmed" tt="uppercase" mt={mt} mb={2} style={{ letterSpacing: 0.5 }}>
+      {children}
+    </Text>
+  );
+}
+
 interface Props {
   field: Field;
-  numberFieldKeys: string[];
+  numberFields: NumberField[];
   onChange: (field: Field) => void;
   onRemove: () => void;
   /** Drag handle element (with dnd-kit listeners) rendered at the row start. */
@@ -47,7 +88,7 @@ interface Props {
 
 export function FieldEditor({
   field,
-  numberFieldKeys,
+  numberFields,
   onChange,
   onRemove,
   dragHandle,
@@ -76,6 +117,8 @@ export function FieldEditor({
   const setOptions = (options: FieldOption[]) =>
     onChange({ ...field, options } as Field);
 
+  const TypeIcon = TYPE_ICONS[field.type];
+
   return (
     <Paper withBorder radius="md" bg="var(--mantine-color-body)">
       {/* Summary row — always visible, click to expand */}
@@ -88,8 +131,11 @@ export function FieldEditor({
           style={{ flex: 1, minWidth: 0, cursor: "pointer" }}
           onClick={() => setOpen((o) => !o)}
         >
+          <ThemeIcon variant="subtle" color="gray" size="sm">
+            <TypeIcon size={16} />
+          </ThemeIcon>
           <Text fw={600} fz="sm" truncate>
-            {field.label || "Câmp nou"}
+            {field.label || "Întrebare nouă"}
           </Text>
           <Badge size="sm" variant="light" color="mist">
             {TYPE_LABELS[field.type]}
@@ -102,156 +148,240 @@ export function FieldEditor({
         </Group>
 
         <Group gap={2} wrap="nowrap">
-          <ActionIcon variant="subtle" color="gray" onClick={() => setOpen((o) => !o)} aria-label="Editează câmpul">
+          <ActionIcon variant="subtle" color="gray" onClick={() => setOpen((o) => !o)} aria-label="Editează întrebarea">
             {open ? <ChevronUp size={16} /> : <Pencil size={15} />}
           </ActionIcon>
-          <ActionIcon variant="subtle" color="red" onClick={onRemove} aria-label="Șterge câmpul">
+          <ActionIcon variant="subtle" color="red" onClick={onRemove} aria-label="Șterge întrebarea">
             <Trash2 size={16} />
           </ActionIcon>
         </Group>
       </Group>
 
       {open && (
-        <Stack gap="md" px="sm" pb="md">
-          <Group grow align="flex-end">
+        <>
+          <Divider />
+          <Stack gap="md" p="md">
+            {/* ── Bază ─────────────────────────────────────────────────── */}
             <TextInput
-              label="Etichetă (vizibilă clientului)"
+              label="Întrebarea (vizibilă clientului)"
+              placeholder="ex. Tip de legare"
               maxLength={TEXT_MAX}
               value={field.label}
               onChange={(e) => patch({ label: e.currentTarget.value })}
             />
-            <TextInput
-              label="Cheie (machine)"
-              description="doar a-z, 0-9, _"
-              maxLength={TEXT_MAX}
-              value={field.key}
-              onChange={(e) =>
-                patch({
-                  key: e.currentTarget.value.toLowerCase().replace(/[^a-z0-9_]/g, "_"),
-                })
+            <Group align="flex-end" grow>
+              <Select
+                label={<HintLabel text="Tip" hint={TYPE_HINTS[field.type]} />}
+                value={field.type}
+                allowDeselect={false}
+                data={fieldTypes.map((t) => ({ value: t, label: TYPE_LABELS[t] }))}
+                onChange={(v) => v && changeType(v as FieldType)}
+              />
+              <TextInput
+                label={
+                  <HintLabel
+                    text="Indiciu (opțional)"
+                    hint="Un text scurt afișat sub câmp pentru a-l ajuta pe client."
+                  />
+                }
+                placeholder="ex. Alege A4 pentru lucrări standard"
+                maxLength={TEXT_MAX}
+                value={field.help ?? ""}
+                onChange={(e) => patch({ help: e.currentTarget.value || null })}
+              />
+            </Group>
+            <Switch
+              label={
+                <HintLabel
+                  text="Obligatoriu"
+                  hint="Clientul trebuie să completeze acest câmp înainte de a comanda."
+                />
               }
+              checked={field.required}
+              onChange={(e) => patch({ required: e.currentTarget.checked })}
             />
-            <Select
-              label="Tip"
-              value={field.type}
-              allowDeselect={false}
-              data={fieldTypes.map((t) => ({ value: t, label: TYPE_LABELS[t] }))}
-              onChange={(v) => v && changeType(v as FieldType)}
-            />
-          </Group>
 
-          <Switch
-            label="Obligatoriu"
-            checked={field.required}
-            onChange={(e) => patch({ required: e.currentTarget.checked })}
-          />
+            {/* ── Options (selects) ─────────────────────────────────────── */}
+            {hasOptions && (
+              <>
+                <OptionsEditor
+                  options={field.options}
+                  numberFields={numberFields}
+                  multi={field.type === "multi_select"}
+                  onChange={setOptions}
+                />
+                {field.type === "multi_select" && (
+                  <Group align="flex-end" gap="sm">
+                    <NumberInput
+                      label="Minim selecții"
+                      w={140}
+                      min={0}
+                      value={field.min_select}
+                      onChange={(v) => patch({ min_select: typeof v === "number" ? v : 0 })}
+                    />
+                    <NumberInput
+                      label={<HintLabel text="Maxim selecții" hint="Lasă gol pentru selecții nelimitate." />}
+                      w={170}
+                      min={1}
+                      value={field.max_select ?? undefined}
+                      onChange={(v) => patch({ max_select: typeof v === "number" ? v : null })}
+                    />
+                  </Group>
+                )}
+              </>
+            )}
 
-          {/* Type-specific controls */}
-          {hasOptions && (
-            <OptionsEditor
-              options={field.options}
-              numberFieldKeys={numberFieldKeys}
-              multi={field.type === "multi_select"}
-              onChange={setOptions}
-            />
-          )}
+            {/* ── Number ("Cantitate") ──────────────────────────────────── */}
+            {field.type === "number" && (
+              <>
+                <SectionLabel mt="xs">Reguli pentru cantitate</SectionLabel>
+                <Group align="flex-end" gap="sm" wrap="wrap">
+                  <NumberInput label="Min" w={90} value={field.min} onChange={(v) => patch({ min: typeof v === "number" ? v : 0 })} />
+                  <NumberInput label={<HintLabel text="Max" hint="Lasă gol pentru fără limită." />} w={120} value={field.max ?? undefined} onChange={(v) => patch({ max: typeof v === "number" ? v : null })} />
+                  <NumberInput label={<HintLabel text="Pas" hint="Cât crește valoarea la fiecare apăsare a săgeților." />} w={90} min={0} step={0.5} value={field.step} onChange={(v) => patch({ step: typeof v === "number" ? v : 1 })} />
+                  <TextInput label={<HintLabel text="Unitate" hint="Afișată lângă număr (ex. pagini, bucăți)." />} w={130} maxLength={TEXT_MAX} placeholder="ex. pagini" value={field.unit ?? ""} onChange={(e) => patch({ unit: e.currentTarget.value || null })} />
+                </Group>
+                <Group gap="sm" align="center">
+                  <Text fz="sm" fw={500}>Cost:</Text>
+                  <PriceRuleInput value={field.price} numberFields={numberFields} onChange={(price) => patch({ price })} />
+                </Group>
+              </>
+            )}
 
-          {field.type === "multi_select" && (
-            <Group align="flex-end">
-              <NumberInput
-                label="Minim selecții"
-                w={140}
-                min={0}
-                value={field.min_select}
-                onChange={(v) => patch({ min_select: typeof v === "number" ? v : 0 })}
-              />
-              <NumberInput
-                label="Maxim (gol = nelimitat)"
-                w={200}
-                min={1}
-                value={field.max_select ?? undefined}
-                onChange={(v) => patch({ max_select: typeof v === "number" ? v : null })}
-              />
-            </Group>
-          )}
-
-          {field.type === "number" && (
-            <Group align="flex-end" wrap="wrap">
-              <NumberInput label="Min" w={90} value={field.min} onChange={(v) => patch({ min: typeof v === "number" ? v : 0 })} />
-              <NumberInput label="Max (gol = ∞)" w={120} value={field.max ?? undefined} onChange={(v) => patch({ max: typeof v === "number" ? v : null })} />
-              <NumberInput label="Pas" w={90} min={0} step={0.5} value={field.step} onChange={(v) => patch({ step: typeof v === "number" ? v : 1 })} />
-              <TextInput label="Unitate" w={120} maxLength={TEXT_MAX} placeholder="ex. pagini" value={field.unit ?? ""} onChange={(e) => patch({ unit: e.currentTarget.value || null })} />
-              <PriceRuleInput label="Preț câmp" value={field.price} numberFieldKeys={numberFieldKeys} onChange={(price) => patch({ price })} />
-            </Group>
-          )}
-
-          {field.type === "boolean" && (
-            <PriceRuleInput
-              label="Preț când e bifat"
-              value={field.price}
-              numberFieldKeys={numberFieldKeys}
-              onChange={(price) => patch({ price })}
-            />
-          )}
-        </Stack>
+            {/* ── Boolean ───────────────────────────────────────────────── */}
+            {field.type === "boolean" && (
+              <Group gap="sm" align="center">
+                <Text fz="sm" fw={500}>Cost când e bifat:</Text>
+                <PriceRuleInput value={field.price} numberFields={numberFields} onChange={(price) => patch({ price })} />
+              </Group>
+            )}
+          </Stack>
+        </>
       )}
     </Paper>
   );
 }
 
+/* ── One option row: a clearly-editable label + a price pill + default + delete ───── */
+function OptionRow({
+  opt,
+  multi,
+  numberFields,
+  onChange,
+  onRemove,
+}: {
+  opt: FieldOption;
+  multi: boolean;
+  numberFields: NumberField[];
+  onChange: (changes: Partial<FieldOption>) => void;
+  onRemove: () => void;
+}) {
+  const [advanced, setAdvanced] = useState(!!opt.swatch || !!opt.locked);
+
+  return (
+    <Box>
+      <Group justify="space-between" wrap="nowrap" gap="sm" align="flex-start">
+        <TextInput
+          size="sm"
+          placeholder="ex. Spiră metalică"
+          maxLength={TEXT_MAX}
+          value={opt.label}
+          onChange={(e) => onChange({ label: e.currentTarget.value })}
+          style={{ flex: 1, minWidth: 140 }}
+        />
+        <Group gap="sm" wrap="nowrap" mih={36} align="center" style={{ flexShrink: 0 }}>
+          <PriceRuleInput value={opt.price} numberFields={numberFields} onChange={(price) => onChange({ price })} />
+          <Checkbox
+            label={multi ? "Bifat" : "Implicit"}
+            checked={opt.default ?? false}
+            onChange={(e) => onChange({ default: e.currentTarget.checked })}
+            styles={{ label: { paddingInlineStart: 6, fontSize: "var(--mantine-font-size-xs)" } }}
+          />
+          <ActionIcon variant="subtle" color="red" onClick={onRemove} aria-label="Șterge opțiunea">
+            <Trash2 size={16} />
+          </ActionIcon>
+        </Group>
+      </Group>
+
+      <UnstyledButton onClick={() => setAdvanced((a) => !a)} mt={4}>
+        <Group gap={4} wrap="nowrap">
+          <ChevronUp
+            size={12}
+            style={{ transition: "transform 150ms", transform: advanced ? "none" : "rotate(180deg)", color: "var(--mantine-color-dimmed)" }}
+          />
+          <Text fz="xs" c="dimmed" fw={500}>
+            Avansat
+          </Text>
+        </Group>
+      </UnstyledButton>
+      {advanced && (
+        <Group align="flex-end" gap="sm" wrap="wrap" mt="xs">
+          <ColorInput
+            label={<HintLabel text="Culoare" hint="Afișează opțiunea ca un buline colorat (ex. alegeri de culoare)." />}
+            w={170}
+            format="hex"
+            placeholder="#f5f5dc"
+            value={opt.swatch ?? ""}
+            onChange={(v) => onChange({ swatch: v || undefined })}
+          />
+          <Switch
+            label={<HintLabel text="Inclus mereu" hint="Opțiunea e mereu selectată și clientul nu o poate scoate." />}
+            checked={opt.locked ?? false}
+            onChange={(e) => onChange({ locked: e.currentTarget.checked })}
+          />
+        </Group>
+      )}
+    </Box>
+  );
+}
+
 function OptionsEditor({
   options,
-  numberFieldKeys,
+  numberFields,
   multi,
   onChange,
 }: {
   options: FieldOption[];
-  numberFieldKeys: string[];
+  numberFields: NumberField[];
   multi: boolean;
   onChange: (options: FieldOption[]) => void;
 }) {
-  const update = (i: number, changes: Partial<FieldOption>) =>
-    onChange(options.map((o, idx) => (idx === i ? { ...o, ...changes } : o)));
+  const update = (i: number, changes: Partial<FieldOption>) => {
+    let next = options.map((o, idx) => (idx === i ? { ...o, ...changes } : o));
+    // Single-select: only one option can be the default — turning one on clears the rest.
+    if (!multi && changes.default === true) {
+      next = next.map((o, idx) => (idx === i ? o : { ...o, default: false }));
+    }
+    onChange(next);
+  };
   const remove = (i: number) => onChange(options.filter((_, idx) => idx !== i));
-  const add = () => onChange([...options, newOption(options.length)]);
+  const add = () => {
+    const value = nextKey("optiune", options.map((o) => o.value));
+    onChange([...options, { ...newOption(options.length), value }]);
+  };
 
   return (
     <Box>
-      <Text fz="xs" fw={600} c="dimmed" tt="uppercase" mb="xs" style={{ letterSpacing: 0.5 }}>
-        Opțiuni
-      </Text>
-      <Stack gap="xs">
+      <SectionLabel mt="md">Opțiuni</SectionLabel>
+      <Stack gap={0}>
         {options.map((opt, i) => (
-          <Box
-            key={i}
-            style={{
-              borderLeft: "3px solid var(--mantine-color-brand-3)",
-              paddingLeft: 12,
-            }}
-          >
-            <Group align="flex-end" gap="sm" wrap="wrap">
-              <TextInput label="Etichetă" w={160} maxLength={TEXT_MAX} value={opt.label} onChange={(e) => update(i, { label: e.currentTarget.value })} />
-              <TextInput
-                label="Valoare"
-                w={130}
-                maxLength={TEXT_MAX}
-                value={opt.value}
-                onChange={(e) => update(i, { value: e.currentTarget.value.toLowerCase().replace(/[^a-z0-9_]/g, "_") })}
+          <Box key={i}>
+            {i > 0 && <Divider />}
+            <Box py="xs">
+              <OptionRow
+                opt={opt}
+                multi={multi}
+                numberFields={numberFields}
+                onChange={(changes) => update(i, changes)}
+                onRemove={() => remove(i)}
               />
-              <ColorInput label="Culoare (opțional)" w={150} format="hex" placeholder="#f5f5dc" value={opt.swatch ?? ""} onChange={(v) => update(i, { swatch: v || undefined })} />
-              <PriceRuleInput value={opt.price} numberFieldKeys={numberFieldKeys} onChange={(price) => update(i, { price })} />
-              <Switch label={multi ? "Bifat implicit" : "Implicit"} checked={opt.default ?? false} onChange={(e) => update(i, { default: e.currentTarget.checked })} />
-              <Switch label="Blocat" checked={opt.locked ?? false} onChange={(e) => update(i, { locked: e.currentTarget.checked })} />
-              <ActionIcon variant="subtle" color="red" onClick={() => remove(i)} aria-label="Șterge opțiunea">
-                <Trash2 size={16} />
-              </ActionIcon>
-            </Group>
+            </Box>
           </Box>
         ))}
-        <Button variant="light" size="xs" leftSection={<Plus size={14} />} onClick={add} w="fit-content">
-          Adaugă opțiune
-        </Button>
       </Stack>
+      <Button variant="subtle" size="xs" leftSection={<Plus size={14} />} mt={4} onClick={add}>
+        Adaugă opțiune
+      </Button>
     </Box>
   );
 }

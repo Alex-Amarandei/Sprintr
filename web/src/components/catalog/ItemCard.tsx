@@ -43,34 +43,43 @@ import {
   type FileTypeKey,
   type Item,
 } from "@/lib/catalog/schema";
-import { newField } from "@/lib/catalog/factories";
+import { newField, nextKey } from "@/lib/catalog/factories";
 import { FILE_TYPE_OPTIONS } from "@/lib/catalog/fileTypes";
 import { itemImageUrl, mainImage } from "@/lib/catalog/images";
 import { formatPrice, roCount } from "@/lib/utils/format";
+import { HintLabel } from "@/components/ui/InfoHint";
 import { FieldEditor } from "./FieldEditor";
 import { ItemImages } from "./ItemImages";
 import { ItemThumb } from "./ItemThumb";
 
 const TYPE_LABELS: Record<FieldType, string> = {
-  single_select: "Selecție unică",
-  multi_select: "Selecție multiplă",
+  single_select: "Alegere (o variantă)",
+  multi_select: "Alegere (mai multe)",
   boolean: "Da / Nu",
-  number: "Număr",
+  number: "Cantitate",
   text: "Text liber",
+};
+
+const TYPE_DESCRIPTIONS: Record<FieldType, string> = {
+  single_select: "Clientul alege o singură variantă dintr-o listă.",
+  multi_select: "Clientul poate bifa mai multe variante.",
+  boolean: "Un adaos opțional, bifat sau nu.",
+  number: "Un număr introdus de client (ex. pagini, bucăți).",
+  text: "Text liber, doar informativ.",
 };
 
 /** A field row wrapped as a dnd-kit sortable, with its own drag handle. */
 function SortableFieldEditor({
   id,
   field,
-  numberFieldKeys,
+  numberFields,
   onChange,
   onRemove,
 }: {
   /** Stable client-side row id — decoupled from the editable `field.key`. */
   id: string;
   field: Field;
-  numberFieldKeys: string[];
+  numberFields: { key: string; label: string }[];
   onChange: (f: Field) => void;
   onRemove: () => void;
 }) {
@@ -98,7 +107,7 @@ function SortableFieldEditor({
     <div ref={setNodeRef} style={style}>
       <FieldEditor
         field={field}
-        numberFieldKeys={numberFieldKeys}
+        numberFields={numberFields}
         onChange={onChange}
         onRemove={onRemove}
         dragHandle={handle}
@@ -136,11 +145,17 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
   }, [item.fields.length]);
 
   const patch = (changes: Partial<Item>) => onChange({ ...item, ...changes });
-  const numberFieldKeys = item.fields.filter((f) => f.type === "number").map((f) => f.key);
+  // number fields are the valid targets for per-unit pricing — pass {key,label} so the picker
+  // shows the human label, not the hidden machine key.
+  const numberFields = item.fields
+    .filter((f) => f.type === "number")
+    .map((f) => ({ key: f.key, label: f.label }));
   const setFields = (fields: Field[]) => onChange({ ...item, fields });
   const addField = (type: FieldType) => {
     setFieldIds((ids) => [...ids, `fld-${uidRef.current++}`]);
-    setFields([...item.fields, newField(type, item.fields.length)]);
+    // Stable, unique, hidden machine key (auto-generated; never shown to the shop).
+    const key = nextKey("camp", item.fields.map((f) => f.key));
+    setFields([...item.fields, { ...newField(type, item.fields.length), key }]);
   };
   const updateField = (i: number, field: Field) =>
     setFields(item.fields.map((f, idx) => (idx === i ? field : f)));
@@ -243,10 +258,22 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
             onChange={(v) => patch({ category_id: v })}
           />
 
-          <Group>
-            <Switch label="Necesită fișier atașat" checked={item.requires_upload} onChange={(e) => patch({ requires_upload: e.currentTarget.checked })} />
-            <Switch label="Activ" checked={item.is_active} onChange={(e) => patch({ is_active: e.currentTarget.checked })} />
-            <Switch label="În stoc" checked={item.in_stock} onChange={(e) => patch({ in_stock: e.currentTarget.checked })} />
+          <Group gap="xl">
+            <Switch
+              label={<HintLabel text="Necesită fișier atașat" hint="Clientul trebuie să încarce un fișier (ex. PDF-ul de printat) ca să poată comanda." />}
+              checked={item.requires_upload}
+              onChange={(e) => patch({ requires_upload: e.currentTarget.checked })}
+            />
+            <Switch
+              label={<HintLabel text="Listat în catalog" hint="Dacă e oprit, serviciul nu apare deloc în catalog (ca un draft sau scos din ofertă)." />}
+              checked={item.is_active}
+              onChange={(e) => patch({ is_active: e.currentTarget.checked })}
+            />
+            <Switch
+              label={<HintLabel text="În stoc" hint="Apare în catalog, dar dacă e oprit clientul nu îl poate comanda (indisponibil momentan)." />}
+              checked={item.in_stock}
+              onChange={(e) => patch({ in_stock: e.currentTarget.checked })}
+            />
           </Group>
 
           {item.requires_upload && (
@@ -263,7 +290,7 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
           <Divider label="Imagini" labelPosition="left" />
           <ItemImages images={item.images} onChange={(images) => patch({ images })} />
 
-          <Divider label="Câmpuri configurabile" labelPosition="left" />
+          <Divider label="Întrebări pentru client" labelPosition="left" />
 
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onFieldDragEnd}>
             <SortableContext items={fieldIds} strategy={verticalListSortingStrategy}>
@@ -273,7 +300,7 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
                     key={fieldIds[i]}
                     id={fieldIds[i]}
                     field={field}
-                    numberFieldKeys={numberFieldKeys}
+                    numberFields={numberFields}
                     onChange={(f) => updateField(i, f)}
                     onRemove={() => removeField(i)}
                   />
@@ -282,16 +309,22 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
             </SortableContext>
           </DndContext>
 
-          <Menu shadow="md" position="bottom-start">
+          <Menu shadow="md" position="bottom-start" width={280}>
             <Menu.Target>
               <Button variant="light" leftSection={<Plus size={16} />} w="fit-content">
-                Adaugă câmp
+                Adaugă întrebare
               </Button>
             </Menu.Target>
             <Menu.Dropdown>
+              <Menu.Label>Ce vrei să întrebi clientul?</Menu.Label>
               {fieldTypes.map((t) => (
                 <Menu.Item key={t} onClick={() => addField(t)}>
-                  {TYPE_LABELS[t]}
+                  <Text fz="sm" fw={600}>
+                    {TYPE_LABELS[t]}
+                  </Text>
+                  <Text fz="xs" c="dimmed">
+                    {TYPE_DESCRIPTIONS[t]}
+                  </Text>
                 </Menu.Item>
               ))}
             </Menu.Dropdown>

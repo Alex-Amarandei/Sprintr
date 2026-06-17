@@ -10,6 +10,14 @@ export function newOption(index = 0): FieldOption {
   return { value: `optiune_${index + 1}`, label: `Opțiune ${index + 1}` };
 }
 
+/** First `${prefix}_N` not already in `existing` — for stable, unique, hidden machine keys. */
+export function nextKey(prefix: string, existing: string[]): string {
+  const used = new Set(existing);
+  let n = existing.length + 1;
+  while (used.has(`${prefix}_${n}`)) n++;
+  return `${prefix}_${n}`;
+}
+
 export function newField(type: FieldType, index = 0): Field {
   const base = {
     key: `camp_${index + 1}`,
