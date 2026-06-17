@@ -92,6 +92,10 @@ export async function exportShopOrders(opts: {
     .from("orders")
     .select("id, created_at, status, total, commission, payout, payment_method")
     .eq("shop_id", shopId)
+    // Same "actually placed" rule as getShopOrders: never include an unpaid online order (an
+    // abandoned checkout) in a shop report — otherwise the manual-payout CSV would credit the shop
+    // a `payout` for money the platform never collected. Refunded orders stay in for audit.
+    .or("payment_method.neq.online,payment_status.eq.paid,payment_status.eq.refunded")
     .order("created_at", { ascending: false });
   if (opts.from) q = q.gte("created_at", opts.from);
   if (opts.to) q = q.lt("created_at", opts.to);

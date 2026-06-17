@@ -175,9 +175,12 @@ self-contained record — it never changes when the catalog is later edited.
   on accept; on `in_delivery` dispatches the Glovo courier, on `rejected` cancels it + refunds (if paid).
 - **Order visibility (shop):** an order reaches the shop (queue + the "Comandă nouă" notification) only
   once it's actually placed — **cash on insert, online ONLY when `payment_status='paid'`.** Enforced by the
-  `notify_new_order`/`notify_paid_order` triggers + the `payment_method.neq.online,payment_status.eq.paid`
-  filter in `getShopOrders`/`getShopOrderCounts`. So an **abandoned/unpaid online checkout is invisible** to
-  the shop (no order received, no notification) until payment succeeds.
+  `notify_new_order`/`notify_paid_order` triggers + a shared `payment_method.neq.online,payment_status.eq.paid,
+  payment_status.eq.refunded` filter in `getShopOrders`/`getShopOrderCounts`/`exportShopOrders` (payout CSV).
+  `refunded` is included because a refund implies the charge was captured first — so an online order the shop
+  **rejects (auto-refunded)** or refunds manually STAYS in its history instead of vanishing from the queue.
+  An **abandoned/unpaid online checkout is invisible** to the shop (no order, no notification, not in the
+  payout CSV) until payment succeeds.
 
 ## Routing
 - Customer: `/browse`, `/orders`, `/shop/[shopId]`, `/order/[orderId]` (public: `/browse`, `/shop/[id]`).
