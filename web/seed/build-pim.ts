@@ -77,7 +77,7 @@ function svcFmt(o: {
   return {
     id: o.id, kind: "service", title: o.title, description: o.desc,
     images: o.images ?? [], is_active: true, in_stock: true, sort_order: sortSeq++,
-    base_price: 0, min_quantity: 1, requires_upload: o.upload ?? false,
+    base_price: 0, min_quantity: 1, requires_upload: o.upload ?? true,
     accepted_file_types: o.upload ? PRINT_FILES : ["pdf", "image"],
     category_id: o.cat,
     fields: [formatField(o.prices), qtyField(o.qtyLabel, o.qtyUnit)],
@@ -88,7 +88,7 @@ function svcFlat(o: { id: string; title: string; desc: string; cat: string; pric
   return {
     id: o.id, kind: "service", title: o.title, description: o.desc,
     images: [], is_active: true, in_stock: true, sort_order: sortSeq++,
-    base_price: o.price, min_quantity: 1, requires_upload: false,
+    base_price: o.price, min_quantity: 1, requires_upload: true,
     accepted_file_types: ["pdf", "image"], category_id: o.cat,
     fields: [qtyField(o.qtyLabel, o.qtyUnit)],
   };
@@ -102,7 +102,7 @@ function svcSelect(o: {
   return {
     id: o.id, kind: "service", title: o.title, description: o.desc,
     images: o.images ?? [], is_active: true, in_stock: true, sort_order: sortSeq++,
-    base_price: 0, min_quantity: 1, requires_upload: o.upload ?? false,
+    base_price: 0, min_quantity: 1, requires_upload: o.upload ?? true,
     accepted_file_types: o.upload ? PRINT_FILES : ["pdf", "image"], category_id: o.cat,
     fields: [o.select, qtyField(o.qtyLabel, o.qtyUnit)],
   };

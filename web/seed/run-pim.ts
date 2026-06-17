@@ -32,13 +32,22 @@ if (!url || !key) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL / SUPABASE_S
 const db = createClient<Database>(url, key, { auth: { persistSession: false } });
 const die = (msg: string, e: unknown) => { throw new Error(`${msg}: ${JSON.stringify(e)}`); };
 
-// 1. Drop the old demo PIM Copy shop (orders first — shops->orders is RESTRICT).
+// 1. Drop the old demo PIM Copy shop AND any previously-seeded PIM* shops (idempotent
+//    re-run). Orders first — shops->orders is RESTRICT; everything else cascades.
 {
-  const { error: oe } = await db.from("orders").delete().eq("shop_id", OLD_PIM_SHOP_ID);
-  if (oe) die("delete old orders", oe);
-  const { error: se } = await db.from("shops").delete().eq("id", OLD_PIM_SHOP_ID);
-  if (se) die("delete old shop", se);
-  console.log("✓ Dropped old PIM Copy shop + its demo orders.");
+  const { data: pim, error: qe } = await db
+    .from("shops")
+    .select("id")
+    .or(`id.eq.${OLD_PIM_SHOP_ID},name.like.PIM%`);
+  if (qe) die("find PIM shops", qe);
+  const ids = (pim ?? []).map((r) => r.id);
+  if (ids.length) {
+    const { error: oe } = await db.from("orders").delete().in("shop_id", ids);
+    if (oe) die("delete PIM orders", oe);
+    const { error: se } = await db.from("shops").delete().in("id", ids);
+    if (se) die("delete PIM shops", se);
+  }
+  console.log(`✓ Dropped ${ids.length} existing PIM shop(s) + their orders.`);
 }
 
 // 2. Insert the 5 real locations.

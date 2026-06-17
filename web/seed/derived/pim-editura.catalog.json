@@ -311,7 +311,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -400,7 +400,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -489,7 +489,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -578,7 +578,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -667,7 +667,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -756,7 +756,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -794,7 +794,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -883,7 +883,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -921,7 +921,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -1010,7 +1010,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -1099,7 +1099,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -1188,7 +1188,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -1277,7 +1277,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -1366,7 +1366,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -1455,7 +1455,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -1544,7 +1544,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -1633,7 +1633,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -1722,7 +1722,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"
@@ -1811,7 +1811,7 @@
       "min_quantity": 1,
       "sku": null,
       "unit": null,
-      "requires_upload": false,
+      "requires_upload": true,
       "accepted_file_types": [
         "pdf",
         "image"

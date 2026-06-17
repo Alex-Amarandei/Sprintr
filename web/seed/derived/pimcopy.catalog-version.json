@@ -1,0 +1,391 @@
+{
+  "_meta": {
+    "note": "DERIVED from web/seed/pimcopy.json — down-mapped to the SprintR builder-spec document shape (single_select|multi_select|boolean|number|text, additive|per_unit pricing). Do NOT edit pimcopy.json from here; this is a generated artifact used to seed a catalog_versions draft for PIM Copy.",
+    "source_seed": "web/seed/pimcopy.json",
+    "shop": "PIM Copy",
+    "generated_at": "2026-05-30",
+    "mapping_notes": [
+      "radio/select -> single_select.",
+      "Per-page / per-cm pricing modelled as a `number` field whose own price is per_unit, with option modifiers using per_unit `per` referencing that number field's key.",
+      "Tiered prices (arc metalic thin/med/thick, cutter A3..A0) collapsed to a single representative additive amount — MVP has no tiered/conditional pricing.",
+      "All prices are fictive estimates except where the source marked price_estimated:false."
+    ]
+  },
+  "schema_version": 1,
+  "items": [
+    {
+      "id": "946f9fc3-c309-433d-ab4e-f945c689763c",
+      "kind": "service",
+      "title": "Editură & Tipografie digitală",
+      "description": "Servicii de editură și tipografie digitală pentru autori care au nevoie de tiraje mici, rapide, de calitate și la prețuri accesibile.",
+      "image_path": null,
+      "is_active": true,
+      "sort_order": 0,
+      "base_price": 250,
+      "requires_upload": true,
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "fields": [
+        {
+          "key": "tiraj",
+          "label": "Tiraj (număr exemplare)",
+          "type": "number",
+          "required": true,
+          "help": "Tiraj minim inclus în prețul de bază; fiecare exemplar se tarifează suplimentar.",
+          "default": 50,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "exemplare",
+          "price": { "mode": "per_unit", "amount": 6, "per": "tiraj" }
+        }
+      ]
+    },
+    {
+      "id": "5312d1dc-1176-4d50-836f-373056969936",
+      "kind": "service",
+      "title": "Multiplicări și listări A4/A3 alb-negru",
+      "description": "Copiere și listare documente A4 și A3 alb-negru pe hârtie de calitate 80gr. Viteză până la 105 copii A4/minut.",
+      "image_path": null,
+      "is_active": true,
+      "sort_order": 1,
+      "base_price": 0,
+      "requires_upload": true,
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "fields": [
+        {
+          "key": "pagini",
+          "label": "Număr de pagini",
+          "type": "number",
+          "required": true,
+          "help": "Preț de bază: 0,25 lei/pagină A4 alb-negru, o singură față.",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "pagini",
+          "price": { "mode": "per_unit", "amount": 0.25, "per": "pagini" }
+        },
+        {
+          "key": "format",
+          "label": "Format",
+          "type": "single_select",
+          "required": true,
+          "options": [
+            { "value": "a4", "label": "A4", "price": { "mode": "additive", "amount": 0 }, "default": true, "locked": false },
+            { "value": "a3", "label": "A3", "price": { "mode": "per_unit", "amount": 0.25, "per": "pagini" }, "default": false, "locked": false }
+          ]
+        },
+        {
+          "key": "tiparire",
+          "label": "Tip tipărire",
+          "type": "single_select",
+          "required": true,
+          "options": [
+            { "value": "single", "label": "O singură față", "price": { "mode": "additive", "amount": 0 }, "default": true, "locked": false },
+            { "value": "duplex", "label": "Față-verso", "price": { "mode": "per_unit", "amount": 0.1, "per": "pagini" }, "default": false, "locked": false }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f4c16313-b7e0-46a3-9287-31a433d409a4",
+      "kind": "service",
+      "title": "Multiplicări și listări A4/A3 color",
+      "description": "Copiere și listare documente A4 și A3 color. Standard pe hârtie satinată 90gr; opțional carton, autocolant, folie, etichetă CD sau calc. Până la 65 copii color A4/minut.",
+      "image_path": null,
+      "is_active": true,
+      "sort_order": 2,
+      "base_price": 0,
+      "requires_upload": true,
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "fields": [
+        {
+          "key": "pagini",
+          "label": "Număr de pagini",
+          "type": "number",
+          "required": true,
+          "help": "Preț de bază: 1,50 lei/pagină A4 color, o singură față, hârtie standard.",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "pagini",
+          "price": { "mode": "per_unit", "amount": 1.5, "per": "pagini" }
+        },
+        {
+          "key": "format",
+          "label": "Format",
+          "type": "single_select",
+          "required": true,
+          "options": [
+            { "value": "a4", "label": "A4", "price": { "mode": "additive", "amount": 0 }, "default": true, "locked": false },
+            { "value": "a3", "label": "A3", "price": { "mode": "per_unit", "amount": 1.5, "per": "pagini" }, "default": false, "locked": false }
+          ]
+        },
+        {
+          "key": "suport",
+          "label": "Tip hârtie / suport",
+          "type": "single_select",
+          "required": true,
+          "options": [
+            { "value": "satinata", "label": "Hârtie satinată 90gr (standard)", "price": { "mode": "additive", "amount": 0 }, "default": true, "locked": false },
+            { "value": "carton", "label": "Carton lucios/mat", "price": { "mode": "per_unit", "amount": 1.0, "per": "pagini" }, "default": false, "locked": false },
+            { "value": "autocolant", "label": "Autocolant vinil", "price": { "mode": "per_unit", "amount": 2.0, "per": "pagini" }, "default": false, "locked": false },
+            { "value": "folie", "label": "Folie retroproiector", "price": { "mode": "per_unit", "amount": 2.5, "per": "pagini" }, "default": false, "locked": false },
+            { "value": "eticheta_cd", "label": "Etichetă CD", "price": { "mode": "per_unit", "amount": 1.5, "per": "pagini" }, "default": false, "locked": false },
+            { "value": "calc", "label": "Calc", "price": { "mode": "per_unit", "amount": 1.0, "per": "pagini" }, "default": false, "locked": false }
+          ]
+        },
+        {
+          "key": "tiparire",
+          "label": "Tip tipărire",
+          "type": "single_select",
+          "required": true,
+          "options": [
+            { "value": "single", "label": "O singură față", "price": { "mode": "additive", "amount": 0 }, "default": true, "locked": false },
+            { "value": "duplex", "label": "Față-verso", "price": { "mode": "per_unit", "amount": 1.0, "per": "pagini" }, "default": false, "locked": false }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f3b79ea5-4f03-4d87-a6ff-ef37b4bbe490",
+      "kind": "service",
+      "title": "Multiplicări și listări formate mari",
+      "description": "Listare proiecte și postere pe formate mari, alb-negru și color. Tarifare per centimetru liniar. Materiale de la hârtie 80gr la banner rezistent la exterior.",
+      "image_path": null,
+      "is_active": true,
+      "sort_order": 3,
+      "base_price": 0,
+      "requires_upload": true,
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "fields": [
+        {
+          "key": "lungime_cm",
+          "label": "Lungime (cm liniari)",
+          "type": "number",
+          "required": true,
+          "help": "Preț de bază: 0,40 lei/cm liniar, alb-negru, hârtie 80gr. Ex.: poster 160x200 ≈ 80 lei.",
+          "default": 100,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "cm",
+          "price": { "mode": "per_unit", "amount": 0.4, "per": "lungime_cm" }
+        },
+        {
+          "key": "culoare",
+          "label": "Tip culoare",
+          "type": "single_select",
+          "required": true,
+          "options": [
+            { "value": "bw", "label": "Alb-negru", "price": { "mode": "additive", "amount": 0 }, "default": true, "locked": false },
+            { "value": "color", "label": "Color", "price": { "mode": "per_unit", "amount": 0.4, "per": "lungime_cm" }, "default": false, "locked": false }
+          ]
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "single_select",
+          "required": true,
+          "options": [
+            { "value": "hartie80", "label": "Hârtie 80gr", "price": { "mode": "additive", "amount": 0 }, "default": true, "locked": false },
+            { "value": "banner", "label": "Banner exterior", "price": { "mode": "per_unit", "amount": 0.6, "per": "lungime_cm" }, "default": false, "locked": false }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c573322f-b6ee-40f3-b435-5044db9ec7e0",
+      "kind": "service",
+      "title": "Servicii de scanare alb-negru și color",
+      "description": "Scanare documente A4/A3 alb-negru și color. Salvare pe stick USB, HDD extern, CD, DVD. Preț identic în toate punctele de lucru.",
+      "image_path": null,
+      "is_active": true,
+      "sort_order": 4,
+      "base_price": 0,
+      "requires_upload": false,
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "fields": [
+        {
+          "key": "pagini",
+          "label": "Număr de pagini",
+          "type": "number",
+          "required": true,
+          "help": "Preț de bază: 0,50 lei/pagină A4 alb-negru.",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "pagini",
+          "price": { "mode": "per_unit", "amount": 0.5, "per": "pagini" }
+        },
+        {
+          "key": "format",
+          "label": "Format",
+          "type": "single_select",
+          "required": true,
+          "options": [
+            { "value": "a4", "label": "A4", "price": { "mode": "additive", "amount": 0 }, "default": true, "locked": false },
+            { "value": "a3", "label": "A3", "price": { "mode": "per_unit", "amount": 0.5, "per": "pagini" }, "default": false, "locked": false }
+          ]
+        },
+        {
+          "key": "tip",
+          "label": "Tip",
+          "type": "single_select",
+          "required": true,
+          "options": [
+            { "value": "bw", "label": "Alb-negru", "price": { "mode": "additive", "amount": 0 }, "default": true, "locked": false },
+            { "value": "color", "label": "Color", "price": { "mode": "per_unit", "amount": 0.5, "per": "pagini" }, "default": false, "locked": false }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "97957880-f14e-4000-a09c-e4829853a7e5",
+      "kind": "service",
+      "title": "Servicii de scanare formate mari",
+      "description": "Scanare planșe și postere alb-negru și color, lățime max. 914mm. Salvare pe stick USB, HDD extern, CD, DVD.",
+      "image_path": null,
+      "is_active": true,
+      "sort_order": 5,
+      "base_price": 0,
+      "requires_upload": false,
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "fields": [
+        {
+          "key": "planse",
+          "label": "Număr planșe/postere",
+          "type": "number",
+          "required": true,
+          "help": "Preț de bază: 5 lei/planșă sau poster.",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "planșe",
+          "price": { "mode": "per_unit", "amount": 5.0, "per": "planse" }
+        }
+      ]
+    },
+    {
+      "id": "953313ba-b492-4521-b4f8-84ca55201535",
+      "kind": "service",
+      "title": "Servicii de legătorie",
+      "description": "Servicii de legătorie cu mai multe opțiuni de legare și copertare.",
+      "image_path": null,
+      "is_active": true,
+      "sort_order": 6,
+      "base_price": 0,
+      "requires_upload": true,
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "fields": [
+        {
+          "key": "legare",
+          "label": "Tip legare",
+          "type": "single_select",
+          "required": true,
+          "help": "Prețul arcului metalic variază cu grosimea (1,5–2,5 lei); afișăm valoarea medie.",
+          "options": [
+            { "value": "arc_plastic", "label": "Arc de plastic (spiră plastic)", "price": { "mode": "additive", "amount": 6 }, "default": true, "locked": false },
+            { "value": "arc_metalic", "label": "Arc metalic (spiră metalică)", "price": { "mode": "additive", "amount": 2 }, "default": false, "locked": false },
+            { "value": "cartonata", "label": "Legare clasică cu cartonare (copertă cartonată)", "price": { "mode": "additive", "amount": 20 }, "default": false, "locked": false },
+            { "value": "termoclei", "label": "Broșare carte (termoclei)", "price": { "mode": "additive", "amount": 12 }, "default": false, "locked": false }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bbd7092c-37f9-4110-9203-b0b0aaba6bbf",
+      "kind": "product",
+      "title": "Imprimare tricou personalizat",
+      "description": "Personalizare tricou pe baza graficii aduse de client. Tricouri albe la Independenței, tricouri colorate la Smârdan.",
+      "image_path": null,
+      "is_active": true,
+      "sort_order": 7,
+      "base_price": 0,
+      "requires_upload": true,
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "fields": [
+        {
+          "key": "cantitate",
+          "label": "Cantitate",
+          "type": "number",
+          "required": true,
+          "help": "40 lei/tricou.",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "tricouri",
+          "price": { "mode": "per_unit", "amount": 40.0, "per": "cantitate" }
+        }
+      ]
+    },
+    {
+      "id": "93349738-0eca-429d-9eb9-82e479217457",
+      "kind": "product",
+      "title": "Tăiere după contur (cutter plotter)",
+      "description": "Tăiere litere și forme din material autocolant. Disponibil la Smârdan.",
+      "image_path": null,
+      "is_active": true,
+      "sort_order": 8,
+      "base_price": 0,
+      "requires_upload": true,
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "type": "single_select",
+          "required": true,
+          "help": "Preț per piesă, în funcție de format.",
+          "options": [
+            { "value": "a3", "label": "A3", "price": { "mode": "additive", "amount": 2.5 }, "default": true, "locked": false },
+            { "value": "a2", "label": "A2", "price": { "mode": "additive", "amount": 5.0 }, "default": false, "locked": false },
+            { "value": "a1", "label": "A1", "price": { "mode": "additive", "amount": 10.0 }, "default": false, "locked": false },
+            { "value": "a0", "label": "A0 sau mai mare", "price": { "mode": "additive", "amount": 20.0 }, "default": false, "locked": false }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "24a54b87-83c6-4a6e-8288-0319d1519b55",
+      "kind": "product",
+      "title": "Insignă rotundă metalică",
+      "description": "Insignă cu suprafață vizibilă circulară, diametru 25mm. Disponibil la Independenței și Smârdan.",
+      "image_path": null,
+      "is_active": true,
+      "sort_order": 9,
+      "base_price": 0,
+      "requires_upload": true,
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "fields": [
+        {
+          "key": "cantitate",
+          "label": "Cantitate",
+          "type": "number",
+          "required": true,
+          "help": "6 lei/insignă.",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "insigne",
+          "price": { "mode": "per_unit", "amount": 6.0, "per": "cantitate" }
+        }
+      ]
+    }
+  ]
+}
