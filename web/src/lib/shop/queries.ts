@@ -14,7 +14,8 @@ export interface ShopProfileData {
   shopId: string;
   name: string;
   description: string;
-  phone: string;
+  phones: string[];
+  website: string;
   email: string;
   address: string;
   schedule: WeeklySchedule | null;
@@ -45,7 +46,7 @@ export async function loadShopProfile(): Promise<ShopProfileData | null> {
   const { data: shop } = await supabase
     .from("shops")
     .select(
-      "id, name, description, phone, email, address, logo_path, banner_path, schedule, schedule_overrides, default_eta_minutes, delivery_fee, active_version_id, is_active"
+      "id, name, description, phones, website_url, email, address, logo_path, banner_path, schedule, schedule_overrides, default_eta_minutes, delivery_fee, active_version_id, is_active"
     )
     .eq("id", shopId)
     .maybeSingle();
@@ -65,7 +66,8 @@ export async function loadShopProfile(): Promise<ShopProfileData | null> {
     shopId: shop.id,
     name: shop.name ?? "",
     description: shop.description ?? "",
-    phone: shop.phone ?? "",
+    phones: shop.phones ?? [],
+    website: shop.website_url ?? "",
     email: shop.email ?? "",
     address: shop.address ?? "",
     schedule: (shop.schedule as WeeklySchedule | null) ?? null,

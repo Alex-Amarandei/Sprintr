@@ -4,7 +4,10 @@ import type { WeeklySchedule } from "./schedule";
 export interface ShopProfileInput {
   name: string;
   description: string;
-  phone: string;
+  /** Contact numbers (persisted to `shops.phones`). */
+  phones: string[];
+  /** Public website URL (persisted to `shops.website_url`). */
+  website: string;
   /** Public contact email (persisted to `shops.email`). */
   email: string;
   address: string;

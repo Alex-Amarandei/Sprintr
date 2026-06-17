@@ -328,22 +328,25 @@ export function ItemOrderForm({
               );
             }
 
-            case "number":
+            case "number": {
+              // The quantity field can't go below the item's min_quantity floor.
+              const fmin = f.is_quantity ? Math.max(f.min, item.min_quantity) : f.min;
               return (
                 <NumberInput
                   key={f.key}
                   label={f.label}
                   description={f.help ?? undefined}
                   withAsterisk={f.required}
-                  min={f.min}
+                  min={fmin}
                   max={f.max ?? undefined}
                   step={f.step}
                   suffix={f.unit ? ` ${f.unit}` : undefined}
-                  value={(answers[f.key] as number) ?? f.min}
-                  onChange={(v) => set(f.key, typeof v === "number" ? v : f.min)}
+                  value={(answers[f.key] as number) ?? fmin}
+                  onChange={(v) => set(f.key, typeof v === "number" ? v : fmin)}
                   error={err}
                 />
               );
+            }
 
             case "text":
               return (

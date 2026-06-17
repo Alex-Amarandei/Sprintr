@@ -41,7 +41,8 @@ function toView(row: {
   name: string;
   description: string | null;
   address: string | null;
-  phone: string | null;
+  phones: string[] | null;
+  website_url: string | null;
   logo_path: string | null;
   banner_path: string | null;
   delivery_fee?: number | null;
@@ -55,7 +56,8 @@ function toView(row: {
     name: row.name,
     description: row.description ?? "",
     address: row.address ?? "Iași",
-    phone: row.phone ?? undefined,
+    phones: row.phones ?? [],
+    website: row.website_url ?? null,
     deliveryFee: Number(row.delivery_fee ?? 0),
     lat: row.lat ?? null,
     lng: row.lng ?? null,
@@ -76,7 +78,7 @@ export async function getShops(): Promise<SampleShop[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("shops")
-    .select("id, name, description, address, phone, logo_path, banner_path, delivery_fee, lat, lng, schedule, schedule_overrides")
+    .select("id, name, description, address, phones, website_url, logo_path, banner_path, delivery_fee, lat, lng, schedule, schedule_overrides")
     .eq("is_active", true)
     .order("created_at", { ascending: true });
   if (error || !data) return [];
@@ -100,7 +102,7 @@ export async function getShopView(id: string): Promise<SampleShop | null> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("shops")
-    .select("id, name, description, address, phone, logo_path, banner_path, delivery_fee, lat, lng, schedule, schedule_overrides")
+    .select("id, name, description, address, phones, website_url, logo_path, banner_path, delivery_fee, lat, lng, schedule, schedule_overrides")
     .eq("id", id)
     .eq("is_active", true)
     .maybeSingle();

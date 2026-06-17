@@ -127,6 +127,10 @@ export const itemSchema = z.object({
   in_stock: z.boolean().default(true),
   sort_order: z.number().int().default(0),
   base_price: z.number().min(0).default(0),
+  // Smallest orderable quantity. Raises the floor of the item's is_quantity field and the
+  // line's quantity multiplier (e.g. business cards sold in lots of 100, flyers from 50).
+  // Backward-compatible: old documents without it parse to 1.
+  min_quantity: z.number().int().min(1).default(1),
   // Optional retail metadata (mainly products): stock-keeping unit + the unit goods are sold in
   // (e.g. "buc", "set", "pachet"). Display-only — never affects pricing/validation.
   // Backward-compatible: old documents without them parse to null.

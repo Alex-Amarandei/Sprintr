@@ -12,7 +12,8 @@ export default async function ShopProfilePage() {
       initial={{
         name: shop?.name ?? "",
         description: shop?.description ?? "",
-        phone: shop?.phone ?? "",
+        phones: shop?.phones ?? [],
+        website: shop?.website ?? "",
         email: shop?.email ?? "",
         address: shop?.address ?? "",
         defaultEtaMinutes: shop?.defaultEtaMinutes ?? null,

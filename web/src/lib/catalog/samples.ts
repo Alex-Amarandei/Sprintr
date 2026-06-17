@@ -20,7 +20,10 @@ export interface SampleShop {
   isOpen?: boolean;
   /** When closed, the next opening time, e.g. "09:00". */
   opensAt?: string;
-  phone?: string;
+  /** Contact numbers (a shop may publish several, e.g. an order line + a personalizare line). */
+  phones?: string[];
+  /** Public website URL, when the shop has one. */
+  website?: string | null;
   /** Per-order delivery fee in lei (0 = free). */
   deliveryFee?: number;
   /** Shop coordinates (owner-set) — drive the delivery-radius check. Null when not set. */

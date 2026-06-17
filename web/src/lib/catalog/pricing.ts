@@ -43,8 +43,12 @@ export function computeItemPrice(item: Item, answers: Answers): PriceResult {
   const lines: PriceLine[] = [];
 
   // The is_quantity number field multiplies the whole line; it is NOT an addon.
+  // Clamped to the item's min_quantity floor so an under-min answer still prices correctly.
   const qField = item.fields.find((f) => f.type === "number" && f.is_quantity);
-  const quantity = qField ? Number(answers[qField.key]) || 1 : 1;
+  const quantity = Math.max(
+    qField ? Number(answers[qField.key]) || 1 : 1,
+    item.min_quantity
+  );
 
   for (const f of item.fields) {
     if (f.type === "number" && f.is_quantity) continue;

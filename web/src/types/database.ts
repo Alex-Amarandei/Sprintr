@@ -60,27 +60,6 @@ export type Database = {
           },
         ]
       }
-      favorites: {
-        Row: { created_at: string; shop_id: string; user_id: string }
-        Insert: { created_at?: string; shop_id: string; user_id: string }
-        Update: { created_at?: string; shop_id?: string; user_id?: string }
-        Relationships: [
-          {
-            foreignKeyName: "favorites_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "favorites_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       catalog_versions: {
         Row: {
           created_at: string
@@ -128,6 +107,39 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          shop_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          shop_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          shop_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -878,8 +890,10 @@ export type Database = {
           logo_path: string | null
           name: string
           phone: string | null
+          phones: string[]
           schedule: Json | null
           schedule_overrides: Json | null
+          website_url: string | null
         }
         Insert: {
           active_version_id?: string | null
@@ -898,8 +912,10 @@ export type Database = {
           logo_path?: string | null
           name: string
           phone?: string | null
+          phones?: string[]
           schedule?: Json | null
           schedule_overrides?: Json | null
+          website_url?: string | null
         }
         Update: {
           active_version_id?: string | null
@@ -918,8 +934,10 @@ export type Database = {
           logo_path?: string | null
           name?: string
           phone?: string | null
+          phones?: string[]
           schedule?: Json | null
           schedule_overrides?: Json | null
+          website_url?: string | null
         }
         Relationships: [
           {
@@ -932,9 +950,21 @@ export type Database = {
         ]
       }
       stripe_events: {
-        Row: { id: string; processed_at: string; type: string }
-        Insert: { id: string; processed_at?: string; type: string }
-        Update: { id?: string; processed_at?: string; type?: string }
+        Row: {
+          id: string
+          processed_at: string
+          type: string
+        }
+        Insert: {
+          id: string
+          processed_at?: string
+          type: string
+        }
+        Update: {
+          id?: string
+          processed_at?: string
+          type?: string
+        }
         Relationships: []
       }
     }

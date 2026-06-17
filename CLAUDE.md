@@ -59,14 +59,18 @@ self-contained record — it never changes when the catalog is later edited.
   RLS = select-own **plus** `profiles_select_shop_customer`: a shop member can read the
   name/phone/email of any customer who ordered at their shop (via SECURITY DEFINER
   `can_read_customer(uuid)`, no orders-RLS recursion).
-- **`shops`** = public-readable storefront: `id, name, description, logo_path, banner_path, phone,
-  email, address, schedule (jsonb), schedule_overrides (jsonb), delivery_fee, commission_rate,
-  default_eta_minutes, lat, lng, active_version_id, created_at`. Storage **paths** not URLs. No `owner_id`,
-  no `city`. `lat/lng` = shop coords, **auto-geocoded from `address` on profile save** (`forwardGeocode`,
-  Iași-bounded) — drive the delivery-radius check + courier pickup. `commission_rate` owner-immutable (admin-only, trigger `shops_guard_commission`);
-  `default_eta_minutes` seeds new orders' ETA. **No `is_active` column** — "temporary pause" =
-  `schedule_overrides` day-entries set to `null` (closed) via the `setShopPause` action;
-  `isOpenNow` honours overrides over the weekly `schedule`, flipping the open badge + checkout gate.
+- **`shops`** = public-readable storefront: `id, name, description, logo_path, banner_path, phones
+  (text[]), website_url, email, address, schedule (jsonb), schedule_overrides (jsonb), delivery_fee,
+  commission_rate, default_eta_minutes, lat, lng, is_active, active_version_id, created_at`. Storage
+  **paths** not URLs (logo/banner also accept a pass-through absolute URL). No `owner_id`, no `city`.
+  `phones` = list of contact numbers (UI: `TagsInput`); the legacy single `phone` column still exists
+  (deprecated, to be dropped after this lands on main). `lat/lng` = shop coords, **auto-geocoded from
+  `address` on profile save** (`forwardGeocode`, Iași-bounded) — drive the delivery-radius check +
+  courier pickup. `commission_rate` owner-immutable (admin-only, trigger `shops_guard_commission`);
+  `default_eta_minutes` seeds new orders' ETA. "Temporary pause" = `schedule_overrides` day-entries set
+  to `null` (closed) via the `setShopPause` action; `isOpenNow` honours overrides over the weekly
+  `schedule`, flipping the open badge + checkout gate. (`is_active` column exists; browse-hiding by it is
+  a separate TODO.)
 - **`shop_permissions`** `(shop_id, profile_id, role)`, `shop_role` enum ordered `staff < catalog <
   owner`. staff=orders+chat; catalog=+catalog/offers; owner=+members/legal/finance. RLS via
   `is_shop_member(shop_id, min_role)` SECURITY DEFINER helper.
@@ -107,9 +111,11 @@ self-contained record — it never changes when the catalog is later edited.
 ### Catalog document (the `document` JSON) — see CONTEXT_HISTORY §1–11 for the full contract
 - `{ schema_version, categories[], items[] }`. Categories nested via `parent_id`.
 - **Item:** `id (stable across versions), kind (service|product), title, description, image_path,
-  is_active, in_stock, sort_order, base_price, sku, unit, category_id, requires_upload,
+  is_active, in_stock, sort_order, base_price, min_quantity, sku, unit, category_id, requires_upload,
   accepted_file_types, fields[]`. `is_active` = published/listed; `in_stock` = availability (both
-  must be true to show/order). `sku`/`unit` = optional retail metadata (display-only, no pricing impact).
+  must be true to show/order). `min_quantity` (default 1) = smallest orderable quantity; it raises the
+  floor of the item's `is_quantity` field + clamps the line multiplier (enforced in defaultAnswers /
+  validateAnswers / the order form / the place-order reprice). `sku`/`unit` = optional retail metadata (display-only, no pricing impact).
 - **Field types (only these 5):** `single_select | multi_select | boolean | number | text`, plus
   `file` handled at item level via `requires_upload`/`accepted_file_types`. Rich UIs (color swatches,
   image choices) are just `single_select` with shop-defined options — not new types.

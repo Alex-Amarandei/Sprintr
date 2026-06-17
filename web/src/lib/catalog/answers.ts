@@ -24,9 +24,12 @@ export function defaultAnswers(item: Item): Answers {
       case "boolean":
         a[f.key] = f.default ?? false;
         break;
-      case "number":
-        a[f.key] = f.default ?? f.min;
+      case "number": {
+        // The quantity field can't default below the item's min_quantity floor.
+        const floor = f.is_quantity ? Math.max(f.min, item.min_quantity) : f.min;
+        a[f.key] = Math.max(f.default ?? floor, floor);
         break;
+      }
       case "text":
         a[f.key] = f.default ?? "";
         break;
@@ -66,10 +69,12 @@ export function validateAnswers(
       }
       case "number": {
         const n = Number(v);
+        // The quantity field enforces the item's min_quantity floor.
+        const min = f.is_quantity ? Math.max(f.min, item.min_quantity) : f.min;
         if (f.required && (v === null || v === "" || Number.isNaN(n)))
           errors[f.key] = "Completează un număr";
         else if (!Number.isNaN(n)) {
-          if (n < f.min) errors[f.key] = `Minim ${f.min}`;
+          if (n < min) errors[f.key] = `Minim ${min}`;
           else if (f.max != null && n > f.max) errors[f.key] = `Maxim ${f.max}`;
         }
         break;

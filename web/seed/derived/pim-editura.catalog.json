@@ -1,0 +1,1890 @@
+{
+  "schema_version": 1,
+  "categories": [
+    {
+      "id": "printare",
+      "name": "Printare interior",
+      "parent_id": null,
+      "sort_order": 1
+    },
+    {
+      "id": "finisare",
+      "name": "Laminare & finisare",
+      "parent_id": null,
+      "sort_order": 2
+    },
+    {
+      "id": "legare",
+      "name": "Legare",
+      "parent_id": null,
+      "sort_order": 3
+    },
+    {
+      "id": "coperti",
+      "name": "Coperți",
+      "parent_id": null,
+      "sort_order": 4
+    }
+  ],
+  "items": [
+    {
+      "id": "e-print-an",
+      "kind": "service",
+      "title": "Printare interior alb-negru",
+      "description": "Print interior alb-negru, preț pe pagină (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 0,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image",
+        "word"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "printare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0333
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0255
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0167
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0128
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0083
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Pagini",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "pag.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-print-color",
+      "kind": "service",
+      "title": "Printare interior color",
+      "description": "Print interior color, preț pe pagină (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 1,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image",
+        "word"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "printare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.1749
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.1283
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0875
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0642
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0437
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Pagini",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "pag.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-print-album",
+      "kind": "service",
+      "title": "Printare color album",
+      "description": "Print color album, preț pe pagină (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 2,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image",
+        "word"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "printare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.3885
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.2915
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.1943
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.1457
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0971
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Pagini",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "pag.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-lam-lucioasa",
+      "kind": "service",
+      "title": "Laminare lucioasă",
+      "description": "Laminare lucioasă, preț pe coală (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 3,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "finisare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.6216
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.4995
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.3663
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.2664
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.2331
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Coli",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "coli",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-lam-mata",
+      "kind": "service",
+      "title": "Laminare mată",
+      "description": "Laminare mată, preț pe coală (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 4,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "finisare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.6216
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.4995
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.3663
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.2664
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.2331
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Coli",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "coli",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-lam-soft",
+      "kind": "service",
+      "title": "Laminare soft touch",
+      "description": "Laminare soft touch, preț pe coală (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 5,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "finisare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 2.442
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 1.998
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 1.4208
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.999
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.7104
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Coli",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "coli",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-brosare",
+      "kind": "service",
+      "title": "Broșare",
+      "description": "Broșare, preț pe exemplar (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 6,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "finisare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.6216
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.4995
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.4773
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.3663
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.2553
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-capsare",
+      "kind": "service",
+      "title": "Capsare",
+      "description": "Capsare, preț pe exemplar (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 7,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "finisare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.8214
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.7326
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.6882
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.5439
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.3996
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-clapite",
+      "kind": "service",
+      "title": "Clăpițe",
+      "description": "Clăpițe, preț pe exemplar (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 8,
+      "base_price": 0.9657,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "finisare",
+      "fields": [
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-coasere",
+      "kind": "service",
+      "title": "Coasere fascicol (3-6 foi)",
+      "description": "Coasere fascicol, preț pe exemplar (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 9,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "finisare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.2331
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.2109
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.1554
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.1554
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.1554
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-tiplare",
+      "kind": "service",
+      "title": "Țiplare carte în folie",
+      "description": "Țiplare carte în folie de plastic, preț pe exemplar (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 10,
+      "base_price": 1.4097,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "finisare",
+      "fields": [
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-lacuire-sub",
+      "kind": "service",
+      "title": "Lăcuire (sub 30% suprafață)",
+      "description": "Lăcuire pe sub 30% din suprafață (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 11,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "finisare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 2.1423
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 2.0757
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 1.9536
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 1.8315
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 1.7094
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-lacuire-peste",
+      "kind": "service",
+      "title": "Lăcuire (peste 30% suprafață)",
+      "description": "Lăcuire pe peste 30% din suprafață (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 12,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "finisare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 2.8638
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 2.8083
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 2.1978
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 2.0757
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 1.9536
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-folio",
+      "kind": "service",
+      "title": "Folio copertă",
+      "description": "Folio (folie metalizată) pe copertă (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 13,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "finisare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 4.2846
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 4.1514
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 3.9072
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 3.663
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 3.4188
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-supracoperta",
+      "kind": "service",
+      "title": "Supracopertă",
+      "description": "Supracopertă, preț pe exemplar (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 14,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "finisare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 2.442
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 1.8315
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 1.221
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.999
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.6105
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-rotunjire",
+      "kind": "service",
+      "title": "Rotunjire cotor",
+      "description": "Rotunjire cotor, preț pe exemplar (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 15,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "finisare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 1.6983
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 1.1433
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.7104
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.7104
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.7104
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-legare-cartonata",
+      "kind": "service",
+      "title": "Legare cartonată",
+      "description": "Legare cartonată, preț pe exemplar (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 16,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "legare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 7.548
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 6.438
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 5.55
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 4.662
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 3.663
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-legare-buretata",
+      "kind": "service",
+      "title": "Legare cartonată buretată",
+      "description": "Legare cartonată buretată, preț pe exemplar (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 17,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "legare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 9.435
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 7.77
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 6.66
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 6.105
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 4.44
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-legare-catifea",
+      "kind": "service",
+      "title": "Legare cartonată catifea",
+      "description": "Legare cartonată cu catifea, preț pe exemplar (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 18,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "legare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 24.975
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 19.425
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 16.65
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 16.095
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 15.54
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-legare-catifea-buretata",
+      "kind": "service",
+      "title": "Legare catifea buretată",
+      "description": "Legare cartonată catifea buretată, preț pe exemplar (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 19,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "legare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 27.639
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 21.09
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 17.76
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 17.205
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 16.65
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-coperta-fata",
+      "kind": "service",
+      "title": "Copertă - tipar față",
+      "description": "Copertă carton volumetric, tipar față (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 20,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "coperti",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 1.11
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.8325
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.555
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.444
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.2775
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "e-coperta-fata-verso",
+      "kind": "service",
+      "title": "Copertă - tipar față-verso",
+      "description": "Copertă carton volumetric, tipar față-verso (TVA 11% inclus).",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 21,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "coperti",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 2.22
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 1.665
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 1.11
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.888
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.555
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    }
+  ]
+}
