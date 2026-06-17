@@ -132,6 +132,14 @@ const P_LAM: Prices = { a4: 0.56, b5: 0.45, a5: 0.33, b6: 0.24, a6: 0.21 };
 const P_BROSARE: Prices = { a4: 0.56, b5: 0.45, a5: 0.43, b6: 0.33, a6: 0.23 };
 const P_CAPSARE: Prices = { a4: 0.74, b5: 0.66, a5: 0.62, b6: 0.49, a6: 0.36 };
 
+// Romanian VAT. The official PDF prices are listed *fără TVA*; consumer prices must include it.
+// Books (Editură) = 11% reduced rate; other print/copy services (copy shops) = 21% standard.
+// (Published retail prices already on the website — metal spiral, cutter plotter — are left as-is.)
+const VAT_BOOK = 1.11;
+const VAT_STD = 1.21;
+const r4 = (n: number) => Math.round(n * 10000) / 10000;
+const vat = (p: Prices, f: number): Prices => ({ a4: r4(p.a4 * f), b5: r4(p.b5 * f), a5: r4(p.a5 * f), b6: r4(p.b6 * f), a6: r4(p.a6 * f) });
+
 // ── COPY shops (Smârdan, Tudor, Independenței) — shared catalog ──────────────
 function buildCopy(): CatalogDocument {
   sortSeq = 0;
@@ -143,11 +151,11 @@ function buildCopy(): CatalogDocument {
       { id: "retail", name: "Tipărituri & retail", sort_order: 3 },
     ],
     items: [
-      svcFmt({ id: "print-an", title: "Printare & copiere alb-negru", desc: "Print sau copie alb-negru, preț pe pagină.", cat: "print", prices: P_AN, qtyLabel: "Număr de pagini", qtyUnit: "pag.", upload: true }),
-      svcFmt({ id: "print-color", title: "Printare & copiere color", desc: "Print sau copie color, preț pe pagină.", cat: "print", prices: P_COLOR, qtyLabel: "Număr de pagini", qtyUnit: "pag.", upload: true }),
-      svcFmt({ id: "print-album", title: "Printare color foto / album", desc: "Print color de calitate foto, preț pe pagină.", cat: "print", prices: P_ALBUM, qtyLabel: "Număr de pagini", qtyUnit: "pag.", upload: true }),
-      svcFmt({ id: "laminare-lucioasa", title: "Laminare lucioasă", desc: "Laminare lucioasă, preț pe coală.", cat: "legatorie", prices: P_LAM, qtyLabel: "Număr de coli", qtyUnit: "coli" }),
-      svcFmt({ id: "laminare-mata", title: "Laminare mată", desc: "Laminare mată, preț pe coală.", cat: "legatorie", prices: P_LAM, qtyLabel: "Număr de coli", qtyUnit: "coli" }),
+      svcFmt({ id: "print-an", title: "Printare & copiere alb-negru", desc: "Print sau copie alb-negru, preț pe pagină (TVA inclus).", cat: "print", prices: vat(P_AN, VAT_STD), qtyLabel: "Număr de pagini", qtyUnit: "pag.", upload: true }),
+      svcFmt({ id: "print-color", title: "Printare & copiere color", desc: "Print sau copie color, preț pe pagină (TVA inclus).", cat: "print", prices: vat(P_COLOR, VAT_STD), qtyLabel: "Număr de pagini", qtyUnit: "pag.", upload: true }),
+      svcFmt({ id: "print-album", title: "Printare color foto / album", desc: "Print color de calitate foto, preț pe pagină (TVA inclus).", cat: "print", prices: vat(P_ALBUM, VAT_STD), qtyLabel: "Număr de pagini", qtyUnit: "pag.", upload: true }),
+      svcFmt({ id: "laminare-lucioasa", title: "Laminare lucioasă", desc: "Laminare lucioasă, preț pe coală (TVA inclus).", cat: "legatorie", prices: vat(P_LAM, VAT_STD), qtyLabel: "Număr de coli", qtyUnit: "coli" }),
+      svcFmt({ id: "laminare-mata", title: "Laminare mată", desc: "Laminare mată, preț pe coală (TVA inclus).", cat: "legatorie", prices: vat(P_LAM, VAT_STD), qtyLabel: "Număr de coli", qtyUnit: "coli" }),
       svcSelect({
         id: "arc-metalic", title: "Legare cu arc metalic (spirală)", desc: "Legare cu spirală metalică, în funcție de grosime.", cat: "legatorie",
         select: sel("grosime", "Grosime", [
@@ -157,8 +165,8 @@ function buildCopy(): CatalogDocument {
         ]),
         qtyLabel: "Exemplare", qtyUnit: "buc.",
       }),
-      svcFmt({ id: "brosare", title: "Broșare", desc: "Broșare, preț pe exemplar.", cat: "legatorie", prices: P_BROSARE, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "capsare", title: "Capsare", desc: "Capsare, preț pe exemplar.", cat: "legatorie", prices: P_CAPSARE, qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "brosare", title: "Broșare", desc: "Broșare, preț pe exemplar (TVA inclus).", cat: "legatorie", prices: vat(P_BROSARE, VAT_STD), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "capsare", title: "Capsare", desc: "Capsare, preț pe exemplar (TVA inclus).", cat: "legatorie", prices: vat(P_CAPSARE, VAT_STD), qtyLabel: "Exemplare", qtyUnit: "buc." }),
       // Hidden retail (no published price yet) — real options preserved.
       {
         id: "scanare", kind: "service", title: "Scanare documente", description: "Scanare alb-negru sau color a documentelor aduse în locație.",
@@ -291,28 +299,28 @@ function buildEditura(): CatalogDocument {
       { id: "coperti", name: "Coperți", sort_order: 4 },
     ],
     items: [
-      svcFmt({ id: "e-print-an", title: "Printare interior alb-negru", desc: "Print interior alb-negru, preț pe pagină (fără TVA).", cat: "printare", prices: P_AN, qtyLabel: "Pagini", qtyUnit: "pag.", upload: true }),
-      svcFmt({ id: "e-print-color", title: "Printare interior color", desc: "Print interior color, preț pe pagină (fără TVA).", cat: "printare", prices: P_COLOR, qtyLabel: "Pagini", qtyUnit: "pag.", upload: true }),
-      svcFmt({ id: "e-print-album", title: "Printare color album", desc: "Print color album, preț pe pagină (fără TVA).", cat: "printare", prices: P_ALBUM, qtyLabel: "Pagini", qtyUnit: "pag.", upload: true }),
-      svcFmt({ id: "e-lam-lucioasa", title: "Laminare lucioasă", desc: "Laminare lucioasă, preț pe coală (fără TVA).", cat: "finisare", prices: P_LAM, qtyLabel: "Coli", qtyUnit: "coli" }),
-      svcFmt({ id: "e-lam-mata", title: "Laminare mată", desc: "Laminare mată, preț pe coală (fără TVA).", cat: "finisare", prices: P_LAM, qtyLabel: "Coli", qtyUnit: "coli" }),
-      svcFmt({ id: "e-lam-soft", title: "Laminare soft touch", desc: "Laminare soft touch, preț pe coală (fără TVA).", cat: "finisare", prices: { a4: 2.20, b5: 1.80, a5: 1.28, b6: 0.90, a6: 0.64 }, qtyLabel: "Coli", qtyUnit: "coli" }),
-      svcFmt({ id: "e-brosare", title: "Broșare", desc: "Broșare, preț pe exemplar (fără TVA).", cat: "finisare", prices: P_BROSARE, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "e-capsare", title: "Capsare", desc: "Capsare, preț pe exemplar (fără TVA).", cat: "finisare", prices: P_CAPSARE, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFlat({ id: "e-clapite", title: "Clăpițe", desc: "Clăpițe, preț pe exemplar (fără TVA).", cat: "finisare", price: 0.87, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "e-coasere", title: "Coasere fascicol (3-6 foi)", desc: "Coasere fascicol, preț pe exemplar (fără TVA).", cat: "finisare", prices: { a4: 0.21, b5: 0.19, a5: 0.14, b6: 0.14, a6: 0.14 }, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFlat({ id: "e-tiplare", title: "Țiplare carte în folie", desc: "Țiplare carte în folie de plastic, preț pe exemplar (fără TVA).", cat: "finisare", price: 1.27, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "e-lacuire-sub", title: "Lăcuire (sub 30% suprafață)", desc: "Lăcuire pe sub 30% din suprafață (fără TVA).", cat: "finisare", prices: { a4: 1.93, b5: 1.87, a5: 1.76, b6: 1.65, a6: 1.54 }, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "e-lacuire-peste", title: "Lăcuire (peste 30% suprafață)", desc: "Lăcuire pe peste 30% din suprafață (fără TVA).", cat: "finisare", prices: { a4: 2.58, b5: 2.53, a5: 1.98, b6: 1.87, a6: 1.76 }, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "e-folio", title: "Folio copertă", desc: "Folio (folie metalizată) pe copertă (fără TVA).", cat: "finisare", prices: { a4: 3.86, b5: 3.74, a5: 3.52, b6: 3.30, a6: 3.08 }, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "e-supracoperta", title: "Supracopertă", desc: "Supracopertă, preț pe exemplar (fără TVA).", cat: "finisare", prices: { a4: 2.20, b5: 1.65, a5: 1.10, b6: 0.90, a6: 0.55 }, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "e-rotunjire", title: "Rotunjire cotor", desc: "Rotunjire cotor, preț pe exemplar (fără TVA).", cat: "finisare", prices: { a4: 1.53, b5: 1.03, a5: 0.64, b6: 0.64, a6: 0.64 }, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "e-legare-cartonata", title: "Legare cartonată", desc: "Legare cartonată, preț pe exemplar (fără TVA).", cat: "legare", prices: { a4: 6.80, b5: 5.80, a5: 5.00, b6: 4.20, a6: 3.30 }, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "e-legare-buretata", title: "Legare cartonată buretată", desc: "Legare cartonată buretată, preț pe exemplar (fără TVA).", cat: "legare", prices: { a4: 8.50, b5: 7.00, a5: 6.00, b6: 5.50, a6: 4.00 }, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "e-legare-catifea", title: "Legare cartonată catifea", desc: "Legare cartonată cu catifea, preț pe exemplar (fără TVA).", cat: "legare", prices: { a4: 22.50, b5: 17.50, a5: 15.00, b6: 14.50, a6: 14.00 }, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "e-legare-catifea-buretata", title: "Legare catifea buretată", desc: "Legare cartonată catifea buretată, preț pe exemplar (fără TVA).", cat: "legare", prices: { a4: 24.90, b5: 19.00, a5: 16.00, b6: 15.50, a6: 15.00 }, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "e-coperta-fata", title: "Copertă - tipar față", desc: "Copertă carton volumetric, tipar față (fără TVA).", cat: "coperti", prices: { a4: 1.00, b5: 0.75, a5: 0.50, b6: 0.40, a6: 0.25 }, qtyLabel: "Exemplare", qtyUnit: "buc." }),
-      svcFmt({ id: "e-coperta-fata-verso", title: "Copertă - tipar față-verso", desc: "Copertă carton volumetric, tipar față-verso (fără TVA).", cat: "coperti", prices: { a4: 2.00, b5: 1.50, a5: 1.00, b6: 0.80, a6: 0.50 }, qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-print-an", title: "Printare interior alb-negru", desc: "Print interior alb-negru, preț pe pagină (TVA 11% inclus).", cat: "printare", prices: vat(P_AN, VAT_BOOK), qtyLabel: "Pagini", qtyUnit: "pag.", upload: true }),
+      svcFmt({ id: "e-print-color", title: "Printare interior color", desc: "Print interior color, preț pe pagină (TVA 11% inclus).", cat: "printare", prices: vat(P_COLOR, VAT_BOOK), qtyLabel: "Pagini", qtyUnit: "pag.", upload: true }),
+      svcFmt({ id: "e-print-album", title: "Printare color album", desc: "Print color album, preț pe pagină (TVA 11% inclus).", cat: "printare", prices: vat(P_ALBUM, VAT_BOOK), qtyLabel: "Pagini", qtyUnit: "pag.", upload: true }),
+      svcFmt({ id: "e-lam-lucioasa", title: "Laminare lucioasă", desc: "Laminare lucioasă, preț pe coală (TVA 11% inclus).", cat: "finisare", prices: vat(P_LAM, VAT_BOOK), qtyLabel: "Coli", qtyUnit: "coli" }),
+      svcFmt({ id: "e-lam-mata", title: "Laminare mată", desc: "Laminare mată, preț pe coală (TVA 11% inclus).", cat: "finisare", prices: vat(P_LAM, VAT_BOOK), qtyLabel: "Coli", qtyUnit: "coli" }),
+      svcFmt({ id: "e-lam-soft", title: "Laminare soft touch", desc: "Laminare soft touch, preț pe coală (TVA 11% inclus).", cat: "finisare", prices: vat({ a4: 2.20, b5: 1.80, a5: 1.28, b6: 0.90, a6: 0.64 }, VAT_BOOK), qtyLabel: "Coli", qtyUnit: "coli" }),
+      svcFmt({ id: "e-brosare", title: "Broșare", desc: "Broșare, preț pe exemplar (TVA 11% inclus).", cat: "finisare", prices: vat(P_BROSARE, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-capsare", title: "Capsare", desc: "Capsare, preț pe exemplar (TVA 11% inclus).", cat: "finisare", prices: vat(P_CAPSARE, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFlat({ id: "e-clapite", title: "Clăpițe", desc: "Clăpițe, preț pe exemplar (TVA 11% inclus).", cat: "finisare", price: r4(0.87 * VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-coasere", title: "Coasere fascicol (3-6 foi)", desc: "Coasere fascicol, preț pe exemplar (TVA 11% inclus).", cat: "finisare", prices: vat({ a4: 0.21, b5: 0.19, a5: 0.14, b6: 0.14, a6: 0.14 }, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFlat({ id: "e-tiplare", title: "Țiplare carte în folie", desc: "Țiplare carte în folie de plastic, preț pe exemplar (TVA 11% inclus).", cat: "finisare", price: r4(1.27 * VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-lacuire-sub", title: "Lăcuire (sub 30% suprafață)", desc: "Lăcuire pe sub 30% din suprafață (TVA 11% inclus).", cat: "finisare", prices: vat({ a4: 1.93, b5: 1.87, a5: 1.76, b6: 1.65, a6: 1.54 }, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-lacuire-peste", title: "Lăcuire (peste 30% suprafață)", desc: "Lăcuire pe peste 30% din suprafață (TVA 11% inclus).", cat: "finisare", prices: vat({ a4: 2.58, b5: 2.53, a5: 1.98, b6: 1.87, a6: 1.76 }, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-folio", title: "Folio copertă", desc: "Folio (folie metalizată) pe copertă (TVA 11% inclus).", cat: "finisare", prices: vat({ a4: 3.86, b5: 3.74, a5: 3.52, b6: 3.30, a6: 3.08 }, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-supracoperta", title: "Supracopertă", desc: "Supracopertă, preț pe exemplar (TVA 11% inclus).", cat: "finisare", prices: vat({ a4: 2.20, b5: 1.65, a5: 1.10, b6: 0.90, a6: 0.55 }, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-rotunjire", title: "Rotunjire cotor", desc: "Rotunjire cotor, preț pe exemplar (TVA 11% inclus).", cat: "finisare", prices: vat({ a4: 1.53, b5: 1.03, a5: 0.64, b6: 0.64, a6: 0.64 }, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-legare-cartonata", title: "Legare cartonată", desc: "Legare cartonată, preț pe exemplar (TVA 11% inclus).", cat: "legare", prices: vat({ a4: 6.80, b5: 5.80, a5: 5.00, b6: 4.20, a6: 3.30 }, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-legare-buretata", title: "Legare cartonată buretată", desc: "Legare cartonată buretată, preț pe exemplar (TVA 11% inclus).", cat: "legare", prices: vat({ a4: 8.50, b5: 7.00, a5: 6.00, b6: 5.50, a6: 4.00 }, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-legare-catifea", title: "Legare cartonată catifea", desc: "Legare cartonată cu catifea, preț pe exemplar (TVA 11% inclus).", cat: "legare", prices: vat({ a4: 22.50, b5: 17.50, a5: 15.00, b6: 14.50, a6: 14.00 }, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-legare-catifea-buretata", title: "Legare catifea buretată", desc: "Legare cartonată catifea buretată, preț pe exemplar (TVA 11% inclus).", cat: "legare", prices: vat({ a4: 24.90, b5: 19.00, a5: 16.00, b6: 15.50, a6: 15.00 }, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-coperta-fata", title: "Copertă - tipar față", desc: "Copertă carton volumetric, tipar față (TVA 11% inclus).", cat: "coperti", prices: vat({ a4: 1.00, b5: 0.75, a5: 0.50, b6: 0.40, a6: 0.25 }, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
+      svcFmt({ id: "e-coperta-fata-verso", title: "Copertă - tipar față-verso", desc: "Copertă carton volumetric, tipar față-verso (TVA 11% inclus).", cat: "coperti", prices: vat({ a4: 2.00, b5: 1.50, a5: 1.00, b6: 0.80, a6: 0.50 }, VAT_BOOK), qtyLabel: "Exemplare", qtyUnit: "buc." }),
     ],
   };
   return validate(doc);
@@ -365,7 +373,7 @@ export const shops = [
   },
   {
     name: "PIM Editură & Tipografie",
-    description: "Editura și tipografia PIM (Smârdan 76): tipar carte, legare, coperți și finisare. Prețuri conform listei oficiale, fără TVA.",
+    description: "Editura și tipografia PIM (Smârdan 76): tipar carte, legare, coperți și finisare. Prețuri conform listei oficiale, TVA 11% inclus.",
     address: "Strada Smârdan 76, Iași",
     phones: ["0730 086 676", "0732 430 407"], email: "tipografiaiasi@pimcopy.ro",
     lat: 47.1579872, lng: 27.5937972, eta: 4320,

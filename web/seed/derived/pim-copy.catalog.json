@@ -25,7 +25,7 @@
       "id": "print-an",
       "kind": "service",
       "title": "Printare & copiere alb-negru",
-      "description": "Print sau copie alb-negru, preț pe pagină.",
+      "description": "Print sau copie alb-negru, preț pe pagină (TVA inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -58,7 +58,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.03
+                "amount": 0.0363
               },
               "default": true
             },
@@ -67,7 +67,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.023
+                "amount": 0.0278
               }
             },
             {
@@ -75,7 +75,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.015
+                "amount": 0.0182
               }
             },
             {
@@ -83,7 +83,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.0115
+                "amount": 0.0139
               }
             },
             {
@@ -91,7 +91,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.0075
+                "amount": 0.0091
               }
             }
           ]
@@ -115,7 +115,7 @@
       "id": "print-color",
       "kind": "service",
       "title": "Printare & copiere color",
-      "description": "Print sau copie color, preț pe pagină.",
+      "description": "Print sau copie color, preț pe pagină (TVA inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -148,7 +148,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.1576
+                "amount": 0.1907
               },
               "default": true
             },
@@ -157,7 +157,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.1156
+                "amount": 0.1399
               }
             },
             {
@@ -165,7 +165,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.0788
+                "amount": 0.0953
               }
             },
             {
@@ -173,7 +173,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.0578
+                "amount": 0.0699
               }
             },
             {
@@ -181,7 +181,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.0394
+                "amount": 0.0477
               }
             }
           ]
@@ -205,7 +205,7 @@
       "id": "print-album",
       "kind": "service",
       "title": "Printare color foto / album",
-      "description": "Print color de calitate foto, preț pe pagină.",
+      "description": "Print color de calitate foto, preț pe pagină (TVA inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -238,7 +238,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.35
+                "amount": 0.4235
               },
               "default": true
             },
@@ -247,7 +247,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.2626
+                "amount": 0.3177
               }
             },
             {
@@ -255,7 +255,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.175
+                "amount": 0.2118
               }
             },
             {
@@ -263,7 +263,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.1313
+                "amount": 0.1589
               }
             },
             {
@@ -271,7 +271,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.0875
+                "amount": 0.1059
               }
             }
           ]
@@ -295,7 +295,7 @@
       "id": "laminare-lucioasa",
       "kind": "service",
       "title": "Laminare lucioasă",
-      "description": "Laminare lucioasă, preț pe coală.",
+      "description": "Laminare lucioasă, preț pe coală (TVA inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -327,7 +327,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.56
+                "amount": 0.6776
               },
               "default": true
             },
@@ -336,7 +336,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.45
+                "amount": 0.5445
               }
             },
             {
@@ -344,7 +344,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.33
+                "amount": 0.3993
               }
             },
             {
@@ -352,7 +352,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.24
+                "amount": 0.2904
               }
             },
             {
@@ -360,7 +360,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.21
+                "amount": 0.2541
               }
             }
           ]
@@ -384,7 +384,7 @@
       "id": "laminare-mata",
       "kind": "service",
       "title": "Laminare mată",
-      "description": "Laminare mată, preț pe coală.",
+      "description": "Laminare mată, preț pe coală (TVA inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -416,7 +416,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.56
+                "amount": 0.6776
               },
               "default": true
             },
@@ -425,7 +425,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.45
+                "amount": 0.5445
               }
             },
             {
@@ -433,7 +433,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.33
+                "amount": 0.3993
               }
             },
             {
@@ -441,7 +441,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.24
+                "amount": 0.2904
               }
             },
             {
@@ -449,7 +449,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.21
+                "amount": 0.2541
               }
             }
           ]
@@ -546,7 +546,7 @@
       "id": "brosare",
       "kind": "service",
       "title": "Broșare",
-      "description": "Broșare, preț pe exemplar.",
+      "description": "Broșare, preț pe exemplar (TVA inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -578,7 +578,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.56
+                "amount": 0.6776
               },
               "default": true
             },
@@ -587,7 +587,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.45
+                "amount": 0.5445
               }
             },
             {
@@ -595,7 +595,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.43
+                "amount": 0.5203
               }
             },
             {
@@ -603,7 +603,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.33
+                "amount": 0.3993
               }
             },
             {
@@ -611,7 +611,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.23
+                "amount": 0.2783
               }
             }
           ]
@@ -635,7 +635,7 @@
       "id": "capsare",
       "kind": "service",
       "title": "Capsare",
-      "description": "Capsare, preț pe exemplar.",
+      "description": "Capsare, preț pe exemplar (TVA inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -667,7 +667,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.74
+                "amount": 0.8954
               },
               "default": true
             },
@@ -676,7 +676,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.66
+                "amount": 0.7986
               }
             },
             {
@@ -684,7 +684,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.62
+                "amount": 0.7502
               }
             },
             {
@@ -692,7 +692,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.49
+                "amount": 0.5929
               }
             },
             {
@@ -700,7 +700,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.36
+                "amount": 0.4356
               }
             }
           ]

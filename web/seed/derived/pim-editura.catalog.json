@@ -31,7 +31,7 @@
       "id": "e-print-an",
       "kind": "service",
       "title": "Printare interior alb-negru",
-      "description": "Print interior alb-negru, preț pe pagină (fără TVA).",
+      "description": "Print interior alb-negru, preț pe pagină (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -64,7 +64,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.03
+                "amount": 0.0333
               },
               "default": true
             },
@@ -73,7 +73,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.023
+                "amount": 0.0255
               }
             },
             {
@@ -81,7 +81,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.015
+                "amount": 0.0167
               }
             },
             {
@@ -89,7 +89,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.0115
+                "amount": 0.0128
               }
             },
             {
@@ -97,7 +97,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.0075
+                "amount": 0.0083
               }
             }
           ]
@@ -121,7 +121,7 @@
       "id": "e-print-color",
       "kind": "service",
       "title": "Printare interior color",
-      "description": "Print interior color, preț pe pagină (fără TVA).",
+      "description": "Print interior color, preț pe pagină (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -154,7 +154,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.1576
+                "amount": 0.1749
               },
               "default": true
             },
@@ -163,7 +163,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.1156
+                "amount": 0.1283
               }
             },
             {
@@ -171,7 +171,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.0788
+                "amount": 0.0875
               }
             },
             {
@@ -179,7 +179,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.0578
+                "amount": 0.0642
               }
             },
             {
@@ -187,7 +187,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.0394
+                "amount": 0.0437
               }
             }
           ]
@@ -211,7 +211,7 @@
       "id": "e-print-album",
       "kind": "service",
       "title": "Printare color album",
-      "description": "Print color album, preț pe pagină (fără TVA).",
+      "description": "Print color album, preț pe pagină (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -244,7 +244,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.35
+                "amount": 0.3885
               },
               "default": true
             },
@@ -253,7 +253,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.2626
+                "amount": 0.2915
               }
             },
             {
@@ -261,7 +261,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.175
+                "amount": 0.1943
               }
             },
             {
@@ -269,7 +269,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.1313
+                "amount": 0.1457
               }
             },
             {
@@ -277,7 +277,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.0875
+                "amount": 0.0971
               }
             }
           ]
@@ -301,7 +301,7 @@
       "id": "e-lam-lucioasa",
       "kind": "service",
       "title": "Laminare lucioasă",
-      "description": "Laminare lucioasă, preț pe coală (fără TVA).",
+      "description": "Laminare lucioasă, preț pe coală (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -333,7 +333,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.56
+                "amount": 0.6216
               },
               "default": true
             },
@@ -342,7 +342,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.45
+                "amount": 0.4995
               }
             },
             {
@@ -350,7 +350,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.33
+                "amount": 0.3663
               }
             },
             {
@@ -358,7 +358,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.24
+                "amount": 0.2664
               }
             },
             {
@@ -366,7 +366,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.21
+                "amount": 0.2331
               }
             }
           ]
@@ -390,7 +390,7 @@
       "id": "e-lam-mata",
       "kind": "service",
       "title": "Laminare mată",
-      "description": "Laminare mată, preț pe coală (fără TVA).",
+      "description": "Laminare mată, preț pe coală (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -422,7 +422,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.56
+                "amount": 0.6216
               },
               "default": true
             },
@@ -431,7 +431,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.45
+                "amount": 0.4995
               }
             },
             {
@@ -439,7 +439,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.33
+                "amount": 0.3663
               }
             },
             {
@@ -447,7 +447,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.24
+                "amount": 0.2664
               }
             },
             {
@@ -455,7 +455,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.21
+                "amount": 0.2331
               }
             }
           ]
@@ -479,7 +479,7 @@
       "id": "e-lam-soft",
       "kind": "service",
       "title": "Laminare soft touch",
-      "description": "Laminare soft touch, preț pe coală (fără TVA).",
+      "description": "Laminare soft touch, preț pe coală (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -511,7 +511,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 2.2
+                "amount": 2.442
               },
               "default": true
             },
@@ -520,7 +520,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 1.8
+                "amount": 1.998
               }
             },
             {
@@ -528,7 +528,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 1.28
+                "amount": 1.4208
               }
             },
             {
@@ -536,7 +536,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.9
+                "amount": 0.999
               }
             },
             {
@@ -544,7 +544,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.64
+                "amount": 0.7104
               }
             }
           ]
@@ -568,7 +568,7 @@
       "id": "e-brosare",
       "kind": "service",
       "title": "Broșare",
-      "description": "Broșare, preț pe exemplar (fără TVA).",
+      "description": "Broșare, preț pe exemplar (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -600,7 +600,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.56
+                "amount": 0.6216
               },
               "default": true
             },
@@ -609,7 +609,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.45
+                "amount": 0.4995
               }
             },
             {
@@ -617,7 +617,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.43
+                "amount": 0.4773
               }
             },
             {
@@ -625,7 +625,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.33
+                "amount": 0.3663
               }
             },
             {
@@ -633,7 +633,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.23
+                "amount": 0.2553
               }
             }
           ]
@@ -657,7 +657,7 @@
       "id": "e-capsare",
       "kind": "service",
       "title": "Capsare",
-      "description": "Capsare, preț pe exemplar (fără TVA).",
+      "description": "Capsare, preț pe exemplar (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -689,7 +689,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.74
+                "amount": 0.8214
               },
               "default": true
             },
@@ -698,7 +698,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.66
+                "amount": 0.7326
               }
             },
             {
@@ -706,7 +706,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.62
+                "amount": 0.6882
               }
             },
             {
@@ -714,7 +714,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.49
+                "amount": 0.5439
               }
             },
             {
@@ -722,7 +722,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.36
+                "amount": 0.3996
               }
             }
           ]
@@ -746,13 +746,13 @@
       "id": "e-clapite",
       "kind": "service",
       "title": "Clăpițe",
-      "description": "Clăpițe, preț pe exemplar (fără TVA).",
+      "description": "Clăpițe, preț pe exemplar (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
       "in_stock": true,
       "sort_order": 8,
-      "base_price": 0.87,
+      "base_price": 0.9657,
       "min_quantity": 1,
       "sku": null,
       "unit": null,
@@ -784,7 +784,7 @@
       "id": "e-coasere",
       "kind": "service",
       "title": "Coasere fascicol (3-6 foi)",
-      "description": "Coasere fascicol, preț pe exemplar (fără TVA).",
+      "description": "Coasere fascicol, preț pe exemplar (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -816,7 +816,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 0.21
+                "amount": 0.2331
               },
               "default": true
             },
@@ -825,7 +825,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.19
+                "amount": 0.2109
               }
             },
             {
@@ -833,7 +833,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.14
+                "amount": 0.1554
               }
             },
             {
@@ -841,7 +841,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.14
+                "amount": 0.1554
               }
             },
             {
@@ -849,7 +849,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.14
+                "amount": 0.1554
               }
             }
           ]
@@ -873,13 +873,13 @@
       "id": "e-tiplare",
       "kind": "service",
       "title": "Țiplare carte în folie",
-      "description": "Țiplare carte în folie de plastic, preț pe exemplar (fără TVA).",
+      "description": "Țiplare carte în folie de plastic, preț pe exemplar (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
       "in_stock": true,
       "sort_order": 10,
-      "base_price": 1.27,
+      "base_price": 1.4097,
       "min_quantity": 1,
       "sku": null,
       "unit": null,
@@ -911,7 +911,7 @@
       "id": "e-lacuire-sub",
       "kind": "service",
       "title": "Lăcuire (sub 30% suprafață)",
-      "description": "Lăcuire pe sub 30% din suprafață (fără TVA).",
+      "description": "Lăcuire pe sub 30% din suprafață (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -943,7 +943,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 1.93
+                "amount": 2.1423
               },
               "default": true
             },
@@ -952,7 +952,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 1.87
+                "amount": 2.0757
               }
             },
             {
@@ -960,7 +960,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 1.76
+                "amount": 1.9536
               }
             },
             {
@@ -968,7 +968,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 1.65
+                "amount": 1.8315
               }
             },
             {
@@ -976,7 +976,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 1.54
+                "amount": 1.7094
               }
             }
           ]
@@ -1000,7 +1000,7 @@
       "id": "e-lacuire-peste",
       "kind": "service",
       "title": "Lăcuire (peste 30% suprafață)",
-      "description": "Lăcuire pe peste 30% din suprafață (fără TVA).",
+      "description": "Lăcuire pe peste 30% din suprafață (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -1032,7 +1032,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 2.58
+                "amount": 2.8638
               },
               "default": true
             },
@@ -1041,7 +1041,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 2.53
+                "amount": 2.8083
               }
             },
             {
@@ -1049,7 +1049,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 1.98
+                "amount": 2.1978
               }
             },
             {
@@ -1057,7 +1057,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 1.87
+                "amount": 2.0757
               }
             },
             {
@@ -1065,7 +1065,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 1.76
+                "amount": 1.9536
               }
             }
           ]
@@ -1089,7 +1089,7 @@
       "id": "e-folio",
       "kind": "service",
       "title": "Folio copertă",
-      "description": "Folio (folie metalizată) pe copertă (fără TVA).",
+      "description": "Folio (folie metalizată) pe copertă (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -1121,7 +1121,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 3.86
+                "amount": 4.2846
               },
               "default": true
             },
@@ -1130,7 +1130,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 3.74
+                "amount": 4.1514
               }
             },
             {
@@ -1138,7 +1138,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 3.52
+                "amount": 3.9072
               }
             },
             {
@@ -1146,7 +1146,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 3.3
+                "amount": 3.663
               }
             },
             {
@@ -1154,7 +1154,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 3.08
+                "amount": 3.4188
               }
             }
           ]
@@ -1178,7 +1178,7 @@
       "id": "e-supracoperta",
       "kind": "service",
       "title": "Supracopertă",
-      "description": "Supracopertă, preț pe exemplar (fără TVA).",
+      "description": "Supracopertă, preț pe exemplar (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -1210,7 +1210,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 2.2
+                "amount": 2.442
               },
               "default": true
             },
@@ -1219,7 +1219,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 1.65
+                "amount": 1.8315
               }
             },
             {
@@ -1227,7 +1227,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 1.1
+                "amount": 1.221
               }
             },
             {
@@ -1235,7 +1235,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.9
+                "amount": 0.999
               }
             },
             {
@@ -1243,7 +1243,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.55
+                "amount": 0.6105
               }
             }
           ]
@@ -1267,7 +1267,7 @@
       "id": "e-rotunjire",
       "kind": "service",
       "title": "Rotunjire cotor",
-      "description": "Rotunjire cotor, preț pe exemplar (fără TVA).",
+      "description": "Rotunjire cotor, preț pe exemplar (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -1299,7 +1299,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 1.53
+                "amount": 1.6983
               },
               "default": true
             },
@@ -1308,7 +1308,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 1.03
+                "amount": 1.1433
               }
             },
             {
@@ -1316,7 +1316,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.64
+                "amount": 0.7104
               }
             },
             {
@@ -1324,7 +1324,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.64
+                "amount": 0.7104
               }
             },
             {
@@ -1332,7 +1332,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.64
+                "amount": 0.7104
               }
             }
           ]
@@ -1356,7 +1356,7 @@
       "id": "e-legare-cartonata",
       "kind": "service",
       "title": "Legare cartonată",
-      "description": "Legare cartonată, preț pe exemplar (fără TVA).",
+      "description": "Legare cartonată, preț pe exemplar (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -1388,7 +1388,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 6.8
+                "amount": 7.548
               },
               "default": true
             },
@@ -1397,7 +1397,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 5.8
+                "amount": 6.438
               }
             },
             {
@@ -1405,7 +1405,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 5
+                "amount": 5.55
               }
             },
             {
@@ -1413,7 +1413,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 4.2
+                "amount": 4.662
               }
             },
             {
@@ -1421,7 +1421,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 3.3
+                "amount": 3.663
               }
             }
           ]
@@ -1445,7 +1445,7 @@
       "id": "e-legare-buretata",
       "kind": "service",
       "title": "Legare cartonată buretată",
-      "description": "Legare cartonată buretată, preț pe exemplar (fără TVA).",
+      "description": "Legare cartonată buretată, preț pe exemplar (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -1477,7 +1477,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 8.5
+                "amount": 9.435
               },
               "default": true
             },
@@ -1486,7 +1486,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 7
+                "amount": 7.77
               }
             },
             {
@@ -1494,7 +1494,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 6
+                "amount": 6.66
               }
             },
             {
@@ -1502,7 +1502,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 5.5
+                "amount": 6.105
               }
             },
             {
@@ -1510,7 +1510,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 4
+                "amount": 4.44
               }
             }
           ]
@@ -1534,7 +1534,7 @@
       "id": "e-legare-catifea",
       "kind": "service",
       "title": "Legare cartonată catifea",
-      "description": "Legare cartonată cu catifea, preț pe exemplar (fără TVA).",
+      "description": "Legare cartonată cu catifea, preț pe exemplar (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -1566,7 +1566,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 22.5
+                "amount": 24.975
               },
               "default": true
             },
@@ -1575,7 +1575,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 17.5
+                "amount": 19.425
               }
             },
             {
@@ -1583,7 +1583,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 15
+                "amount": 16.65
               }
             },
             {
@@ -1591,7 +1591,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 14.5
+                "amount": 16.095
               }
             },
             {
@@ -1599,7 +1599,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 14
+                "amount": 15.54
               }
             }
           ]
@@ -1623,7 +1623,7 @@
       "id": "e-legare-catifea-buretata",
       "kind": "service",
       "title": "Legare catifea buretată",
-      "description": "Legare cartonată catifea buretată, preț pe exemplar (fără TVA).",
+      "description": "Legare cartonată catifea buretată, preț pe exemplar (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -1655,7 +1655,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 24.9
+                "amount": 27.639
               },
               "default": true
             },
@@ -1664,7 +1664,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 19
+                "amount": 21.09
               }
             },
             {
@@ -1672,7 +1672,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 16
+                "amount": 17.76
               }
             },
             {
@@ -1680,7 +1680,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 15.5
+                "amount": 17.205
               }
             },
             {
@@ -1688,7 +1688,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 15
+                "amount": 16.65
               }
             }
           ]
@@ -1712,7 +1712,7 @@
       "id": "e-coperta-fata",
       "kind": "service",
       "title": "Copertă - tipar față",
-      "description": "Copertă carton volumetric, tipar față (fără TVA).",
+      "description": "Copertă carton volumetric, tipar față (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -1744,7 +1744,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 1
+                "amount": 1.11
               },
               "default": true
             },
@@ -1753,7 +1753,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 0.75
+                "amount": 0.8325
               }
             },
             {
@@ -1761,7 +1761,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 0.5
+                "amount": 0.555
               }
             },
             {
@@ -1769,7 +1769,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.4
+                "amount": 0.444
               }
             },
             {
@@ -1777,7 +1777,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.25
+                "amount": 0.2775
               }
             }
           ]
@@ -1801,7 +1801,7 @@
       "id": "e-coperta-fata-verso",
       "kind": "service",
       "title": "Copertă - tipar față-verso",
-      "description": "Copertă carton volumetric, tipar față-verso (fără TVA).",
+      "description": "Copertă carton volumetric, tipar față-verso (TVA 11% inclus).",
       "image_path": null,
       "images": [],
       "is_active": true,
@@ -1833,7 +1833,7 @@
               "label": "A4",
               "price": {
                 "mode": "additive",
-                "amount": 2
+                "amount": 2.22
               },
               "default": true
             },
@@ -1842,7 +1842,7 @@
               "label": "B5",
               "price": {
                 "mode": "additive",
-                "amount": 1.5
+                "amount": 1.665
               }
             },
             {
@@ -1850,7 +1850,7 @@
               "label": "A5",
               "price": {
                 "mode": "additive",
-                "amount": 1
+                "amount": 1.11
               }
             },
             {
@@ -1858,7 +1858,7 @@
               "label": "B6",
               "price": {
                 "mode": "additive",
-                "amount": 0.8
+                "amount": 0.888
               }
             },
             {
@@ -1866,7 +1866,7 @@
               "label": "A6",
               "price": {
                 "mode": "additive",
-                "amount": 0.5
+                "amount": 0.555
               }
             }
           ]
