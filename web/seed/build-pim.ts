@@ -25,6 +25,10 @@ import type { WeeklySchedule } from "../src/lib/shop/schedule";
 export const OWNER_PROFILE_ID = "ee9c3155-1c5f-4e78-aadb-325935efe58e"; // alex.m.amarandei@gmail.com
 export const OLD_PIM_SHOP_ID = "6596de4b-52d9-4bad-a0e3-b0cc491b51e5";
 export const LOGO = "https://pimcopy.ro/assets/images/logo.png";
+// Google Maps cover photos per location (Smârdan address shared by 3 shops).
+export const BANNER_SMARDAN = "https://lh3.googleusercontent.com/gps-cs-s/APNQkAG0v7YmVABKrcaX_M5-_Cbk8zXIOlk-wsEkgDSabNJ0mL5ZnG3202EhjVLyy-rzipUINuCNTxex1oYqfpCEP855SdGXETSOwwhxdgPGqNHAgYdAglGMbLl04xy8IrKr8URRVze_=s1360-w1360-h1020-rw";
+export const BANNER_TUDOR = "https://lh3.googleusercontent.com/gps-cs-s/APNQkAF0_JflyE5Nu0KW5_DuoJTQhim-8VQKXFFpYIc6_IsHHqK6mE9tQz5V3kUwJAELGhd905m7NGkdsUAJ_Y-fyJU3QgO5_JnsgpfpJ-pC_DUE4BWvUUzz6Tbbu4PyhJi1CZR_GJhW=s1360-w1360-h1020-rw";
+export const BANNER_INDEP = "https://lh3.googleusercontent.com/gps-cs-s/APNQkAEsSI8ylpIDxrKk3Co9KB_XxfFNQ-5OFDRY73_ltU94YCaQVDC2TneRj8aSb9nskuT7gdwOcg6imUClxDSbvnZ-NzkmS6IthydXOVWAlfPn1xKyuiD9XtB4n2myXmlWE1jGNEhR=s1360-w1360-h1020-rw";
 const IMG = (n: string) => `https://pimcopy.ro/assets/servicii/${n}.png`;
 
 // ── Field/item helpers ───────────────────────────────────────────────────────
@@ -449,7 +453,7 @@ export const shops = [
     address: "Strada Smârdan 76, Iași",
     phones: ["0729 992 968", "0729 992 979"], email: "comenzismardan@pimcopy.ro",
     lat: 47.1579872, lng: 27.5937972, eta: 30,
-    schedule: wk("06:00", "21:30"), doc: copyDoc,
+    schedule: wk("06:00", "21:30"), doc: copyDoc, banner: BANNER_SMARDAN,
   },
   {
     name: "PIM Copy - Tudor T18",
@@ -457,7 +461,7 @@ export const shops = [
     address: "Bulevardul Tudor Vladimirescu, cămin T18, Iași",
     phones: ["0729 992 965", "0729 992 978"], email: "tudor@pimcopy.ro",
     lat: 47.1487573, lng: 27.6024016, eta: 30,
-    schedule: wk("06:00", "21:30", ["09:00", "18:00"], ["09:00", "18:00"]), doc: copyDoc,
+    schedule: wk("06:00", "21:30", ["09:00", "18:00"], ["09:00", "18:00"]), doc: copyDoc, banner: BANNER_TUDOR,
   },
   {
     name: "PIM Copy - Independenței",
@@ -465,7 +469,7 @@ export const shops = [
     address: "Bulevardul Independenței 12, Iași",
     phones: ["0729 992 967", "0729 992 976"], email: "comenziumf@pimcopy.ro",
     lat: 47.1679740, lng: 27.5807210, eta: 30,
-    schedule: wk("06:00", "21:00", ["09:00", "16:30"]), doc: copyDoc,
+    schedule: wk("06:00", "21:00", ["09:00", "16:30"]), doc: copyDoc, banner: BANNER_INDEP,
   },
   {
     name: "PIM Personalizare",
@@ -473,7 +477,7 @@ export const shops = [
     address: "Strada Smârdan 76, Iași",
     phones: ["0733 580 203"], email: "personalizare@pimcopy.ro",
     lat: 47.1579872, lng: 27.5937972, eta: 240,
-    schedule: wk("09:00", "17:00"), doc: persoDoc,
+    schedule: wk("09:00", "17:00"), doc: persoDoc, banner: BANNER_SMARDAN,
   },
   {
     name: "PIM Editură & Tipografie",
@@ -481,7 +485,7 @@ export const shops = [
     address: "Strada Smârdan 76, Iași",
     phones: ["0730 086 676", "0732 430 407"], email: "tipografiaiasi@pimcopy.ro",
     lat: 47.1579872, lng: 27.5937972, eta: 4320,
-    schedule: wk("06:00", "21:30"), doc: edituraDoc, website: "https://pimcopy.ro/editura",
+    schedule: wk("06:00", "21:30"), doc: edituraDoc, website: "https://pimcopy.ro/editura", banner: BANNER_SMARDAN,
   },
 ] as const;
 
@@ -504,12 +508,13 @@ for (const s of shops) {
   const sid = randomUUID();
   const vid = randomUUID();
   const website = (s as { website?: string }).website ?? "https://pimcopy.ro";
+  const banner = (s as { banner?: string }).banner ?? null;
   out.push("");
   out.push(`-- ${s.name}`);
   out.push(
-    `insert into public.shops (id, name, description, address, phones, website_url, email, lat, lng, schedule, logo_path, default_eta_minutes, delivery_fee, is_active) values (` +
+    `insert into public.shops (id, name, description, address, phones, website_url, email, lat, lng, schedule, logo_path, banner_path, default_eta_minutes, delivery_fee, is_active) values (` +
     `${sqlStr(sid)}, ${sqlStr(s.name)}, ${sqlStr(s.description)}, ${sqlStr(s.address)}, ${sqlArr(s.phones)}, ${sqlStr(website)}, ${sqlStr(s.email)}, ${s.lat}, ${s.lng}, ` +
-    `$sched$${JSON.stringify(s.schedule)}$sched$::jsonb, ${sqlStr(LOGO)}, ${s.eta}, 0, true);`
+    `$sched$${JSON.stringify(s.schedule)}$sched$::jsonb, ${sqlStr(LOGO)}, ${banner ? sqlStr(banner) : "null"}, ${s.eta}, 0, true);`
   );
   out.push(
     `insert into public.catalog_versions (id, shop_id, version, status, label, document, published_at) values (` +

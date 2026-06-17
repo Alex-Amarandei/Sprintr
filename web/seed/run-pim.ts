@@ -66,6 +66,7 @@ for (const s of shops) {
       lng: s.lng,
       schedule: s.schedule,
       logo_path: "https://pimcopy.ro/assets/images/logo.png",
+      banner_path: (s as { banner?: string }).banner ?? null,
       default_eta_minutes: s.eta,
       delivery_fee: 0,
       is_active: true,
