@@ -203,10 +203,10 @@
       "description": "Căni cu print personalizat.",
       "image_path": null,
       "images": [
-        "https://pimcopy.ro/assets/servicii/poza-digitala-1.png",
-        "https://pimcopy.ro/assets/servicii/poza-digitala-2.png",
-        "https://pimcopy.ro/assets/servicii/poza-digitala-3.png",
-        "https://pimcopy.ro/assets/servicii/poza-digitala-4.png"
+        "https://pimcopy.ro/assets/servicii/cani-personalizate-1.png",
+        "https://pimcopy.ro/assets/servicii/cani-personalizate-2.png",
+        "https://pimcopy.ro/assets/servicii/cani-personalizate-3.png",
+        "https://pimcopy.ro/assets/servicii/cani-personalizate-4.png"
       ],
       "is_active": true,
       "in_stock": false,
@@ -267,75 +267,6 @@
       ]
     },
     {
-      "id": "gravare-laser",
-      "kind": "service",
-      "title": "Gravare laser",
-      "description": "Gravare laser pe diverse materiale.",
-      "image_path": null,
-      "images": [],
-      "is_active": true,
-      "in_stock": false,
-      "sort_order": 3,
-      "base_price": 0,
-      "min_quantity": 1,
-      "sku": null,
-      "unit": null,
-      "requires_upload": true,
-      "accepted_file_types": [
-        "pdf",
-        "image"
-      ],
-      "stock_display": "none",
-      "inventory_item_id": null,
-      "category_id": "obiecte",
-      "fields": [
-        {
-          "key": "material",
-          "label": "Material",
-          "required": true,
-          "help": null,
-          "type": "single_select",
-          "default": "lemn",
-          "options": [
-            {
-              "value": "lemn",
-              "label": "Lemn",
-              "default": true
-            },
-            {
-              "value": "sticla",
-              "label": "Sticlă"
-            },
-            {
-              "value": "metal",
-              "label": "Metal"
-            },
-            {
-              "value": "piele",
-              "label": "Piele"
-            },
-            {
-              "value": "plexiglas",
-              "label": "Plexiglas"
-            }
-          ]
-        },
-        {
-          "key": "cantitate",
-          "label": "Bucăți",
-          "required": true,
-          "help": null,
-          "type": "number",
-          "default": 1,
-          "min": 1,
-          "max": null,
-          "step": 1,
-          "unit": "buc.",
-          "is_quantity": true
-        }
-      ]
-    },
-    {
       "id": "insigne",
       "kind": "service",
       "title": "Insigne (badge-uri)",
@@ -344,7 +275,7 @@
       "images": [],
       "is_active": true,
       "in_stock": false,
-      "sort_order": 4,
+      "sort_order": 3,
       "base_price": 0,
       "min_quantity": 10,
       "sku": null,
@@ -388,6 +319,476 @@
           "help": null,
           "type": "number",
           "default": 10,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "sepci",
+      "kind": "service",
+      "title": "Șepci personalizate",
+      "description": "Șepci cu print personalizat.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/sepci-1.png",
+        "https://pimcopy.ro/assets/servicii/sepci-2.png",
+        "https://pimcopy.ro/assets/servicii/sepci-3.png",
+        "https://pimcopy.ro/assets/servicii/sepci-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 4,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "textile",
+      "fields": [
+        {
+          "key": "culoare",
+          "label": "Culoare",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "alb",
+          "options": [
+            {
+              "value": "alb",
+              "label": "Alb",
+              "default": true
+            },
+            {
+              "value": "negru",
+              "label": "Negru"
+            },
+            {
+              "value": "albastru-marin",
+              "label": "Albastru-marin"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "sacosa",
+      "kind": "service",
+      "title": "Sacoșă din bumbac",
+      "description": "Sacoșe din bumbac personalizate, format A4.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/sacosa-1.png",
+        "https://pimcopy.ro/assets/servicii/sacosa-2.png",
+        "https://pimcopy.ro/assets/servicii/sacosa-3.png",
+        "https://pimcopy.ro/assets/servicii/sacosa-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 5,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "textile",
+      "fields": [
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "puzzle",
+      "kind": "service",
+      "title": "Puzzle personalizat",
+      "description": "Puzzle personalizat, din carton sau magnetic.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/puzzle-1.png",
+        "https://pimcopy.ro/assets/servicii/puzzle-2.png",
+        "https://pimcopy.ro/assets/servicii/puzzle-3.png",
+        "https://pimcopy.ro/assets/servicii/puzzle-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 6,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "obiecte",
+      "fields": [
+        {
+          "key": "tip",
+          "label": "Tip",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "carton",
+          "options": [
+            {
+              "value": "carton",
+              "label": "Carton",
+              "default": true
+            },
+            {
+              "value": "magnetic",
+              "label": "Magnetic"
+            }
+          ]
+        },
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a5",
+          "options": [
+            {
+              "value": "a5",
+              "label": "A5",
+              "default": true
+            },
+            {
+              "value": "a4",
+              "label": "A4"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "pixuri",
+      "kind": "service",
+      "title": "Pixuri personalizate",
+      "description": "Pixuri personalizate prin print UV sau gravare laser.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/pix-1.png",
+        "https://pimcopy.ro/assets/servicii/pix-2.png",
+        "https://pimcopy.ro/assets/servicii/pix-3.png",
+        "https://pimcopy.ro/assets/servicii/pix-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 7,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "obiecte",
+      "fields": [
+        {
+          "key": "tip",
+          "label": "Tip",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "plastic-uv",
+          "options": [
+            {
+              "value": "plastic-uv",
+              "label": "Pix plastic, print UV",
+              "default": true
+            },
+            {
+              "value": "metalic-gravat",
+              "label": "Pix metalic, gravat laser"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "ecuson-gravat",
+      "kind": "service",
+      "title": "Ecuson gravat laser",
+      "description": "Ecusoane gravate laser, 7 x 2.5 cm.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/ecuson-1.png",
+        "https://pimcopy.ro/assets/servicii/ecuson-2.png",
+        "https://pimcopy.ro/assets/servicii/ecuson-3.png",
+        "https://pimcopy.ro/assets/servicii/ecuson-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 8,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "obiecte",
+      "fields": [
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "stampila",
+      "kind": "service",
+      "title": "Ștampilă",
+      "description": "Ștampile personalizate, diverse forme și dimensiuni.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/stampila-1.png",
+        "https://pimcopy.ro/assets/servicii/stampila-2.png",
+        "https://pimcopy.ro/assets/servicii/stampila-3.png",
+        "https://pimcopy.ro/assets/servicii/stampila-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 9,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "obiecte",
+      "fields": [
+        {
+          "key": "forma",
+          "label": "Placheta",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "rotund-25",
+          "options": [
+            {
+              "value": "rotund-25",
+              "label": "Rotundă 25 mm",
+              "default": true
+            },
+            {
+              "value": "rotund-42",
+              "label": "Rotundă 42 mm"
+            },
+            {
+              "value": "dreptunghi-47x18",
+              "label": "Dreptunghi 47 x 18 mm"
+            },
+            {
+              "value": "dreptunghi-38x14",
+              "label": "Dreptunghi 38 x 14 mm (buzunar)"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "bricheta",
+      "kind": "service",
+      "title": "Brichetă personalizată",
+      "description": "Brichete personalizate prin print UV.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/bricheta-1.png",
+        "https://pimcopy.ro/assets/servicii/bricheta-2.png",
+        "https://pimcopy.ro/assets/servicii/bricheta-3.png",
+        "https://pimcopy.ro/assets/servicii/bricheta-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 10,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "obiecte",
+      "fields": [
+        {
+          "key": "personalizare",
+          "label": "Personalizare",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "o-fata",
+          "options": [
+            {
+              "value": "o-fata",
+              "label": "O față",
+              "default": true
+            },
+            {
+              "value": "ambele",
+              "label": "Ambele fețe"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "placa-parcare",
+      "kind": "service",
+      "title": "Placă de parcare",
+      "description": "Plăcuțe de parcare personalizate, 30 x 42 cm.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/placa-parcare-1.png",
+        "https://pimcopy.ro/assets/servicii/placa-parcare-2.png",
+        "https://pimcopy.ro/assets/servicii/placa-parcare-3.png",
+        "https://pimcopy.ro/assets/servicii/placa-parcare-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 11,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "obiecte",
+      "fields": [
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
           "min": 1,
           "max": null,
           "step": 1,

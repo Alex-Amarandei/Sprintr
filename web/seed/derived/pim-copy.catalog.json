@@ -14,10 +14,16 @@
       "sort_order": 2
     },
     {
+      "id": "print-mare",
+      "name": "Print mare & afișaj",
+      "parent_id": null,
+      "sort_order": 3
+    },
+    {
       "id": "retail",
       "name": "Tipărituri & retail",
       "parent_id": null,
-      "sort_order": 3
+      "sort_order": 4
     }
   ],
   "items": [
@@ -1215,6 +1221,670 @@
           "help": null,
           "type": "number",
           "default": 50,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "fotografii",
+      "kind": "service",
+      "title": "Fotografii digitale",
+      "description": "Printare foto pe carton 250g, formate mici.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/poza-digitala-1.png",
+        "https://pimcopy.ro/assets/servicii/poza-digitala-2.png",
+        "https://pimcopy.ro/assets/servicii/poza-digitala-3.png",
+        "https://pimcopy.ro/assets/servicii/poza-digitala-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 14,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "retail",
+      "fields": [
+        {
+          "key": "dimensiune",
+          "label": "Dimensiune",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "12x17",
+          "options": [
+            {
+              "value": "12x17",
+              "label": "12 x 17 cm",
+              "default": true
+            },
+            {
+              "value": "11x15",
+              "label": "11 x 15 cm"
+            },
+            {
+              "value": "10x15",
+              "label": "10 x 15 cm"
+            },
+            {
+              "value": "9x12",
+              "label": "9 x 12 cm"
+            }
+          ]
+        },
+        {
+          "key": "carton",
+          "label": "Carton 250g",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "lucios",
+          "options": [
+            {
+              "value": "lucios",
+              "label": "Lucios",
+              "default": true
+            },
+            {
+              "value": "mat",
+              "label": "Mat"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "mape",
+      "kind": "service",
+      "title": "Mape cu buzunar",
+      "description": "Mape personalizate din carton dublu cretat mat.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/mapa-1.png",
+        "https://pimcopy.ro/assets/servicii/mapa-2.png",
+        "https://pimcopy.ro/assets/servicii/mapa-3.png",
+        "https://pimcopy.ro/assets/servicii/mapa-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 15,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "retail",
+      "fields": [
+        {
+          "key": "tipar",
+          "label": "Tipar",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "fata",
+          "options": [
+            {
+              "value": "fata",
+              "label": "Față",
+              "default": true
+            },
+            {
+              "value": "fata-verso",
+              "label": "Față-verso"
+            }
+          ]
+        },
+        {
+          "key": "pliere",
+          "label": "Pliere",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "big-simplu",
+          "options": [
+            {
+              "value": "big-simplu",
+              "label": "Big simplu",
+              "default": true
+            },
+            {
+              "value": "big-dublu",
+              "label": "Big dublu"
+            }
+          ]
+        },
+        {
+          "key": "laminare",
+          "label": "Laminare",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "fara",
+          "options": [
+            {
+              "value": "fara",
+              "label": "Fără",
+              "default": true
+            },
+            {
+              "value": "lucioasa",
+              "label": "Lucioasă"
+            },
+            {
+              "value": "mata",
+              "label": "Mată"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "plicuri",
+      "kind": "service",
+      "title": "Plicuri personalizate",
+      "description": "Plicuri siliconice albe 80g, personalizate.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/plic-1.png",
+        "https://pimcopy.ro/assets/servicii/plic-2.png",
+        "https://pimcopy.ro/assets/servicii/plic-3.png",
+        "https://pimcopy.ro/assets/servicii/plic-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 16,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "retail",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "dl",
+          "options": [
+            {
+              "value": "dl",
+              "label": "DL (110 x 220 mm)",
+              "default": true
+            },
+            {
+              "value": "c5",
+              "label": "C5 (162 x 229 mm)"
+            },
+            {
+              "value": "c4",
+              "label": "C4 (229 x 324 mm)"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "printuri-mari",
+      "kind": "service",
+      "title": "Printuri dimensiuni mari",
+      "description": "Print format mare pentru interior și exterior, pe diverse suporturi.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/listare-indoor-outdoor-1.png",
+        "https://pimcopy.ro/assets/servicii/listare-indoor-outdoor-2.png",
+        "https://pimcopy.ro/assets/servicii/listare-indoor-outdoor-3.png",
+        "https://pimcopy.ro/assets/servicii/listare-indoor-outdoor-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 17,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "print-mare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a2",
+          "options": [
+            {
+              "value": "a2",
+              "label": "A2",
+              "default": true
+            },
+            {
+              "value": "a1",
+              "label": "A1"
+            },
+            {
+              "value": "a0",
+              "label": "A0"
+            },
+            {
+              "value": "b2",
+              "label": "B2"
+            },
+            {
+              "value": "b1",
+              "label": "B1"
+            },
+            {
+              "value": "b0",
+              "label": "B0"
+            },
+            {
+              "value": "nonstandard",
+              "label": "Non-standard"
+            }
+          ]
+        },
+        {
+          "key": "suport",
+          "label": "Suport",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "carton-150",
+          "options": [
+            {
+              "value": "carton-150",
+              "label": "Carton 150g (whiteback)",
+              "default": true
+            },
+            {
+              "value": "vinil-alb",
+              "label": "Autocolant vinil alb (PVC)"
+            },
+            {
+              "value": "vinil-perforat",
+              "label": "Autocolant vinil perforat (PVC)"
+            },
+            {
+              "value": "canvas-lucios",
+              "label": "Canvas sintetic lucios"
+            },
+            {
+              "value": "canvas-mat",
+              "label": "Canvas bumbac mat"
+            },
+            {
+              "value": "mesh",
+              "label": "Mesh"
+            },
+            {
+              "value": "tapet",
+              "label": "Tapet"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "planse",
+      "kind": "service",
+      "title": "Planșe",
+      "description": "Listare planșe format mare, cu pliere opțională.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/planse-1.png",
+        "https://pimcopy.ro/assets/servicii/planse-2.png",
+        "https://pimcopy.ro/assets/servicii/planse-3.png",
+        "https://pimcopy.ro/assets/servicii/planse-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 18,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "print-mare",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "default": true
+            },
+            {
+              "value": "a3",
+              "label": "A3"
+            },
+            {
+              "value": "a2",
+              "label": "A2"
+            },
+            {
+              "value": "a1",
+              "label": "A1"
+            },
+            {
+              "value": "a0",
+              "label": "A0"
+            },
+            {
+              "value": "nonstandard",
+              "label": "Non-standard"
+            }
+          ]
+        },
+        {
+          "key": "pliere",
+          "label": "Pliere",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "fara",
+          "options": [
+            {
+              "value": "fara",
+              "label": "Fără pliere",
+              "default": true
+            },
+            {
+              "value": "cu",
+              "label": "Cu pliere"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "brosuri-capsate",
+      "kind": "service",
+      "title": "Broșuri capsate",
+      "description": "Broșuri capsate în diverse formate.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 19,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "retail",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a5-landscape",
+          "options": [
+            {
+              "value": "a5-landscape",
+              "label": "A5 landscape",
+              "default": true
+            },
+            {
+              "value": "a5-portrait",
+              "label": "A5 portrait"
+            },
+            {
+              "value": "20x20",
+              "label": "20 x 20 cm"
+            },
+            {
+              "value": "a4",
+              "label": "A4"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "calendare",
+      "kind": "service",
+      "title": "Calendare",
+      "description": "Calendare personalizate de birou, perete sau buzunar.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 20,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "retail",
+      "fields": [
+        {
+          "key": "tip",
+          "label": "Tip",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "birou",
+          "options": [
+            {
+              "value": "birou",
+              "label": "De birou",
+              "default": true
+            },
+            {
+              "value": "perete-a3",
+              "label": "De perete A3, datat lunar"
+            },
+            {
+              "value": "buzunar",
+              "label": "De buzunar"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "agende",
+      "kind": "service",
+      "title": "Agende personalizate",
+      "description": "Agende personalizate, datate sau nedatate.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 21,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "retail",
+      "fields": [
+        {
+          "key": "tip",
+          "label": "Tip",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "nedatata",
+          "options": [
+            {
+              "value": "nedatata",
+              "label": "Nedatată (80 foi)",
+              "default": true
+            },
+            {
+              "value": "saptamanal",
+              "label": "Datată săptămânal (75 foi)"
+            },
+            {
+              "value": "zilnic",
+              "label": "Datată zilnic (185 foi)"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
           "min": 1,
           "max": null,
           "step": 1,

@@ -148,7 +148,8 @@ function buildCopy(): CatalogDocument {
     categories: [
       { id: "print", name: "Printare & copiere", sort_order: 1 },
       { id: "legatorie", name: "Legătorie & finisare", sort_order: 2 },
-      { id: "retail", name: "Tipărituri & retail", sort_order: 3 },
+      { id: "print-mare", name: "Print mare & afișaj", sort_order: 3 },
+      { id: "retail", name: "Tipărituri & retail", sort_order: 4 },
     ],
     items: [
       svcFmt({ id: "print-an", title: "Printare & copiere alb-negru", desc: "Print sau copie alb-negru, preț pe pagină (TVA inclus).", cat: "print", prices: vat(P_AN, VAT_STD), qtyLabel: "Număr de pagini", qtyUnit: "pag.", upload: true }),
@@ -221,6 +222,68 @@ function buildCopy(): CatalogDocument {
         ],
         minQty: 50, qtyLabel: "Bucăți", qtyUnit: "buc.",
       }),
+      retail({
+        id: "fotografii", title: "Fotografii digitale", desc: "Printare foto pe carton 250g, formate mici.", cat: "retail",
+        selects: [
+          sel("dimensiune", "Dimensiune", [{ value: "12x17", label: "12 x 17 cm" }, { value: "11x15", label: "11 x 15 cm" }, { value: "10x15", label: "10 x 15 cm" }, { value: "9x12", label: "9 x 12 cm" }]),
+          sel("carton", "Carton 250g", [{ value: "lucios", label: "Lucios" }, { value: "mat", label: "Mat" }]),
+        ],
+        images: ["poza-digitala-1", "poza-digitala-2", "poza-digitala-3", "poza-digitala-4"].map(IMG),
+        qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "mape", title: "Mape cu buzunar", desc: "Mape personalizate din carton dublu cretat mat.", cat: "retail",
+        selects: [
+          sel("tipar", "Tipar", [{ value: "fata", label: "Față" }, { value: "fata-verso", label: "Față-verso" }]),
+          sel("pliere", "Pliere", [{ value: "big-simplu", label: "Big simplu" }, { value: "big-dublu", label: "Big dublu" }]),
+          sel("laminare", "Laminare", [{ value: "fara", label: "Fără" }, { value: "lucioasa", label: "Lucioasă" }, { value: "mata", label: "Mată" }]),
+        ],
+        images: ["mapa-1", "mapa-2", "mapa-3", "mapa-4"].map(IMG),
+        qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "plicuri", title: "Plicuri personalizate", desc: "Plicuri siliconice albe 80g, personalizate.", cat: "retail",
+        selects: [sel("format", "Format", [{ value: "dl", label: "DL (110 x 220 mm)" }, { value: "c5", label: "C5 (162 x 229 mm)" }, { value: "c4", label: "C4 (229 x 324 mm)" }])],
+        images: ["plic-1", "plic-2", "plic-3", "plic-4"].map(IMG),
+        qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "printuri-mari", title: "Printuri dimensiuni mari", desc: "Print format mare pentru interior și exterior, pe diverse suporturi.", cat: "print-mare",
+        selects: [
+          sel("format", "Format", [{ value: "a2", label: "A2" }, { value: "a1", label: "A1" }, { value: "a0", label: "A0" }, { value: "b2", label: "B2" }, { value: "b1", label: "B1" }, { value: "b0", label: "B0" }, { value: "nonstandard", label: "Non-standard" }]),
+          sel("suport", "Suport", [
+            { value: "carton-150", label: "Carton 150g (whiteback)" }, { value: "vinil-alb", label: "Autocolant vinil alb (PVC)" },
+            { value: "vinil-perforat", label: "Autocolant vinil perforat (PVC)" }, { value: "canvas-lucios", label: "Canvas sintetic lucios" },
+            { value: "canvas-mat", label: "Canvas bumbac mat" }, { value: "mesh", label: "Mesh" }, { value: "tapet", label: "Tapet" },
+          ]),
+        ],
+        images: ["listare-indoor-outdoor-1", "listare-indoor-outdoor-2", "listare-indoor-outdoor-3", "listare-indoor-outdoor-4"].map(IMG),
+        qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "planse", title: "Planșe", desc: "Listare planșe format mare, cu pliere opțională.", cat: "print-mare",
+        selects: [
+          sel("format", "Format", [{ value: "a4", label: "A4" }, { value: "a3", label: "A3" }, { value: "a2", label: "A2" }, { value: "a1", label: "A1" }, { value: "a0", label: "A0" }, { value: "nonstandard", label: "Non-standard" }]),
+          sel("pliere", "Pliere", [{ value: "fara", label: "Fără pliere" }, { value: "cu", label: "Cu pliere" }]),
+        ],
+        images: ["planse-1", "planse-2", "planse-3", "planse-4"].map(IMG),
+        qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "brosuri-capsate", title: "Broșuri capsate", desc: "Broșuri capsate în diverse formate.", cat: "retail",
+        selects: [sel("format", "Format", [{ value: "a5-landscape", label: "A5 landscape" }, { value: "a5-portrait", label: "A5 portrait" }, { value: "20x20", label: "20 x 20 cm" }, { value: "a4", label: "A4" }])],
+        images: [], qtyLabel: "Exemplare", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "calendare", title: "Calendare", desc: "Calendare personalizate de birou, perete sau buzunar.", cat: "retail",
+        selects: [sel("tip", "Tip", [{ value: "birou", label: "De birou" }, { value: "perete-a3", label: "De perete A3, datat lunar" }, { value: "buzunar", label: "De buzunar" }])],
+        images: [], qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "agende", title: "Agende personalizate", desc: "Agende personalizate, datate sau nedatate.", cat: "retail",
+        selects: [sel("tip", "Tip", [{ value: "nedatata", label: "Nedatată (80 foi)" }, { value: "saptamanal", label: "Datată săptămânal (75 foi)" }, { value: "zilnic", label: "Datată zilnic (185 foi)" }])],
+        images: [], qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
     ],
   };
   return validate(doc);
@@ -264,23 +327,64 @@ function buildPerso(): CatalogDocument {
             { value: "termosensibila", label: "Termosensibilă (magică)" }, { value: "inima", label: "În formă de inimă" },
           ]),
         ],
-        images: ["poza-digitala-1", "poza-digitala-2", "poza-digitala-3", "poza-digitala-4"].map(IMG),
-        qtyLabel: "Bucăți", qtyUnit: "buc.",
-      }),
-      retail({
-        id: "gravare-laser", title: "Gravare laser", desc: "Gravare laser pe diverse materiale.", cat: "obiecte",
-        selects: [
-          sel("material", "Material", [
-            { value: "lemn", label: "Lemn" }, { value: "sticla", label: "Sticlă" },
-            { value: "metal", label: "Metal" }, { value: "piele", label: "Piele" }, { value: "plexiglas", label: "Plexiglas" },
-          ]),
-        ],
+        images: ["cani-personalizate-1", "cani-personalizate-2", "cani-personalizate-3", "cani-personalizate-4"].map(IMG),
         qtyLabel: "Bucăți", qtyUnit: "buc.",
       }),
       retail({
         id: "insigne", title: "Insigne (badge-uri)", desc: "Insigne personalizate cu print.", cat: "obiecte",
         selects: [sel("diametru", "Diametru", [{ value: "25", label: "25 mm" }, { value: "37", label: "37 mm" }, { value: "58", label: "58 mm" }])],
         minQty: 10, qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "sepci", title: "Șepci personalizate", desc: "Șepci cu print personalizat.", cat: "textile",
+        selects: [sel("culoare", "Culoare", [{ value: "alb", label: "Alb" }, { value: "negru", label: "Negru" }, { value: "albastru-marin", label: "Albastru-marin" }])],
+        images: ["sepci-1", "sepci-2", "sepci-3", "sepci-4"].map(IMG),
+        qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "sacosa", title: "Sacoșă din bumbac", desc: "Sacoșe din bumbac personalizate, format A4.", cat: "textile",
+        selects: [], images: ["sacosa-1", "sacosa-2", "sacosa-3", "sacosa-4"].map(IMG),
+        qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "puzzle", title: "Puzzle personalizat", desc: "Puzzle personalizat, din carton sau magnetic.", cat: "obiecte",
+        selects: [
+          sel("tip", "Tip", [{ value: "carton", label: "Carton" }, { value: "magnetic", label: "Magnetic" }]),
+          sel("format", "Format", [{ value: "a5", label: "A5" }, { value: "a4", label: "A4" }]),
+        ],
+        images: ["puzzle-1", "puzzle-2", "puzzle-3", "puzzle-4"].map(IMG),
+        qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "pixuri", title: "Pixuri personalizate", desc: "Pixuri personalizate prin print UV sau gravare laser.", cat: "obiecte",
+        selects: [sel("tip", "Tip", [{ value: "plastic-uv", label: "Pix plastic, print UV" }, { value: "metalic-gravat", label: "Pix metalic, gravat laser" }])],
+        images: ["pix-1", "pix-2", "pix-3", "pix-4"].map(IMG),
+        qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "ecuson-gravat", title: "Ecuson gravat laser", desc: "Ecusoane gravate laser, 7 x 2.5 cm.", cat: "obiecte",
+        selects: [], images: ["ecuson-1", "ecuson-2", "ecuson-3", "ecuson-4"].map(IMG),
+        qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "stampila", title: "Ștampilă", desc: "Ștampile personalizate, diverse forme și dimensiuni.", cat: "obiecte",
+        selects: [sel("forma", "Placheta", [
+          { value: "rotund-25", label: "Rotundă 25 mm" }, { value: "rotund-42", label: "Rotundă 42 mm" },
+          { value: "dreptunghi-47x18", label: "Dreptunghi 47 x 18 mm" }, { value: "dreptunghi-38x14", label: "Dreptunghi 38 x 14 mm (buzunar)" },
+        ])],
+        images: ["stampila-1", "stampila-2", "stampila-3", "stampila-4"].map(IMG),
+        qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "bricheta", title: "Brichetă personalizată", desc: "Brichete personalizate prin print UV.", cat: "obiecte",
+        selects: [sel("personalizare", "Personalizare", [{ value: "o-fata", label: "O față" }, { value: "ambele", label: "Ambele fețe" }])],
+        images: ["bricheta-1", "bricheta-2", "bricheta-3", "bricheta-4"].map(IMG),
+        qtyLabel: "Bucăți", qtyUnit: "buc.",
+      }),
+      retail({
+        id: "placa-parcare", title: "Placă de parcare", desc: "Plăcuțe de parcare personalizate, 30 x 42 cm.", cat: "obiecte",
+        selects: [], images: ["placa-parcare-1", "placa-parcare-2", "placa-parcare-3", "placa-parcare-4"].map(IMG),
+        qtyLabel: "Bucăți", qtyUnit: "buc.",
       }),
     ],
   };
