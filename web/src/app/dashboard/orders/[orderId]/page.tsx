@@ -22,13 +22,15 @@ import {
   Store,
   Truck,
 } from "lucide-react";
-import { getOrderDetail, getShopOrders } from "@/lib/orders/queries";
+import { getOrderDetail, getOrderModification, getShopOrders } from "@/lib/orders/queries";
+import { ShopModificationControl } from "@/components/order/ShopModificationControl";
 import { mapsLink } from "@/lib/geo/geocode";
 import { courierStatusLabel } from "@/lib/delivery/types";
 import { createClient } from "@/lib/supabase/server";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { ChatPanel } from "@/components/order/ChatPanel";
 import { ShopOrderActions } from "@/components/order/ShopOrderActions";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { OrderEtaEditor } from "@/components/order/OrderEtaEditor";
 import { DownloadButton } from "@/components/order/DownloadButton";
 import { LinkAnchor, LinkActionIcon } from "@/components/ui/links";
@@ -68,7 +70,11 @@ function InfoRow({
 
 export default async function ShopOrderDetailPage({ params }: Props) {
   const { orderId } = await params;
-  const [order, queue] = await Promise.all([getOrderDetail(orderId), getShopOrders()]);
+  const [order, queue, modification] = await Promise.all([
+    getOrderDetail(orderId),
+    getShopOrders(),
+    getOrderModification(orderId),
+  ]);
   if (!order) notFound();
 
   const supabase = await createClient();
@@ -255,7 +261,10 @@ export default async function ShopOrderDetailPage({ params }: Props) {
 
       <Group justify="space-between" align="flex-start" wrap="wrap" gap="md">
         <div>
-          <Title order={2}>Comanda #{shortId}</Title>
+          <Group gap="sm" align="center">
+            <Title order={2}>Comanda #{shortId}</Title>
+            <StatusBadge status={order.status} />
+          </Group>
           <Text c="dimmed" mt={4}>
             {order.customerName} · Plasată {order.placedAt}
             {order.eta ? ` · ETA ${order.eta}` : ""}
@@ -326,6 +335,15 @@ export default async function ShopOrderDetailPage({ params }: Props) {
                 <Text fz="sm" c="dimmed">Taxă serviciu</Text>
                 <Text fz="sm">{(order.serviceFee ?? 0).toFixed(2)} lei</Text>
               </Group>
+              {(order.adjustment ?? 0) !== 0 && (
+                <Group justify="space-between">
+                  <Text fz="sm" c="dimmed">Ajustare</Text>
+                  <Text fz="sm" c={(order.adjustment ?? 0) > 0 ? "orange" : "teal.7"}>
+                    {(order.adjustment ?? 0) > 0 ? "+" : "−"}
+                    {Math.abs(order.adjustment ?? 0).toFixed(2)} lei
+                  </Text>
+                </Group>
+              )}
               <Group justify="space-between" mt={4}>
                 <Text fw={700}>Total client</Text>
                 <Text fw={800} fz={20} c="var(--mantine-color-text)">
@@ -347,6 +365,12 @@ export default async function ShopOrderDetailPage({ params }: Props) {
               )}
             </Stack>
           </Card>
+
+          <ShopModificationControl
+            orderId={order.id}
+            orderStatus={order.status}
+            modification={modification}
+          />
 
           {/* Files */}
           {files.length > 0 && (

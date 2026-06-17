@@ -21,6 +21,7 @@ export async function quoteDelivery(
     .from("shops")
     .select("name, phone, address, lat, lng")
     .eq("id", shopId)
+    .eq("is_active", true)
     .maybeSingle();
   if (shop?.lat == null || shop?.lng == null) return null;
 

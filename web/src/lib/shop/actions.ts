@@ -176,3 +176,32 @@ export async function setShopPause(
   revalidatePath("/browse");
   return { ok: true };
 }
+
+/**
+ * Hard on/off visibility switch (`shops.is_active`) — distinct from the temporary pause above.
+ * Deactivating hides the shop from browse AND makes its storefront unreachable by direct URL;
+ * the owner can still reach the dashboard (RLS lets members read their own shop) to reactivate.
+ * Owner-gated by the `shops_update_owner` RLS policy.
+ */
+export async function setShopActive(
+  active: boolean
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Neautentificat" };
+  const shopId = await getActiveShopId();
+  if (!shopId) return { ok: false, error: "Niciun magazin asociat" };
+
+  const { error } = await supabase
+    .from("shops")
+    .update({ is_active: active })
+    .eq("id", shopId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/dashboard/profile");
+  revalidatePath(`/shop/${shopId}`);
+  revalidatePath("/browse");
+  return { ok: true };
+}

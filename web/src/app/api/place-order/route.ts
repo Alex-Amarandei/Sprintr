@@ -167,9 +167,11 @@ export async function POST(req: NextRequest) {
     // Load active catalog + shipping fee
     const { data: shop } = await db
       .from("shops")
-      .select("active_version_id, delivery_fee, commission_rate, default_eta_minutes, lat, lng, address")
+      .select("active_version_id, delivery_fee, commission_rate, default_eta_minutes, lat, lng, address, is_active")
       .eq("id", shop_id)
       .single();
+    // Service role bypasses RLS, so the deactivated-shop guard must be explicit here.
+    if (shop && shop.is_active === false) return err("Magazinul nu este disponibil", 422);
     if (!shop?.active_version_id) return err("Shop has no active catalog", 422);
 
     // Delivery radius: block when the drop-off is farther than MAX_DELIVERY_KM from the shop.
@@ -357,7 +359,10 @@ export async function POST(req: NextRequest) {
             amount: Math.round(total * 100), // RON → bani
             currency: "ron",
             metadata: { order_id: order.id, shop_id },
-            automatic_payment_methods: { enabled: true },
+            // `allow_redirects: never` drops redirect-based methods (Klarna et al.),
+            // keeping card + wallets (Apple/Google Pay) + Link. Confirm flow already
+            // uses `redirect: "if_required"`, so no redirect return is needed.
+            automatic_payment_methods: { enabled: true, allow_redirects: "never" },
           },
           // Idempotency: a client retry for the same order reuses the same PaymentIntent
           // rather than creating duplicates.

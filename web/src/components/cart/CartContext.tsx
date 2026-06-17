@@ -1,10 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { toCartLineInput, type CartLine } from "@/lib/catalog/cart";
 import { applyOffers, isOfferLive, toEngineOffer, type AppliedOffer } from "@/lib/catalog/offers";
-import { listShopOffers } from "@/lib/offers/api";
+import { listShopOffers, validateCode } from "@/lib/offers/api";
 import type { OfferRow } from "@/lib/offers/types";
+
+/** Status of the cart's typed promo code. */
+export type PromoStatus = "idle" | "checking" | "valid" | "invalid";
 
 const STORAGE_KEY = "sprintr.cart.v1";
 
@@ -70,6 +73,16 @@ interface CartContextValue {
   /** A live automatic free-shipping offer is in effect. */
   freeShipping: boolean;
   appliedOffers: AppliedOffer[];
+  /** The promo code the customer typed in the cart (carried into checkout). */
+  promoCode: string;
+  /** Validation state of `promoCode` (drives the cart feedback message). */
+  promoStatus: PromoStatus;
+  /** The matched code-offer (also folded into the discount preview), or null. */
+  promoOffer: OfferRow | null;
+  /** Validate + apply a typed promo code against the cart's shop. */
+  applyPromo: (code: string) => Promise<void>;
+  /** Clear the typed promo code + its discount. */
+  clearPromo: () => void;
   /** Discounted total for one line (for the strikethrough); falls back to its original. */
   lineFinal: (lineId: string) => number;
   addLine: (line: CartLine, shop: CartShop) => void;
@@ -89,6 +102,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   // Live automatic offers for the cart's shop (for the discount preview).
   const [offers, setOffers] = useState<OfferRow[]>([]);
+  // Typed promo code + the matched code-offer (folded into the preview + carried to checkout).
+  const [promoCode, setPromoCode] = useState("");
+  const [promoStatus, setPromoStatus] = useState<PromoStatus>("idle");
+  const [promoOffer, setPromoOffer] = useState<OfferRow | null>(null);
 
   useEffect(() => {
     const c = loadCart();
@@ -109,6 +126,46 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Load the cart shop's live automatic offers so the cart can preview the discount.
   // Code-triggered offers are deliberately excluded (those apply only at checkout).
   const shopId = shop?.id ?? null;
+  // A promo code is shop-specific — drop it whenever the cart's shop changes (or clears).
+  useEffect(() => {
+    setPromoCode("");
+    setPromoStatus("idle");
+    setPromoOffer(null);
+  }, [shopId]);
+
+  const applyPromo = useCallback(
+    async (code: string) => {
+      const trimmed = code.trim();
+      setPromoCode(trimmed);
+      if (!trimmed || !shopId) {
+        setPromoStatus("idle");
+        setPromoOffer(null);
+        return;
+      }
+      setPromoStatus("checking");
+      try {
+        const offer = await validateCode(shopId, trimmed);
+        if (offer && isOfferLive(offer)) {
+          setPromoOffer(offer);
+          setPromoStatus("valid");
+        } else {
+          setPromoOffer(null);
+          setPromoStatus("invalid");
+        }
+      } catch {
+        setPromoOffer(null);
+        setPromoStatus("invalid");
+      }
+    },
+    [shopId]
+  );
+
+  const clearPromo = useCallback(() => {
+    setPromoCode("");
+    setPromoStatus("idle");
+    setPromoOffer(null);
+  }, []);
+
   useEffect(() => {
     if (!shopId) {
       setOffers([]);
@@ -133,9 +190,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const total = round2(lines.reduce((s, l) => s + l.total, 0));
 
     // Apply offers for a live preview (shipping handled separately at checkout → baseShipping 0).
+    // A validated promo code's offer is folded in so its discount shows in the cart too.
+    const previewOffers = promoOffer ? [...offers, promoOffer] : offers;
     const result =
-      lines.length && offers.length
-        ? applyOffers(lines.map(toCartLineInput), offers.map(toEngineOffer), 0)
+      lines.length && previewOffers.length
+        ? applyOffers(lines.map(toCartLineInput), previewOffers.map(toEngineOffer), 0)
         : null;
     const discount = result?.discount ?? 0;
     const lineMap = new Map((result?.lines ?? []).map((lr) => [lr.lineId, lr.finalTotal]));
@@ -154,6 +213,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       payable: round2(total - discount),
       freeShipping: result?.freeShipping ?? false,
       appliedOffers: result?.appliedOffers ?? [],
+      promoCode,
+      promoStatus,
+      promoOffer,
+      applyPromo,
+      clearPromo,
       lineFinal: (lineId) =>
         lineMap.get(lineId) ?? lines.find((l) => l.lineId === lineId)?.total ?? 0,
       // Cross-shop conflicts are resolved by the UI (confirm + clear) BEFORE calling
@@ -175,7 +239,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setShop(null);
       },
     };
-  }, [lines, shop, offers]);
+  }, [lines, shop, offers, promoCode, promoStatus, promoOffer, applyPromo, clearPromo]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

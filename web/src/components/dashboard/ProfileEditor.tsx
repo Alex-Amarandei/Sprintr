@@ -22,7 +22,7 @@ import {
 import { Check, Circle, Image as ImageIcon, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { setShopImage, setShopPause, updateShopProfile } from "@/lib/shop/actions";
+import { setShopActive, setShopImage, setShopPause, updateShopProfile } from "@/lib/shop/actions";
 import type { ShopProfileInput } from "@/lib/shop/types";
 import { shopAssetUrl, uploadShopAsset } from "@/lib/storage/shopAssets";
 import { MAX_IMAGE_MB } from "@/lib/catalog/images";
@@ -31,6 +31,7 @@ import {
   phoneError,
   sanitizePhoneInput,
 } from "@/lib/utils/validation";
+import { formatTimeInput } from "@/lib/utils/format";
 import {
   DAY_LABELS,
   DAY_ORDER,
@@ -76,6 +77,7 @@ export function ProfileEditor({
   initial,
   schedule: initialSchedule,
   scheduleOverrides,
+  isActive,
   logoPath: initialLogo,
   bannerPath: initialBanner,
   meta,
@@ -84,6 +86,7 @@ export function ProfileEditor({
   initial: ProfileText;
   schedule: WeeklySchedule | null;
   scheduleOverrides: Record<string, { open: string; close: string } | null>;
+  isActive: boolean;
   logoPath: string | null;
   bannerPath: string | null;
   meta: { itemCount: number };
@@ -114,6 +117,24 @@ export function ProfileEditor({
       router.refresh();
     } else {
       toast.error(res.error ?? "Nu am putut actualiza pauza");
+    }
+  }
+
+  // Hard on/off visibility (`is_active`) — distinct from the temporary pause above.
+  const [togglingActive, setTogglingActive] = useState(false);
+  async function toggleActive(active: boolean) {
+    if (!shopId) {
+      toast.error("Niciun magazin asociat contului tău");
+      return;
+    }
+    setTogglingActive(true);
+    const res = await setShopActive(active);
+    setTogglingActive(false);
+    if (res.ok) {
+      toast.success(active ? "Magazinul este din nou activ" : "Magazinul a fost dezactivat");
+      router.refresh();
+    } else {
+      toast.error(res.error ?? "Nu am putut actualiza vizibilitatea");
     }
   }
   // Baseline of what's currently persisted, for dirty-tracking. Updated after each
@@ -429,6 +450,7 @@ export function ProfileEditor({
                         value={hours?.open ?? ""}
                         disabled={!open}
                         onChange={(e) => setHours(key, "open", e.currentTarget.value)}
+                        onBlur={(e) => setHours(key, "open", formatTimeInput(e.currentTarget.value))}
                       />
                       <Text c="dimmed">—</Text>
                       <TextInput
@@ -438,6 +460,7 @@ export function ProfileEditor({
                         value={hours?.close ?? ""}
                         disabled={!open}
                         onChange={(e) => setHours(key, "close", e.currentTarget.value)}
+                        onBlur={(e) => setHours(key, "close", formatTimeInput(e.currentTarget.value))}
                       />
                       <Badge w={78} variant="light" color={open ? "teal" : "mist"}>
                         {open ? "Deschis" : "Închis"}
@@ -539,6 +562,26 @@ export function ProfileEditor({
                   </Button>
                 </>
               )}
+            </Card>
+
+            {/* Hard on/off visibility — distinct from the temporary pause above. */}
+            <Card>
+              <Group justify="space-between" wrap="nowrap" gap="sm" align="flex-start">
+                <div style={{ minWidth: 0 }}>
+                  <Text fw={600}>Magazin activ</Text>
+                  <Text fz="sm" c="dimmed" mt={4}>
+                    Dezactivat, magazinul dispare din listă și nu mai poate fi accesat de clienți
+                    (nici prin link direct). Diferit de pauza temporară.
+                  </Text>
+                </div>
+                <Switch
+                  checked={isActive}
+                  disabled={!shopId || togglingActive}
+                  onChange={(e) => toggleActive(e.currentTarget.checked)}
+                  aria-label="Magazin activ"
+                  style={{ flexShrink: 0 }}
+                />
+              </Group>
             </Card>
           </Stack>
         </Box>

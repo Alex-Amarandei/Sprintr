@@ -81,7 +81,8 @@ export function ChatPanel({
   initialMessages: SampleMessage[];
   /** Complaint-thread history. */
   complaintMessages?: SampleMessage[];
-  height?: number;
+  /** Panel height — a number (px) or any CSS value ("100%" to fill a sized parent). */
+  height?: number | string;
   perspective?: "customer" | "shop";
   /** Order is terminal (done/rejected) → order thread read-only, complaint thread open. */
   orderClosed?: boolean;

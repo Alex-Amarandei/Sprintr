@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
+import { finalizeModificationById } from "@/lib/orders/modifications-internal";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +49,14 @@ export async function POST(req: NextRequest) {
 
   if (event.type === "payment_intent.succeeded") {
     const pi = event.data.object as Stripe.PaymentIntent;
+
+    // Delta charge for an order modification (the extra a customer pays to accept a change) →
+    // finalize that modification instead of touching the order's own payment status.
+    if (pi.metadata?.kind === "modification" && pi.metadata?.modification_id) {
+      await finalizeModificationById(pi.metadata.modification_id);
+      return NextResponse.json({ received: true });
+    }
+
     const orderId = pi.metadata?.order_id;
 
     if (!orderId) {
@@ -72,13 +81,15 @@ export async function POST(req: NextRequest) {
     }
   } else if (event.type === "charge.refunded") {
     // Catches refunds issued either by our reject flow (refundOrder) or manually from the Stripe
-    // dashboard — match the order by its PaymentIntent and mark it refunded.
+    // dashboard — match the order by its PaymentIntent and mark it refunded. Only a FULL refund
+    // flips the status: a partial refund (e.g. an accepted modification reduction) leaves it 'paid'.
     const charge = event.data.object as Stripe.Charge;
+    const fullyRefunded = charge.amount_refunded >= charge.amount;
     const pi =
       typeof charge.payment_intent === "string"
         ? charge.payment_intent
         : charge.payment_intent?.id;
-    if (pi) {
+    if (pi && fullyRefunded) {
       await db.from("orders").update({ payment_status: "refunded" }).eq("payment_ref", pi);
     }
   }

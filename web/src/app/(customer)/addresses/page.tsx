@@ -1,19 +1,6 @@
-import { Metadata } from "next";
-import { Stack, Text, Title } from "@mantine/core";
-import { getMyAddresses } from "@/lib/addresses/queries";
-import { AddressesManager } from "@/components/account/AddressesManager";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Adresele mele" };
-
-export default async function AddressesPage() {
-  const addresses = await getMyAddresses();
-  return (
-    <Stack gap="lg">
-      <div>
-        <Title order={2}>Adresele mele</Title>
-        <Text c="dimmed">Adresele salvate apar la finalizarea comenzii, pentru livrare rapidă.</Text>
-      </div>
-      <AddressesManager addresses={addresses} />
-    </Stack>
-  );
+/** Saved addresses are now part of the consolidated "Profilul meu" page. */
+export default function AddressesPage() {
+  redirect("/account");
 }

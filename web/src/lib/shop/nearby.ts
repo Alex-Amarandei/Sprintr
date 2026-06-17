@@ -26,6 +26,7 @@ export async function findNearbyShops(
   const { data } = await supabase
     .from("shops")
     .select("id, name, address, lat, lng")
+    .eq("is_active", true)
     .not("lat", "is", null)
     .not("lng", "is", null);
   if (!data) return [];

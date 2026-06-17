@@ -76,7 +76,7 @@ export function summarize(answers: Record<string, unknown> | null, item?: Item):
 }
 
 const ORDER_SELECT =
-  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, delivery_lat, delivery_lng, contact_phone, notes, subtotal, discount, shipping_fee, service_fee, total, commission, payout, eta_minutes, payment_method, payment_status, courier_provider, courier_name, courier_phone, courier_status, courier_tracking_url, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
+  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, delivery_lat, delivery_lng, contact_phone, notes, subtotal, discount, shipping_fee, service_fee, total, adjustment, commission, payout, eta_minutes, payment_method, payment_status, courier_provider, courier_name, courier_phone, courier_status, courier_tracking_url, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
 
 /** Format an ETA in minutes as a short label (e.g. "~30 min", "~1 h 20 min"). */
 function etaLabel(min: number | null | undefined): string | undefined {
@@ -417,6 +417,7 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
     shippingFee: Number(order.shipping_fee ?? 0),
     serviceFee: Number(order.service_fee ?? 0),
     discount: Number(order.discount ?? 0),
+    adjustment: Number(order.adjustment ?? 0),
     commission: Number(order.commission ?? 0),
     payout: Number(order.payout ?? 0),
     lines,
@@ -436,5 +437,36 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
     paymentMethod: PAYMENT_LABEL[order.payment_method] ?? order.payment_method,
     paymentStatus: order.payment_status,
     online: order.payment_method === "online",
+  };
+}
+
+export interface OrderModificationView {
+  id: string;
+  /** Signed: positive = extra charge, negative = reduction. */
+  adjustment: number;
+  reason: string | null;
+  status: "pending" | "accepted" | "declined" | "cancelled";
+  previousTotal: number;
+  newTotal: number;
+}
+
+/** The latest modification for an order (the live one to act on), or null. RLS scopes to participants. */
+export async function getOrderModification(orderId: string): Promise<OrderModificationView | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("order_modifications")
+    .select("id, adjustment, reason, status, previous_total, new_total, created_at")
+    .eq("order_id", orderId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!data) return null;
+  return {
+    id: data.id,
+    adjustment: Number(data.adjustment),
+    reason: data.reason,
+    status: data.status,
+    previousTotal: Number(data.previous_total),
+    newTotal: Number(data.new_total),
   };
 }

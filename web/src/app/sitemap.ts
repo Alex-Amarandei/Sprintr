@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
-    const { data } = await supabase.from("shops").select("id, created_at");
+    const { data } = await supabase.from("shops").select("id, created_at").eq("is_active", true);
     for (const s of data ?? []) {
       staticRoutes.push({
         url: `${base}/shop/${s.id}`,

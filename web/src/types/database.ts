@@ -370,8 +370,66 @@ export type Database = {
           },
         ]
       }
+      order_modifications: {
+        Row: {
+          adjustment: number
+          created_at: string
+          created_by: string | null
+          id: string
+          new_total: number
+          order_id: string
+          payment_intent: string | null
+          previous_total: number
+          reason: string | null
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["modification_status"]
+        }
+        Insert: {
+          adjustment: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          new_total: number
+          order_id: string
+          payment_intent?: string | null
+          previous_total: number
+          reason?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["modification_status"]
+        }
+        Update: {
+          adjustment?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          new_total?: number
+          order_id?: string
+          payment_intent?: string | null
+          previous_total?: number
+          reason?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["modification_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_modifications_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_modifications_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
+          adjustment: number
           applied_offers: Json
           archived_at: string | null
           catalog_version_id: string | null
@@ -410,6 +468,7 @@ export type Database = {
           whatsapp_sent: boolean
         }
         Insert: {
+          adjustment?: number
           applied_offers?: Json
           archived_at?: string | null
           catalog_version_id?: string | null
@@ -448,6 +507,7 @@ export type Database = {
           whatsapp_sent?: boolean
         }
         Update: {
+          adjustment?: number
           applied_offers?: Json
           archived_at?: string | null
           catalog_version_id?: string | null
@@ -640,6 +700,41 @@ export type Database = {
           },
         ]
       }
+      saved_phones: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          label: string | null
+          phone: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string | null
+          phone: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string | null
+          phone?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_phones_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shop_invitations: {
         Row: {
           created_at: string
@@ -777,6 +872,7 @@ export type Database = {
           description: string | null
           email: string | null
           id: string
+          is_active: boolean
           lat: number | null
           lng: number | null
           logo_path: string | null
@@ -796,6 +892,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          is_active?: boolean
           lat?: number | null
           lng?: number | null
           logo_path?: string | null
@@ -815,6 +912,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          is_active?: boolean
           lat?: number | null
           lng?: number | null
           logo_path?: string | null
@@ -885,6 +983,7 @@ export type Database = {
           total_spent: number
         }[]
       }
+      finalize_order_modification: { Args: { p_mod_id: string }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       is_shop_member: {
         Args: {
@@ -1020,6 +1119,7 @@ export type Database = {
       fulfilment_type: "delivery" | "pickup"
       item_kind: "service" | "product"
       message_kind: "order" | "complaint"
+      modification_status: "pending" | "accepted" | "declined" | "cancelled"
       offer_scope: "product" | "category" | "cart"
       offer_trigger: "automatic" | "code"
       offer_type: "percent" | "fixed" | "bxgy" | "free_shipping"
@@ -1166,6 +1266,7 @@ export const Constants = {
       fulfilment_type: ["delivery", "pickup"],
       item_kind: ["service", "product"],
       message_kind: ["order", "complaint"],
+      modification_status: ["pending", "accepted", "declined", "cancelled"],
       offer_scope: ["product", "category", "cart"],
       offer_trigger: ["automatic", "code"],
       offer_type: ["percent", "fixed", "bxgy", "free_shipping"],

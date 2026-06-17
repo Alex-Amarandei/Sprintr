@@ -20,6 +20,8 @@ export interface ShopProfileData {
   schedule: WeeklySchedule | null;
   /** Date-keyed exceptions (`{ "2026-05-31": null }` = closed). Drives the temporary pause. */
   scheduleOverrides: Record<string, { open: string; close: string } | null>;
+  /** Hard on/off visibility flag (distinct from the temporary pause). */
+  isActive: boolean;
   defaultEtaMinutes: number | null;
   deliveryFee: number;
   logoPath: string | null;
@@ -43,7 +45,7 @@ export async function loadShopProfile(): Promise<ShopProfileData | null> {
   const { data: shop } = await supabase
     .from("shops")
     .select(
-      "id, name, description, phone, email, address, logo_path, banner_path, schedule, schedule_overrides, default_eta_minutes, delivery_fee, active_version_id"
+      "id, name, description, phone, email, address, logo_path, banner_path, schedule, schedule_overrides, default_eta_minutes, delivery_fee, active_version_id, is_active"
     )
     .eq("id", shopId)
     .maybeSingle();
@@ -69,6 +71,7 @@ export async function loadShopProfile(): Promise<ShopProfileData | null> {
     schedule: (shop.schedule as WeeklySchedule | null) ?? null,
     scheduleOverrides:
       (shop.schedule_overrides as Record<string, { open: string; close: string } | null> | null) ?? {},
+    isActive: shop.is_active ?? true,
     defaultEtaMinutes: shop.default_eta_minutes ?? null,
     deliveryFee: Number(shop.delivery_fee ?? 0),
     logoPath: shop.logo_path ?? null,

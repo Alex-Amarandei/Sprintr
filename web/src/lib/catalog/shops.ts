@@ -77,6 +77,7 @@ export async function getShops(): Promise<SampleShop[]> {
   const { data, error } = await supabase
     .from("shops")
     .select("id, name, description, address, phone, logo_path, banner_path, delivery_fee, lat, lng, schedule, schedule_overrides")
+    .eq("is_active", true)
     .order("created_at", { ascending: true });
   if (error || !data) return [];
 
@@ -101,6 +102,7 @@ export async function getShopView(id: string): Promise<SampleShop | null> {
     .from("shops")
     .select("id, name, description, address, phone, logo_path, banner_path, delivery_fee, lat, lng, schedule, schedule_overrides")
     .eq("id", id)
+    .eq("is_active", true)
     .maybeSingle();
   if (!data) return null;
 
@@ -122,6 +124,7 @@ export async function getShopCatalog(
     .from("shops")
     .select("active_version_id")
     .eq("id", id)
+    .eq("is_active", true)
     .maybeSingle();
   if (!shop?.active_version_id) return { items: [], categories: [] };
   const { data: version } = await supabase

@@ -20,6 +20,7 @@ export default async function ShopProfilePage() {
       }}
       schedule={shop?.schedule ?? null}
       scheduleOverrides={shop?.scheduleOverrides ?? {}}
+      isActive={shop?.isActive ?? true}
       logoPath={shop?.logoPath ?? null}
       bannerPath={shop?.bannerPath ?? null}
       meta={{ itemCount: shop?.itemCount ?? 0 }}

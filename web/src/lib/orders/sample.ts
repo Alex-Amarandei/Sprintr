@@ -57,6 +57,8 @@ export interface SampleOrder {
   shippingFee?: number;
   serviceFee?: number;
   discount?: number;
+  /** Net of accepted shop modifications (signed: + extra charge, − reduction). */
+  adjustment?: number;
   /** Shop-facing payout breakdown (platform keeps `commission`; shop receives `payout`). */
   commission?: number;
   payout?: number;

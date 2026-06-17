@@ -13,8 +13,9 @@ import {
   Title,
 } from "@mantine/core";
 import { ArrowLeft, Truck } from "lucide-react";
-import { getOrderDetail } from "@/lib/orders/queries";
+import { getOrderDetail, getOrderModification } from "@/lib/orders/queries";
 import { courierStatusLabel } from "@/lib/delivery/types";
+import { CustomerModificationCard } from "@/components/order/CustomerModificationCard";
 import { getMyShopReview } from "@/lib/reviews/queries";
 import { createClient } from "@/lib/supabase/server";
 import { isTerminalStatus } from "@/lib/design/status";
@@ -37,6 +38,7 @@ export default async function OrderDetailPage({ params }: Props) {
   const { orderId } = await params;
   const order = await getOrderDetail(orderId);
   if (!order) notFound();
+  const modification = await getOrderModification(orderId);
 
   const supabase = await createClient();
   const {
@@ -96,6 +98,10 @@ export default async function OrderDetailPage({ params }: Props) {
             </Text>
             <StatusTimeline status={order.status} eta={order.eta} />
           </Card>
+
+          {modification && modification.status === "pending" && (
+            <CustomerModificationCard orderId={order.id} modification={modification} />
+          )}
 
           <Card>
             <Text fw={700} mb="md">
@@ -165,6 +171,15 @@ export default async function OrderDetailPage({ params }: Props) {
                 <Text fz="sm" c="dimmed">Taxă serviciu</Text>
                 <Text fz="sm">{(order.serviceFee ?? 0).toFixed(2)} lei</Text>
               </Group>
+              {(order.adjustment ?? 0) !== 0 && (
+                <Group justify="space-between">
+                  <Text fz="sm" c="dimmed">Ajustare</Text>
+                  <Text fz="sm" c={(order.adjustment ?? 0) > 0 ? "orange" : "teal.7"}>
+                    {(order.adjustment ?? 0) > 0 ? "+" : "−"}
+                    {Math.abs(order.adjustment ?? 0).toFixed(2)} lei
+                  </Text>
+                </Group>
+              )}
               <Group justify="space-between" mt={4}>
                 <Text fw={700}>Total</Text>
                 <Text fw={800} fz="xl" c="var(--mantine-color-text)">

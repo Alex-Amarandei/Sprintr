@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   ActionIcon,
   Avatar,
+  Badge,
   Box,
   Flex,
   Group,
@@ -20,7 +21,6 @@ import type { ShopConversation } from "@/lib/messages/queries";
 import type { OrderStatus } from "@/lib/design/status";
 import type { SampleMessage } from "@/lib/orders/sample";
 import { ChatPanel } from "@/components/order/ChatPanel";
-import { Dot } from "@/components/ui/Dot";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useUnread } from "./UnreadProvider";
@@ -106,14 +106,16 @@ export function MessagesInbox({
     <Stack gap="lg">
       <Title order={2}>Mesaje</Title>
 
-      <Flex gap="md" align="stretch" style={{ minHeight: 580 }}>
+      {/* Fill the viewport below the header so the chat extends downward (min on short screens). */}
+      <Flex gap="md" align="stretch" h="calc(100dvh - 150px)" mih={460}>
         {/* Conversation list (full width on mobile until one is opened) */}
         <Box
           w={{ base: "100%", md: 340 }}
           display={{ base: selected ? "none" : "block", md: "block" }}
           style={{ flexShrink: 0 }}
+          h="100%"
         >
-          <Paper withBorder radius="lg" style={{ overflow: "hidden" }}>
+          <Paper withBorder radius="lg" h="100%" style={{ overflowY: "auto" }}>
             {conversations.length === 0 ? (
               <EmptyState
                 icon={<MessageSquare size={26} />}
@@ -124,6 +126,7 @@ export function MessagesInbox({
               <Stack gap={0}>
                 {conversations.map((c) => {
                   const active = c.orderId === selectedId;
+                  const unread = c.unread > 0;
                   return (
                     <Box
                       key={c.orderId}
@@ -132,7 +135,13 @@ export function MessagesInbox({
                       style={{
                         cursor: "pointer",
                         borderBottom: "1px solid var(--mantine-color-default-border)",
-                        background: active ? "var(--mantine-color-default-hover)" : undefined,
+                        // Unread rows get a brand tint + left accent so they stand out at a glance.
+                        borderLeft: `3px solid ${unread ? "var(--mantine-color-brand-6)" : "transparent"}`,
+                        background: active
+                          ? "var(--mantine-color-default-hover)"
+                          : unread
+                            ? "light-dark(var(--mantine-color-brand-0), var(--mantine-color-dark-6))"
+                            : undefined,
                       }}
                     >
                       <Group justify="space-between" wrap="nowrap" gap="sm">
@@ -167,10 +176,14 @@ export function MessagesInbox({
                           </div>
                         </Group>
                         <Stack gap={8} align="flex-end" style={{ flexShrink: 0 }}>
-                          <Text fz={10} c={c.unread > 0 ? "brand.7" : "dimmed"} fw={c.unread > 0 ? 700 : 400}>
+                          <Text fz={10} c={unread ? "brand.7" : "dimmed"} fw={unread ? 700 : 400}>
                             {timeOnly(c.lastAtIso)}
                           </Text>
-                          {c.unread > 0 && <Dot color="brand" size={9} />}
+                          {unread && (
+                            <Badge color="brand" size="sm" circle aria-label="mesaje necitite">
+                              {c.unread > 9 ? "9+" : c.unread}
+                            </Badge>
+                          )}
                         </Stack>
                       </Group>
                     </Box>
@@ -186,13 +199,14 @@ export function MessagesInbox({
           flex={1}
           display={{ base: selected ? "block" : "none", md: "block" }}
           style={{ minWidth: 0 }}
+          h="100%"
         >
           {!selected ? (
             <Paper
               withBorder
               radius="lg"
               h="100%"
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 580 }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
             >
               <EmptyState
                 icon={<MessageSquare size={26} />}
@@ -201,7 +215,7 @@ export function MessagesInbox({
               />
             </Paper>
           ) : (
-            <Stack gap="sm">
+            <Stack gap="sm" h="100%">
               <Group gap="sm" hiddenFrom="md" wrap="nowrap">
                 <ActionIcon variant="subtle" color="gray" onClick={() => setSelectedId(null)} aria-label="Înapoi la listă">
                   <ArrowLeft size={18} />
@@ -215,7 +229,7 @@ export function MessagesInbox({
                 </Text>
               </Group>
               {loading || messages === null ? (
-                <Paper withBorder radius="lg" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 560 }}>
+                <Paper withBorder radius="lg" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", minHeight: 0 }}>
                   <Loader />
                 </Paper>
               ) : (
@@ -231,7 +245,7 @@ export function MessagesInbox({
                   initialMessages={messages}
                   complaintMessages={complaintMessages}
                   orderClosed={chatClosed(selected.status)}
-                  height={580}
+                  height="100%"
                   onMessage={handleIncoming}
                 />
               )}

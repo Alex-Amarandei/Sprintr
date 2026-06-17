@@ -47,13 +47,19 @@ export function UnreadProvider({
     if (typeof data === "number") setCount(data);
   }, [supabase]);
 
-  // Any new message in the shop's orders (a customer writing) → recompute the count.
+  // Keep the count live: a new customer message (count up) OR a read in another tab — our own
+  // `message_reads` row changing (count down) — both recompute. RLS scopes delivery to us.
   useEffect(() => {
     const channel = supabase
       .channel("shop-unread")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
+        () => refresh()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "message_reads" },
         () => refresh()
       )
       .subscribe();

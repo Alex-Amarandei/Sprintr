@@ -18,7 +18,21 @@ export function StatCard({
 }) {
   return (
     <Card>
-      <Group justify="space-between" align="flex-start" wrap="nowrap">
+      {/* Icon right-aligned; the optional delta chip (if any) stays on the left via mr="auto". */}
+      <Group justify="flex-end" align="flex-start" wrap="nowrap">
+        {delta && (
+          <Text
+            fz="xs"
+            fw={600}
+            mr="auto"
+            style={{
+              color:
+                "light-dark(var(--mantine-color-teal-7), var(--mantine-color-teal-4))",
+            }}
+          >
+            {delta}
+          </Text>
+        )}
         {/* Pin to the light-mode tinted look in both schemes (vivid, not dulled in dark). */}
         <ThemeIcon
           color={color}
@@ -31,18 +45,6 @@ export function StatCard({
         >
           {icon}
         </ThemeIcon>
-        {delta && (
-          <Text
-            fz="xs"
-            fw={600}
-            style={{
-              color:
-                "light-dark(var(--mantine-color-teal-7), var(--mantine-color-teal-4))",
-            }}
-          >
-            {delta}
-          </Text>
-        )}
       </Group>
       <Text fz={24} fw={700} mt="sm" lh={1.1}>
         {value}

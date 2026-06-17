@@ -6,7 +6,6 @@ import { Check, X } from "lucide-react";
 import { toast } from "sonner";
 import type { OrderStatus } from "@/lib/design/status";
 import { advanceOrderStatus } from "@/lib/orders/actions";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 
 const short = (id: string) => id.slice(0, 8);
 
@@ -42,7 +41,6 @@ export function ShopOrderActions({
 
   return (
     <Group gap="sm" wrap="wrap" align="center">
-      <StatusBadge status={status} />
       {status === "pending" && (
         <>
           <Button

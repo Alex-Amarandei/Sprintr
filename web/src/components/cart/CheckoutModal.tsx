@@ -43,6 +43,7 @@ import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils/format";
 import { phoneError, sanitizePhoneInput } from "@/lib/utils/validation";
 import { addAddress } from "@/lib/addresses/actions";
+import { addPhone } from "@/lib/phones/actions";
 import {
   getCurrentPosition,
   reverseGeocode,
@@ -57,6 +58,7 @@ import { createClient } from "@/lib/supabase/client";
 import { uploadOrderFiles } from "@/lib/storage/orderFiles";
 
 type SavedAddr = { id: string; label: string | null; address: string; lat: number | null; lng: number | null };
+type SavedPhoneOption = { id: string; label: string | null; phone: string };
 import { confirmOrderPayment } from "@/lib/orders/payment";
 
 // The map picker is client-only (Leaflet touches `window`) → load it lazily, never on the server.
@@ -107,6 +109,8 @@ interface DeliveryFormValues {
   code: string;
   /** Persist this address to the customer's address book on submit. */
   save_address: boolean;
+  /** Persist this phone to the customer's phone book on submit. */
+  save_phone: boolean;
 }
 
 // Fixed platform service fee per order (matches the server's SERVICE_FEE; not shop-configurable).
@@ -120,6 +124,7 @@ function DeliveryStep({
   shopId,
   shopLat,
   shopLng,
+  initialCode,
   onNext,
   loading,
 }: {
@@ -134,6 +139,8 @@ function DeliveryStep({
   /** Shop coordinates — drive the delivery-radius check (null = shop hasn't set them). */
   shopLat: number | null;
   shopLng: number | null;
+  /** Promo code applied in the cart drawer — prefilled here so it carries through. */
+  initialCode?: string;
   onNext: (values: DeliveryFormValues) => void;
   loading: boolean;
 }) {
@@ -145,8 +152,9 @@ function DeliveryStep({
       delivery_lng: null,
       contact_phone: "",
       notes: "",
-      code: "",
+      code: initialCode ?? "",
       save_address: false,
+      save_phone: false,
       // Delivery is the default fulfilment → must be paid online.
       payment_method: "online",
     },
@@ -174,6 +182,19 @@ function DeliveryStep({
     })();
   }, []);
 
+  // Saved phone book (own-RLS read). Picking one fills the contact phone; an opt-in checkbox
+  // persists a newly typed phone on submit.
+  const [savedPhones, setSavedPhones] = useState<SavedPhoneOption[]>([]);
+  useEffect(() => {
+    void (async () => {
+      const { data } = await createClient()
+        .from("saved_phones")
+        .select("id, label, phone")
+        .order("is_default", { ascending: false });
+      if (data) setSavedPhones(data);
+    })();
+  }, []);
+
   // Save the typed address to the book (if opted in) before continuing.
   const submit = async (values: DeliveryFormValues) => {
     // Hard-block delivery outside the radius (the button is also disabled; Enter could bypass it).
@@ -197,6 +218,9 @@ function DeliveryStep({
         lng: values.delivery_lng,
         makeDefault: saved.length === 0,
       });
+    }
+    if (values.save_phone && values.contact_phone.trim()) {
+      await addPhone({ phone: values.contact_phone, makeDefault: savedPhones.length === 0 });
     }
     onNext(values);
   };
@@ -424,16 +448,37 @@ function DeliveryStep({
           </Stack>
         )}
 
-        <TextInput
-          label="Telefon de contact"
-          placeholder="+40 7XX XXX XXX"
-          required
-          inputMode="tel"
-          {...form.getInputProps("contact_phone")}
-          onChange={(e) =>
-            form.setFieldValue("contact_phone", sanitizePhoneInput(e.target.value))
-          }
-        />
+        <Stack gap="xs">
+          {savedPhones.length > 0 && (
+            <Select
+              label="Telefon salvat"
+              placeholder="Alege un număr salvat…"
+              clearable
+              data={savedPhones.map((p) => ({
+                value: p.id,
+                label: p.label ? `${p.label} — ${p.phone}` : p.phone,
+              }))}
+              onChange={(id) => {
+                const p = savedPhones.find((s) => s.id === id);
+                if (p) form.setFieldValue("contact_phone", p.phone);
+              }}
+            />
+          )}
+          <TextInput
+            label="Telefon de contact"
+            placeholder="+40 7XX XXX XXX"
+            required
+            inputMode="tel"
+            {...form.getInputProps("contact_phone")}
+            onChange={(e) =>
+              form.setFieldValue("contact_phone", sanitizePhoneInput(e.target.value))
+            }
+          />
+          <Checkbox
+            label="Salvează acest număr pentru data viitoare"
+            {...form.getInputProps("save_phone", { type: "checkbox" })}
+          />
+        </Stack>
 
         <Textarea
           label="Mențiuni (opțional)"
@@ -649,7 +694,7 @@ type Step = "delivery" | "payment" | "success";
 export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
   // Full-screen on phones — the multi-step checkout form is cramped in a centered dialog.
   const isMobile = useMediaQuery("(max-width: 48em)");
-  const { lines, shopId, total, discount, freeShipping, deliveryFee, shopLat, shopLng, clear } =
+  const { lines, shopId, total, discount, freeShipping, deliveryFee, shopLat, shopLng, promoCode, clear } =
     useCart();
   const [step, setStep] = useState<Step>("delivery");
   const [loading, setLoading] = useState(false);
@@ -793,6 +838,7 @@ export function CheckoutModal({ opened, onClose }: CheckoutModalProps) {
           shopId={shopId ?? ""}
           shopLat={shopLat}
           shopLng={shopLng}
+          initialCode={promoCode}
           onNext={handleDeliverySubmit}
           loading={loading}
         />

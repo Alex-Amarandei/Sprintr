@@ -422,38 +422,66 @@ Captured here as they come up; not yet assigned to a lane.
 ## 📝 TODO — 2026-06-17 (review feedback)
 
 ### Copy / formatting / small UI
-- [ ] **Romanian-count pluralization** for shop counts — "0 de magazine" is wrong; use `roCount`
+- [x] **Romanian-count pluralization** for shop counts — "0 de magazine" is wrong; use `roCount`
       everywhere (1 magazin / 0 magazine / 2 magazine / 20 de magazine).
-- [ ] **Dashboard KPI icons** (the 4) should be **right-aligned**.
-- [ ] **Schedule time inputs** auto-format 4 digits → time (`2359` → `23:59`).
-- [ ] **"Implicită" button** is non-intuitive → rename to "Setează ca implicită" / "Fă implicită".
-- [ ] **Order status next to the order number** in the shop view (e.g. "#1a2b · În așteptare").
-- [ ] **Drop Klarna** from the payment options.
+      _Fixed `roCount` (`lib/utils/format.ts`): 0 now → "0 magazine" (no "de"); every shop count
+      already routes through it._
+- [x] **Dashboard KPI icons** (the 4) should be **right-aligned**.
+      _`StatCard` top row → `justify="flex-end"`; optional delta chip kept left via `mr="auto"`._
+- [x] **Schedule time inputs** auto-format 4 digits → time (`2359` → `23:59`).
+      _New `formatTimeInput` (`lib/utils/format.ts`) wired `onBlur` on the schedule fields in `ProfileEditor`._
+- [x] **"Implicită" button** is non-intuitive → rename to "Setează ca implicită" / "Fă implicită".
+      _`AddressesManager` action button → "Setează ca implicită" (the default-badge stays "Implicită")._
+- [x] **Order status next to the order number** in the shop view (e.g. "#1a2b · În așteptare").
+      _Order detail header: `StatusBadge` now beside "Comanda #…"; removed the duplicate badge from
+      `ShopOrderActions` (kept the action buttons)._
+- [x] **Drop Klarna** from the payment options.
+      _PaymentIntent now `automatic_payment_methods: { enabled: true, allow_redirects: "never" }` —
+      drops Klarna (redirect method), keeps card + wallets + Link._
 
 ### Shop visibility
-- [ ] **`shops.is_active` column** (default `true`). Inactive shops are **hidden from browse** AND
+- [x] **`shops.is_active` column** (default `true`). Inactive shops are **hidden from browse** AND
       **inaccessible by direct URL** (`/shop/[id]` → notFound / blocked). Distinct from the temporary
       pause (`schedule_overrides`) — this is a hard on/off.
+      _Migration `20260617180305_shop_is_active` (column + RLS: public sees `is_active` only,
+      members/admins still read own). Owner-toggleable via a "Magazin activ" switch in the profile
+      editor (`setShopActive`). Customer reads filtered (`getShops`/`getShopView`/`getShopCatalog`/
+      `findNearbyShops`/`quoteDelivery`/sitemap); place-order rejects inactive (service role = explicit check)._
 
 ### Profile / address / phone autofill
-- [ ] **"Profilul meu"** entry — first item in the customer menu.
-- [ ] My-Profile page holds all autofill data for delivery (addresses, phones, etc.).
-- [ ] **Save-a-location** flow should let me add a **nickname** (label) for the address.
-- [ ] **Saved phone numbers** — autofill / dropdown of saved phones / "add new" in the order modal.
+- [x] **"Profilul meu"** entry — first item in the customer menu. _`ProfileMenu` → `/account`._
+- [x] My-Profile page holds all autofill data for delivery (addresses, phones, etc.).
+      _New `/account` page consolidating profile header + addresses + phones; `/addresses` redirects to it._
+- [x] **Save-a-location** flow should let me add a **nickname** (label) for the address.
+      _Already in `addresses.label` + `AddressesManager`; now surfaced on the `/account` page._
+- [x] **Saved phone numbers** — autofill / dropdown of saved phones / "add new" in the order modal.
+      _New `saved_phones` table (migration `20260617180313`) mirroring addresses; `lib/phones/*` +
+      `PhonesManager` on `/account`; checkout shows a "Telefon salvat" picker + "save for next time"._
 - [ ] **Phone prefix** = selectable dropdown **with country flags**.
 - [ ] **"Adresă salvată" vs "Adresă de livrare"** can differ → confusing. Selecting a saved address
       should fill (or grey out) the delivery-address field, not coexist as two different values.
 
 ### Discounts
-- [ ] **Discount-code field in the cart side-drawer** (basket view), **persisted** through to the order modal.
-- [ ] **Validate discount codes** + show clearly when a code doesn't exist.
+- [x] **Discount-code field in the cart side-drawer** (basket view), **persisted** through to the order modal.
+      _`CartBar` promo input → `CartContext.applyPromo` (validates via `validate_offer_code`, folds the
+      offer into the live discount preview); `promoCode` prefills the checkout modal's code field._
+- [x] **Validate discount codes** + show clearly when a code doesn't exist.
+      _On apply: valid → "Cod aplicat: {name}" + discount preview updates; invalid → inline "Codul nu
+      există sau a expirat" error on the field._
 
 ### Chat / notifications / unread
-- [ ] **Highlight unread conversations** more clearly in the shop messages view.
-- [ ] **Chat box full height** — extend downward to fill available space.
-- [ ] **Sidebar unread-messages badge not updating in real time** — fix.
-- [ ] **Client notifications: more detail** than the current generic message.
-- [ ] **Client notifications not real-time** — fix (subscribe on the customer side too).
+- [x] **Highlight unread conversations** more clearly in the shop messages view.
+      _Unread rows get a brand-tinted background + left accent bar + a count badge (was just a dot)._
+- [x] **Chat box full height** — extend downward to fill available space.
+      _Messages pane fills `calc(100dvh − 150px)`; `ChatPanel` accepts `height="100%"` (order detail keeps px)._
+- [x] **Sidebar unread-messages badge not updating in real time** — fix.
+      _`message_reads` added to the Realtime publication; `UnreadProvider` now also subscribes to it so a
+      read in another tab drops the badge instantly (on top of the existing `messages`-INSERT + focus refresh)._
+- [x] **Client notifications: more detail** than the current generic message.
+      _`notify_order_status` now writes a body: "Comanda #abcdef12 · {shop name}" (was null)._
+- [x] **Client notifications not real-time** — fix (subscribe on the customer side too).
+      _Already real-time: `NotificationBell` subscribes to `notifications` INSERT filtered by `user_id`
+      (chime on new order). Verified — no change needed._
 
 ### Orders / statuses / financials
 - [ ] **More order statuses**: ready-for-pickup, picked-up, in-delivery, delivered.
@@ -464,9 +492,26 @@ Captured here as they come up; not yet assigned to a lane.
       syntactic sugar — no stored computation, only the diff).
 - [ ] **Partial item rejection** — reject only some lines (e.g. accept 3 cups, reject 2 OOS pens)
       rather than the whole order.
-- [ ] **Shop-side order modification** — let the shop change an order (charge extra/less) and request
+- [x] **Shop-side order modification** — let the shop change an order (charge extra/less) and request
       the customer's acceptance; auto-refund the difference if less; an optional free-form **extra-charges
       (RON)** field the shop can fill when modifying.
+      _Migration `20260617183739_order_modifications` (`order_modifications` table + `modification_status`
+      enum + `orders.adjustment` + RLS read-only for participants + Realtime). Primitive = signed adjustment
+      (+ extra / − reduction) + reason. Flow (`lib/orders/modifications.ts`): shop `proposeModification`
+      → customer `respondToModification` (accept/decline). On accept: cash → recorded; online reduction →
+      auto **partial-refund** the difference; online extra → a **delta PaymentIntent** the customer confirms
+      with a card (`CustomerModificationCard` Stripe Element) → webhook (`kind:'modification'`) + client
+      `confirmModificationPayment` finalize idempotently. Shop UI `ShopModificationControl` (propose/cancel);
+      breakdown "Ajustare" line both sides; customer notified on propose, shop on response. Webhook also
+      fixed so a **partial** refund no longer marks the whole order `refunded`. Needs Stripe test keys to
+      exercise the card delta-charge end-to-end._
+      _**Hardened after an adversarial multi-agent review** (migration `20260617190808`): finalize is now an
+      atomic `finalize_order_modification` RPC (CAS flip + apply in one txn) so the webhook + client fallback
+      can't double-apply; `respondToModification` re-checks the order is still modifiable before accepting;
+      `advanceOrderStatus` cancels pending mods (+ their unconfirmed delta PIs) when an order goes terminal;
+      an online reduction only finalizes after the partial refund SUCCEEDS; `cancelModification` cancels the
+      delta PI; a partial unique index enforces one-pending-per-order; and the webhook-only helpers moved to
+      `modifications-internal.ts` so `finalizeModificationById` is no longer a client-callable action._
 
 ### Bugs
 - [ ] **Reorder ("Comandă din nou") file types** — from the basket view I can attach **any** file

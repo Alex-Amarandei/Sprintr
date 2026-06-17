@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import {
   ActionIcon,
@@ -13,6 +14,7 @@ import {
   Paper,
   Stack,
   Text,
+  TextInput,
   ThemeIcon,
 } from "@mantine/core";
 import {
@@ -43,9 +45,19 @@ export function CartBar() {
     removeLine,
     attachFiles,
     clear,
+    promoCode,
+    promoStatus,
+    promoOffer,
+    applyPromo,
+    clearPromo,
   } = useCart();
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
   const [checkoutOpened, { open: openCheckout, close: closeCheckout }] = useDisclosure(false);
+  // Local promo input (seeded from the applied code; cleared when the cart's shop changes).
+  const [promoInput, setPromoInput] = useState(promoCode);
+  useEffect(() => {
+    if (!promoCode) setPromoInput("");
+  }, [promoCode]);
 
   // A required-upload line whose file went missing (e.g. stripped on reload — File objects can't
   // persist). Block checkout until it's re-attached, with an inline file picker per affected line.
@@ -184,6 +196,52 @@ export function CartBar() {
                 );
               })}
             </Stack>
+
+            {/* Promo code — validated against the shop; persists into the checkout modal. */}
+            <Paper withBorder radius="md" p="md" bg="var(--mantine-color-body)">
+              <Text fz="sm" fw={600} mb="xs">
+                Cod promoțional
+              </Text>
+              <Group gap="xs" wrap="nowrap" align="flex-start">
+                <TextInput
+                  placeholder="ex. STUDENT10"
+                  value={promoInput}
+                  onChange={(e) => setPromoInput(e.currentTarget.value.toUpperCase())}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && promoInput.trim()) void applyPromo(promoInput);
+                  }}
+                  disabled={promoStatus === "valid"}
+                  error={promoStatus === "invalid" ? "Codul nu există sau a expirat" : undefined}
+                  style={{ flex: 1 }}
+                />
+                {promoStatus === "valid" ? (
+                  <Button
+                    variant="light"
+                    color="gray"
+                    onClick={() => {
+                      clearPromo();
+                      setPromoInput("");
+                    }}
+                  >
+                    Elimină
+                  </Button>
+                ) : (
+                  <Button
+                    variant="light"
+                    loading={promoStatus === "checking"}
+                    disabled={!promoInput.trim()}
+                    onClick={() => void applyPromo(promoInput)}
+                  >
+                    Aplică
+                  </Button>
+                )}
+              </Group>
+              {promoStatus === "valid" && promoOffer && (
+                <Text fz="xs" c="brand" fw={600} mt={6}>
+                  Cod aplicat: {promoOffer.name}
+                </Text>
+              )}
+            </Paper>
 
             {/* Summary */}
             <Paper withBorder radius="md" p="md" bg="var(--mantine-color-body)">
