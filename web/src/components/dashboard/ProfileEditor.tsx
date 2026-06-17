@@ -374,7 +374,6 @@ export function ProfileEditor({
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
                 <TagsInput
                   label="Telefoane"
-                  description="Adaugă unul sau mai multe numere (Enter după fiecare)"
                   inputMode="tel"
                   placeholder="ex. 0729 992 968"
                   value={form.phones}
