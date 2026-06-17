@@ -416,3 +416,58 @@ Captured here as they come up; not yet assigned to a lane.
 - [ ] Refund path tested (reject a paid order → customer is refunded).
 - [ ] Shops have coordinates; the 12 km gate and Glovo coverage agree.
 - [ ] One real end-to-end each: online-pay delivery (paid → dispatched → delivered → done) + pickup/cash.
+
+---
+
+## 📝 TODO — 2026-06-17 (review feedback)
+
+### Copy / formatting / small UI
+- [ ] **Romanian-count pluralization** for shop counts — "0 de magazine" is wrong; use `roCount`
+      everywhere (1 magazin / 0 magazine / 2 magazine / 20 de magazine).
+- [ ] **Dashboard KPI icons** (the 4) should be **right-aligned**.
+- [ ] **Schedule time inputs** auto-format 4 digits → time (`2359` → `23:59`).
+- [ ] **"Implicită" button** is non-intuitive → rename to "Setează ca implicită" / "Fă implicită".
+- [ ] **Order status next to the order number** in the shop view (e.g. "#1a2b · În așteptare").
+- [ ] **Drop Klarna** from the payment options.
+
+### Shop visibility
+- [ ] **`shops.is_active` column** (default `true`). Inactive shops are **hidden from browse** AND
+      **inaccessible by direct URL** (`/shop/[id]` → notFound / blocked). Distinct from the temporary
+      pause (`schedule_overrides`) — this is a hard on/off.
+
+### Profile / address / phone autofill
+- [ ] **"Profilul meu"** entry — first item in the customer menu.
+- [ ] My-Profile page holds all autofill data for delivery (addresses, phones, etc.).
+- [ ] **Save-a-location** flow should let me add a **nickname** (label) for the address.
+- [ ] **Saved phone numbers** — autofill / dropdown of saved phones / "add new" in the order modal.
+- [ ] **Phone prefix** = selectable dropdown **with country flags**.
+- [ ] **"Adresă salvată" vs "Adresă de livrare"** can differ → confusing. Selecting a saved address
+      should fill (or grey out) the delivery-address field, not coexist as two different values.
+
+### Discounts
+- [ ] **Discount-code field in the cart side-drawer** (basket view), **persisted** through to the order modal.
+- [ ] **Validate discount codes** + show clearly when a code doesn't exist.
+
+### Chat / notifications / unread
+- [ ] **Highlight unread conversations** more clearly in the shop messages view.
+- [ ] **Chat box full height** — extend downward to fill available space.
+- [ ] **Sidebar unread-messages badge not updating in real time** — fix.
+- [ ] **Client notifications: more detail** than the current generic message.
+- [ ] **Client notifications not real-time** — fix (subscribe on the customer side too).
+
+### Orders / statuses / financials
+- [ ] **More order statuses**: ready-for-pickup, picked-up, in-delivery, delivered.
+- [ ] **Financial displays = post-commission amount** (what the shop actually receives) — current
+      figure can mislead.
+- [ ] **ETA → "Estimat de completare a comenzii"** (rename "~50 min"). Store it as a **timestamp**
+      set at the moment, and just show `selected_ts − now` as a live countdown (the duration is
+      syntactic sugar — no stored computation, only the diff).
+- [ ] **Partial item rejection** — reject only some lines (e.g. accept 3 cups, reject 2 OOS pens)
+      rather than the whole order.
+- [ ] **Shop-side order modification** — let the shop change an order (charge extra/less) and request
+      the customer's acceptance; auto-refund the difference if less; an optional free-form **extra-charges
+      (RON)** field the shop can fill when modifying.
+
+### Bugs
+- [ ] **Reorder ("Comandă din nou") file types** — from the basket view I can attach **any** file
+      type, bypassing the shop's `accepted_file_types` restriction. Enforce the shop's allowed types.
