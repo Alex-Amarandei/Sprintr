@@ -269,8 +269,9 @@ export async function getShopOrderCounts(): Promise<{ pending: number; inProgres
   const supabase = await createClient();
   const shopId = await getActiveShopId();
   if (!shopId) return { pending: 0, inProgress: 0 };
-  // Same visibility rule as getShopOrders: count only placed orders (hide unpaid online).
-  const placed = "payment_method.neq.online,payment_status.eq.paid";
+  // Same visibility rule as getShopOrders: count only placed orders (hide unpaid online; a paid
+  // order later refunded still counts as placed).
+  const placed = "payment_method.neq.online,payment_status.eq.paid,payment_status.eq.refunded";
   const [pendingRes, progressRes] = await Promise.all([
     supabase
       .from("orders")
@@ -303,10 +304,12 @@ export async function getShopOrders(): Promise<SampleOrder[]> {
     .select(ORDER_SELECT)
     .eq("shop_id", shopId)
     // An order reaches the shop only once it's actually placed: cash orders immediately, but
-    // ONLINE orders only after payment succeeds (payment_status='paid'). An unpaid online order
-    // is an abandoned/incomplete checkout — it must NOT appear in the queue or fire a "new order"
-    // alert. Online orders flip to 'paid' via the Stripe webhook or the confirmOrderPayment fallback.
-    .or("payment_method.neq.online,payment_status.eq.paid")
+    // ONLINE orders only after payment succeeds. An unpaid online order is an abandoned/incomplete
+    // checkout — it must NOT appear in the queue or fire a "new order" alert. We accept 'refunded'
+    // alongside 'paid' because a refund always implies the charge was captured first: an online
+    // order the shop later REJECTS (auto-refunded → 'refunded') or refunds manually must STAY in its
+    // history, not vanish. Online orders flip to 'paid' via the Stripe webhook / confirmOrderPayment.
+    .or("payment_method.neq.online,payment_status.eq.paid,payment_status.eq.refunded")
     .order("created_at", { ascending: false });
   if (error || !data) return [];
 
