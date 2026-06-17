@@ -222,6 +222,17 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
               value={item.base_price}
               onChange={(v) => patch({ base_price: typeof v === "number" ? v : 0 })}
             />
+            <NumberInput
+              label="Cantitate minimă"
+              description="Comanda minimă (ex. 100 buc.)"
+              min={1}
+              step={1}
+              allowDecimal={false}
+              value={item.min_quantity}
+              onChange={(v) =>
+                patch({ min_quantity: typeof v === "number" && v >= 1 ? Math.floor(v) : 1 })
+              }
+            />
           </Group>
 
           <Textarea

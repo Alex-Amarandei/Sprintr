@@ -53,6 +53,7 @@ type CatalogField = {
 type CatalogItem = {
   id: string;
   base_price: number;
+  min_quantity?: number;
   category_id?: string | null;
   requires_upload?: boolean;
   accepted_file_types?: FileTypeKey[];
@@ -83,7 +84,11 @@ function computeItemPrice(item: CatalogItem, answers: Answers) {
   // rather than crashing the whole request with a 500.
   const fields = item.fields ?? [];
   const qField = fields.find((f) => f.type === "number" && f.is_quantity);
-  const quantity = qField ? Number(answers[qField.key]) || 1 : 1;
+  // Clamp to the item's min_quantity floor (mirrors lib/catalog/pricing.ts).
+  const quantity = Math.max(
+    qField ? Number(answers[qField.key]) || 1 : 1,
+    item.min_quantity ?? 1
+  );
   let addons = 0;
   const breakdown: Record<string, number> = {};
 

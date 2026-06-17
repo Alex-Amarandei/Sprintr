@@ -13,6 +13,7 @@ import {
   SimpleGrid,
   Stack,
   Switch,
+  TagsInput,
   Text,
   Textarea,
   TextInput,
@@ -188,10 +189,13 @@ export function ProfileEditor({
       { label: "Descriere completă", done: form.description.trim().length >= 30 },
       { label: "Program setat", done: DAY_ORDER.some((k) => schedule[k] !== null) },
       { label: "Cel puțin 5 produse în catalog", done: meta.itemCount >= 5 },
-      { label: "Telefon de contact", done: form.phone.trim().length >= 6 },
+      {
+        label: "Telefon de contact",
+        done: form.phones.some((p) => p.trim().length >= 6),
+      },
     ];
     return items;
-  }, [meta, form.description, form.phone, schedule, logoPath, bannerPath]);
+  }, [meta, form.description, form.phones, schedule, logoPath, bannerPath]);
 
   const doneCount = checklist.filter((c) => c.done).length;
   const percent = Math.round((doneCount / checklist.length) * 100);
@@ -347,15 +351,19 @@ export function ProfileEditor({
               </SimpleGrid>
               <Textarea label="Descriere" autosize minRows={2} {...field("description")} />
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
-                <TextInput
-                  label="Telefon"
+                <TagsInput
+                  label="Telefoane"
+                  description="Adaugă unul sau mai multe numere (Enter după fiecare)"
                   inputMode="tel"
-                  {...field("phone")}
-                  onChange={(e) => {
-                    const phone = sanitizePhoneInput(e.currentTarget.value);
-                    setForm((f) => ({ ...f, phone }));
-                  }}
-                  error={form.phone ? phoneError(form.phone) : null}
+                  placeholder="ex. 0729 992 968"
+                  value={form.phones}
+                  onChange={(phones) =>
+                    setForm((f) => ({
+                      ...f,
+                      phones: phones.map(sanitizePhoneInput),
+                    }))
+                  }
+                  error={form.phones.map((p) => phoneError(p)).find(Boolean) ?? null}
                 />
                 <TextInput
                   label="Email"
@@ -366,6 +374,12 @@ export function ProfileEditor({
                   error={form.email ? emailError(form.email) : null}
                 />
               </SimpleGrid>
+              <TextInput
+                label="Website"
+                inputMode="url"
+                placeholder="https://exemplu.ro"
+                {...field("website")}
+              />
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
                 <TextInput label="Adresă" {...field("address")} />
                 <TextInput label="Oraș" defaultValue="Iași" disabled />

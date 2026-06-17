@@ -1,0 +1,1227 @@
+{
+  "schema_version": 1,
+  "categories": [
+    {
+      "id": "print",
+      "name": "Printare & copiere",
+      "parent_id": null,
+      "sort_order": 1
+    },
+    {
+      "id": "legatorie",
+      "name": "Legătorie & finisare",
+      "parent_id": null,
+      "sort_order": 2
+    },
+    {
+      "id": "retail",
+      "name": "Tipărituri & retail",
+      "parent_id": null,
+      "sort_order": 3
+    }
+  ],
+  "items": [
+    {
+      "id": "print-an",
+      "kind": "service",
+      "title": "Printare & copiere alb-negru",
+      "description": "Print sau copie alb-negru, preț pe pagină.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 0,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image",
+        "word"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "print",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.03
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.023
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.015
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0115
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0075
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Număr de pagini",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "pag.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "print-color",
+      "kind": "service",
+      "title": "Printare & copiere color",
+      "description": "Print sau copie color, preț pe pagină.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 1,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image",
+        "word"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "print",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.1576
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.1156
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0788
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0578
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0394
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Număr de pagini",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "pag.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "print-album",
+      "kind": "service",
+      "title": "Printare color foto / album",
+      "description": "Print color de calitate foto, preț pe pagină.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 2,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image",
+        "word"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "print",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.35
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.2626
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.175
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.1313
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.0875
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Număr de pagini",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "pag.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "laminare-lucioasa",
+      "kind": "service",
+      "title": "Laminare lucioasă",
+      "description": "Laminare lucioasă, preț pe coală.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 3,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": false,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "legatorie",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.56
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.45
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.33
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.24
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.21
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Număr de coli",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "coli",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "laminare-mata",
+      "kind": "service",
+      "title": "Laminare mată",
+      "description": "Laminare mată, preț pe coală.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 4,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": false,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "legatorie",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.56
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.45
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.33
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.24
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.21
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Număr de coli",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "coli",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "arc-metalic",
+      "kind": "service",
+      "title": "Legare cu arc metalic (spirală)",
+      "description": "Legare cu spirală metalică, în funcție de grosime.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 5,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": false,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "legatorie",
+      "fields": [
+        {
+          "key": "grosime",
+          "label": "Grosime",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "pana80",
+          "options": [
+            {
+              "value": "pana80",
+              "label": "Până la 80 file",
+              "price": {
+                "mode": "additive",
+                "amount": 1.5
+              },
+              "default": true
+            },
+            {
+              "value": "80-160",
+              "label": "80 - 160 file",
+              "price": {
+                "mode": "additive",
+                "amount": 2
+              }
+            },
+            {
+              "value": "peste160",
+              "label": "Peste 160 file",
+              "price": {
+                "mode": "additive",
+                "amount": 2.5
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "brosare",
+      "kind": "service",
+      "title": "Broșare",
+      "description": "Broșare, preț pe exemplar.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 6,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": false,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "legatorie",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.56
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.45
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.43
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.33
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.23
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "capsare",
+      "kind": "service",
+      "title": "Capsare",
+      "description": "Capsare, preț pe exemplar.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": true,
+      "sort_order": 7,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": false,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "legatorie",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "price": {
+                "mode": "additive",
+                "amount": 0.74
+              },
+              "default": true
+            },
+            {
+              "value": "b5",
+              "label": "B5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.66
+              }
+            },
+            {
+              "value": "a5",
+              "label": "A5",
+              "price": {
+                "mode": "additive",
+                "amount": 0.62
+              }
+            },
+            {
+              "value": "b6",
+              "label": "B6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.49
+              }
+            },
+            {
+              "value": "a6",
+              "label": "A6",
+              "price": {
+                "mode": "additive",
+                "amount": 0.36
+              }
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Exemplare",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "scanare",
+      "kind": "service",
+      "title": "Scanare documente",
+      "description": "Scanare alb-negru sau color a documentelor aduse în locație.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 8,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": false,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "retail",
+      "fields": [
+        {
+          "key": "tip",
+          "label": "Tip scanare",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "an",
+          "options": [
+            {
+              "value": "an",
+              "label": "Alb-negru",
+              "default": true
+            },
+            {
+              "value": "color",
+              "label": "Color"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Pagini",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "pag.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "carti-vizita",
+      "kind": "service",
+      "title": "Cărți de vizită",
+      "description": "Cărți de vizită personalizate, carton 250g.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/carti-vizita-1.png",
+        "https://pimcopy.ro/assets/servicii/carti-vizita-2.png",
+        "https://pimcopy.ro/assets/servicii/carti-vizita-3.png",
+        "https://pimcopy.ro/assets/servicii/carti-vizita-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 9,
+      "base_price": 0,
+      "min_quantity": 100,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "retail",
+      "fields": [
+        {
+          "key": "print",
+          "label": "Tipar",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "fata",
+          "options": [
+            {
+              "value": "fata",
+              "label": "Față",
+              "default": true
+            },
+            {
+              "value": "fata-verso",
+              "label": "Față-verso"
+            }
+          ]
+        },
+        {
+          "key": "carton",
+          "label": "Carton 250g",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "lucios",
+          "options": [
+            {
+              "value": "lucios",
+              "label": "Lucios",
+              "default": true
+            },
+            {
+              "value": "mat",
+              "label": "Mat"
+            }
+          ]
+        },
+        {
+          "key": "laminare",
+          "label": "Laminare",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "fara",
+          "options": [
+            {
+              "value": "fara",
+              "label": "Fără",
+              "default": true
+            },
+            {
+              "value": "lucioasa",
+              "label": "Lucioasă"
+            },
+            {
+              "value": "mata",
+              "label": "Mată"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 100,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "stickere",
+      "kind": "service",
+      "title": "Stickere / Etichete",
+      "description": "Stickere și etichete autocolante, decupate la dimensiune.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/eticheta-1.png",
+        "https://pimcopy.ro/assets/servicii/eticheta-2.png",
+        "https://pimcopy.ro/assets/servicii/eticheta-3.png",
+        "https://pimcopy.ro/assets/servicii/eticheta-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 10,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "retail",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a4",
+          "options": [
+            {
+              "value": "a4",
+              "label": "A4",
+              "default": true
+            },
+            {
+              "value": "a3",
+              "label": "A3"
+            }
+          ]
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "hartie",
+          "options": [
+            {
+              "value": "hartie",
+              "label": "Hârtie autocolantă",
+              "default": true
+            },
+            {
+              "value": "vinil-alb",
+              "label": "Vinil alb opac"
+            },
+            {
+              "value": "vinil-transparent",
+              "label": "Vinil transparent"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "roll-up",
+      "kind": "service",
+      "title": "Roll-up banner",
+      "description": "Roll-up publicitar cu sistem de prindere.",
+      "image_path": null,
+      "images": [
+        "https://pimcopy.ro/assets/servicii/rollup-1.png",
+        "https://pimcopy.ro/assets/servicii/rollup-2.png",
+        "https://pimcopy.ro/assets/servicii/rollup-3.png",
+        "https://pimcopy.ro/assets/servicii/rollup-4.png"
+      ],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 11,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "retail",
+      "fields": [
+        {
+          "key": "inaltime",
+          "label": "Înălțime",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "85x200",
+          "options": [
+            {
+              "value": "85x200",
+              "label": "85 x 200 cm",
+              "default": true
+            },
+            {
+              "value": "100x200",
+              "label": "100 x 200 cm"
+            }
+          ]
+        },
+        {
+          "key": "mecanism",
+          "label": "Mecanism",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "cu",
+          "options": [
+            {
+              "value": "cu",
+              "label": "Cu mecanism",
+              "default": true
+            },
+            {
+              "value": "fara",
+              "label": "Doar print (fără mecanism)"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "bannere",
+      "kind": "service",
+      "title": "Bannere publicitare",
+      "description": "Bannere print pe prelată, finisate.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 12,
+      "base_price": 0,
+      "min_quantity": 1,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "retail",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a2",
+          "options": [
+            {
+              "value": "a2",
+              "label": "A2",
+              "default": true
+            },
+            {
+              "value": "a1",
+              "label": "A1"
+            },
+            {
+              "value": "a0",
+              "label": "A0"
+            },
+            {
+              "value": "b2",
+              "label": "B2"
+            },
+            {
+              "value": "b1",
+              "label": "B1"
+            },
+            {
+              "value": "b0",
+              "label": "B0"
+            }
+          ]
+        },
+        {
+          "key": "finisare",
+          "label": "Finisare",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "capse",
+          "options": [
+            {
+              "value": "capse",
+              "label": "Capse",
+              "default": true
+            },
+            {
+              "value": "buzunare",
+              "label": "Buzunare"
+            },
+            {
+              "value": "gauri-vant",
+              "label": "Găuri de vânt"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    },
+    {
+      "id": "flyere",
+      "kind": "service",
+      "title": "Flyere & pliante",
+      "description": "Flyere și pliante publicitare, hârtie lucioasă.",
+      "image_path": null,
+      "images": [],
+      "is_active": true,
+      "in_stock": false,
+      "sort_order": 13,
+      "base_price": 0,
+      "min_quantity": 50,
+      "sku": null,
+      "unit": null,
+      "requires_upload": true,
+      "accepted_file_types": [
+        "pdf",
+        "image"
+      ],
+      "stock_display": "none",
+      "inventory_item_id": null,
+      "category_id": "retail",
+      "fields": [
+        {
+          "key": "format",
+          "label": "Format",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "a6",
+          "options": [
+            {
+              "value": "a6",
+              "label": "A6",
+              "default": true
+            },
+            {
+              "value": "a5",
+              "label": "A5"
+            },
+            {
+              "value": "a4",
+              "label": "A4"
+            }
+          ]
+        },
+        {
+          "key": "hartie",
+          "label": "Hârtie",
+          "required": true,
+          "help": null,
+          "type": "single_select",
+          "default": "135g",
+          "options": [
+            {
+              "value": "135g",
+              "label": "135g lucioasă",
+              "default": true
+            },
+            {
+              "value": "170g",
+              "label": "170g lucioasă"
+            }
+          ]
+        },
+        {
+          "key": "cantitate",
+          "label": "Bucăți",
+          "required": true,
+          "help": null,
+          "type": "number",
+          "default": 50,
+          "min": 1,
+          "max": null,
+          "step": 1,
+          "unit": "buc.",
+          "is_quantity": true
+        }
+      ]
+    }
+  ]
+}

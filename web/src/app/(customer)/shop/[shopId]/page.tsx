@@ -11,7 +11,7 @@ import {
   ThemeIcon,
   Title,
 } from "@mantine/core";
-import { Clock, MapPin, Phone, Star, Truck } from "lucide-react";
+import { Clock, Globe, MapPin, Phone, Star, Truck } from "lucide-react";
 import { ScrollToHash } from "@/components/ui/ScrollToHash";
 import { getShopView, getShopCatalog } from "@/lib/catalog/shops";
 import { getShopReviews } from "@/lib/reviews/queries";
@@ -161,17 +161,35 @@ export default async function ShopDetailPage({ params }: Props) {
                     </Group>
                   </Anchor>
                 )}
-                {shop.phone && (
+                {(shop.phones ?? []).map((p) => (
                   <Anchor
+                    key={p}
                     // Native dial (tel:). Same ember link treatment as the address.
-                    href={`tel:${shop.phone.replace(/\s+/g, "")}`}
+                    href={`tel:${p.replace(/\s+/g, "")}`}
                     c="brand.6"
                     fw={500}
                     underline="hover"
                   >
                     <Group gap={4} wrap="nowrap">
                       <Phone size={15} />
-                      <Text fz="sm">{shop.phone}</Text>
+                      <Text fz="sm">{p}</Text>
+                    </Group>
+                  </Anchor>
+                ))}
+                {shop.website && (
+                  <Anchor
+                    href={shop.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    c="brand.6"
+                    fw={500}
+                    underline="hover"
+                  >
+                    <Group gap={4} wrap="nowrap">
+                      <Globe size={15} />
+                      <Text fz="sm">
+                        {shop.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                      </Text>
                     </Group>
                   </Anchor>
                 )}

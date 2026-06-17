@@ -69,7 +69,8 @@ export async function updateShopProfile(
     .update({
       name: input.name,
       description: input.description || null,
-      phone: input.phone || null,
+      phones: (input.phones ?? []).map((p) => p.trim()).filter(Boolean),
+      website_url: input.website?.trim() || null,
       email: input.email || null,
       address: input.address || null,
       ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
