@@ -109,10 +109,10 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 - [x] Remove fake/mock data from homepage — _dropped "12+ magazine / <60 min / 4.9★" stats_
 - [x] "From the app in a few minutes" text change
 - [x] Remove "Order now" button from navbar
-- [ ] Footer legal section / Terms & Conditions (+ `/terms` page)
+- [x] Footer legal section / Terms & Conditions (+ `/terms` page)
 - [x] Redesign login page — _branded split layout (brand panel + aurora bg), polished
       login/register cards; consistent header logo/theme toggle_
-- [ ] **Role badge** in header — show the role you logged in as (customer/shop/admin).
+- [x] **Role badge** in header — show the role you logged in as (customer/shop/admin).
       Shared component, owned here; C3 imports it into the dashboard header
 - [ ] Adjust toast colors based on theme (global Toaster)
 - [ ] Recheck homepage at the end (QA pass)
@@ -175,8 +175,8 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 - [x] Service-fee / delivery-tax line display ⬅BE — shop storefront shows the delivery fee;
       checkout + order detail break out Subtotal / Reducere / Livrare / Taxă serviciu (2 lei fixed) /
       Total. Delivery fee is per-shop (`shops.delivery_fee`, editable in the profile editor).
-- [ ] Retrieve client order history + "My orders" analytics check
-- [ ] Customer-side chat lifecycle UI — active vs. complaint thread ⬅BE 🔗
+- [x] Retrieve client order history + "My orders" analytics check
+- [x] Customer-side chat lifecycle UI — active vs. complaint thread ⬅BE 🔗
 
 ---
 
@@ -192,7 +192,7 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 - [x] Fix: field collapses on key change
 - [x] View-only mode on catalog when in read role (`staff`) — _role threaded via
       loadCatalogEditor → canEdit; staff see read-only, no edit/publish/switch actions_
-- [~] Add product/service images (multiple; first = main, shown to customers + builder) —
+- [x] Add product/service images (multiple; first = main, shown to customers + builder) —
   _UI + data model + storage seam DONE: `images[]` on items, `ItemImages` manager in both
   cards, main image on `AddItemCard` (customer) + builder cards. **Picking = instant local
   preview (blob URLs, "nou" badge); upload happens only on Save/Publish** via
@@ -207,7 +207,7 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 ### Offers admin (shop side) ⬅BE 🔗
 
 - [ ] Banner color configuration on promos
-- [ ] Promo config UI (per product/category/cart) — admin face of C1's engine
+- [x] Promo config UI (per product/category/cart) — admin face of C1's engine
 
 ### Profile & store
 
@@ -218,9 +218,9 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
       pause via `schedule_overrides` (closes the shop through a picked date). `setShopPause` action
       writes/clears `null` day-entries; `isOpenNow` already honours them, so the open/closed badge +
       checkout gating ("Magazin închis") flip automatically. Profile editor: date picker + pause/resume.
-- [ ] Make the Change-Logo button work (upload ⬅BE)
-- [ ] Select shop when a user owns multiple shops
-- [ ] **Owner role: create / add users & employees** — owner-only members UI
+- [x] Make the Change-Logo button work (upload ⬅BE)
+- [x] Select shop when a user owns multiple shops
+- [x] **Owner role: create / add users & employees** — owner-only members UI
       (add teammate, assign `staff`/`catalog`/`owner`) ⬅BE 🔗
 - [ ] Generate/export invoices & receipts — shop-side view ⬅BE
 
@@ -229,8 +229,8 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 - [x] Shop analytics — dedicated `/dashboard/analytics` page: KPI StatCards (venit/încasări/
   comision/AOV/rating), 30-day revenue area chart + status donut (`@mantine/charts`, recharts 3),
   top-sellers. Dashboard 7-day revenue chart now real (`shop_revenue_daily`).
-- [ ] Shop-side "in delivery" status + order actions ⬅BE 🔗
-- [ ] Shop-side chat lifecycle + review replies / complaint handling ⬅BE 🔗
+- [x] Shop-side "in delivery" status + order actions ⬅BE 🔗
+- [x] Shop-side chat lifecycle + review replies / complaint handling ⬅BE 🔗
 
 ### ⛔ Remaining C3 work is blocked on C1 — exact unblock asks
 
@@ -458,7 +458,7 @@ Captured here as they come up; not yet assigned to a lane.
       _New `saved_phones` table (migration `20260617180313`) mirroring addresses; `lib/phones/*` +
       `PhonesManager` on `/account`; checkout shows a "Telefon salvat" picker + "save for next time"._
 - [ ] **Phone prefix** = selectable dropdown **with country flags**.
-- [ ] **"Adresă salvată" vs "Adresă de livrare"** can differ → confusing. Selecting a saved address
+- [x] **"Adresă salvată" vs "Adresă de livrare"** can differ → confusing. Selecting a saved address
       should fill (or grey out) the delivery-address field, not coexist as two different values.
 
 ### Discounts
@@ -485,7 +485,7 @@ Captured here as they come up; not yet assigned to a lane.
 
 ### Orders / statuses / financials
 - [ ] **More order statuses**: ready-for-pickup, picked-up, in-delivery, delivered.
-- [ ] **Financial displays = post-commission amount** (what the shop actually receives) — current
+- [x] **Financial displays = post-commission amount** (what the shop actually receives) — current
       figure can mislead.
 - [ ] **ETA → "Estimat de completare a comenzii"** (rename "~50 min"). Store it as a **timestamp**
       set at the moment, and just show `selected_ts − now` as a live countdown (the duration is
