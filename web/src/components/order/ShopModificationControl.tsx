@@ -9,7 +9,7 @@ import { cancelModification, proposeModification } from "@/lib/orders/modificati
 import type { OrderStatus } from "@/lib/design/status";
 import type { OrderModificationView } from "@/lib/orders/queries";
 
-const MODIFIABLE: OrderStatus[] = ["accepted", "in_progress", "in_delivery"];
+const MODIFIABLE: OrderStatus[] = ["accepted", "in_progress", "ready_for_pickup", "in_delivery"];
 
 /**
  * Shop-side order-modification control on the order detail. Propose a signed adjustment (+ extra /
@@ -52,10 +52,10 @@ export function ShopModificationControl({
         <Group justify="space-between">
           <Badge color={adj > 0 ? "orange" : "teal"} variant="light">
             {adj > 0 ? "+" : "−"}
-            {Math.abs(adj).toFixed(2)} lei
+            {Math.abs(adj).toFixed(2)} RON
           </Badge>
           <Text fz="sm" c="dimmed">
-            Total nou {modification.newTotal.toFixed(2)} lei
+            Total nou {modification.newTotal.toFixed(2)} RON
           </Text>
         </Group>
         {modification.reason && (

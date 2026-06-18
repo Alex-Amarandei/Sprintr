@@ -14,11 +14,15 @@ export interface ExportRow {
 
 /** Order view-model shared by the customer order views and the shop dashboard. */
 export interface SampleOrderLine {
+  /** The order_item row id (for per-line actions like rejection). */
+  lineId?: string;
   /** Frozen catalog item id — used to deep-link the order line back to the product card. */
   itemId?: string;
   title: string;
   summary: string;
   lineTotal: number;
+  /** Shop marked this line rejected (out of stock) — struck through, excluded from the total. */
+  rejected?: boolean;
   /** First attached file's name (legacy single-file chip). */
   pdfName?: string;
   /** All attached files for this line. */
@@ -49,6 +53,8 @@ export interface SampleOrder {
   eta?: string;
   /** Raw per-order ETA in minutes (shop-editable, defaults from the shop). Visible both sides. */
   etaMinutes?: number | null;
+  /** Absolute ETA target timestamp (ISO) — drives the live "Estimat de completare" countdown. */
+  etaAt?: string | null;
   lines: SampleOrderLine[];
   subtotal: number;
   /** Legacy single line (total − subtotal); prefer the explicit fields below. */

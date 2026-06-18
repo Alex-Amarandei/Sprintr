@@ -80,7 +80,7 @@ export function CustomerModificationCard({
           Total actual
         </Text>
         <Text fz="sm" td="line-through" c="dimmed">
-          {modification.previousTotal.toFixed(2)} lei
+          {modification.previousTotal.toFixed(2)} RON
         </Text>
       </Group>
       <Group justify="space-between">
@@ -89,14 +89,14 @@ export function CustomerModificationCard({
         </Text>
         <Text fz="sm" c={extra ? "orange" : "teal.7"} fw={600}>
           {extra ? "+" : "−"}
-          {Math.abs(adj).toFixed(2)} lei
+          {Math.abs(adj).toFixed(2)} RON
         </Text>
       </Group>
       <Divider my="xs" />
       <Group justify="space-between" mb="md">
         <Text fw={700}>Total nou</Text>
         <Text fw={800} fz="lg">
-          {modification.newTotal.toFixed(2)} lei
+          {modification.newTotal.toFixed(2)} RON
         </Text>
       </Group>
 
@@ -163,7 +163,7 @@ function DeltaPay({
     <form onSubmit={pay}>
       <Stack gap="sm">
         <Text fz="sm" fw={600}>
-          Plătește diferența de {amount.toFixed(2)} lei
+          Plătește diferența de {amount.toFixed(2)} RON
         </Text>
         <PaymentElement />
         {error && (
@@ -172,7 +172,7 @@ function DeltaPay({
           </Alert>
         )}
         <Button type="submit" loading={loading} disabled={!stripe}>
-          Plătește {amount.toFixed(2)} lei
+          Plătește {amount.toFixed(2)} RON
         </Button>
       </Stack>
     </form>

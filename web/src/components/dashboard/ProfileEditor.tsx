@@ -407,7 +407,7 @@ export function ProfileEditor({
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
                 <NumberInput
                   label="Taxă de livrare (lei)"
-                  description="Per comandă cu livrare. Taxa de serviciu (2 lei) e fixă și nu poate fi modificată."
+                  description="Per comandă cu livrare. Taxa de serviciu (2 RON) e fixă și nu poate fi modificată."
                   placeholder="ex. 10"
                   min={0}
                   step={1}

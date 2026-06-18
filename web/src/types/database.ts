@@ -345,6 +345,7 @@ export type Database = {
           order_id: string
           price_breakdown: Json
           quantity: number
+          rejected: boolean
         }
         Insert: {
           answers?: Json
@@ -358,6 +359,7 @@ export type Database = {
           order_id: string
           price_breakdown?: Json
           quantity?: number
+          rejected?: boolean
         }
         Update: {
           answers?: Json
@@ -371,6 +373,7 @@ export type Database = {
           order_id?: string
           price_breakdown?: Json
           quantity?: number
+          rejected?: boolean
         }
         Relationships: [
           {
@@ -460,6 +463,7 @@ export type Database = {
           delivery_lat: number | null
           delivery_lng: number | null
           discount: number
+          eta_at: string | null
           eta_minutes: number | null
           fulfilment: Database["public"]["Enums"]["fulfilment_type"]
           handled_by: string | null
@@ -499,6 +503,7 @@ export type Database = {
           delivery_lat?: number | null
           delivery_lng?: number | null
           discount?: number
+          eta_at?: string | null
           eta_minutes?: number | null
           fulfilment?: Database["public"]["Enums"]["fulfilment_type"]
           handled_by?: string | null
@@ -538,6 +543,7 @@ export type Database = {
           delivery_lat?: number | null
           delivery_lng?: number | null
           discount?: number
+          eta_at?: string | null
           eta_minutes?: number | null
           fulfilment?: Database["public"]["Enums"]["fulfilment_type"]
           handled_by?: string | null
@@ -1048,6 +1054,10 @@ export type Database = {
         Args: { o: Database["public"]["Tables"]["offers"]["Row"] }
         Returns: boolean
       }
+      reject_order_lines: {
+        Args: { p_line_ids: string[]; p_order_id: string }
+        Returns: number
+      }
       remove_shop_member: {
         Args: { p_profile_id: string; p_shop_id: string }
         Returns: undefined
@@ -1177,7 +1187,10 @@ export type Database = {
         | "accepted"
         | "rejected"
         | "in_progress"
+        | "ready_for_pickup"
         | "in_delivery"
+        | "picked_up"
+        | "delivered"
         | "done"
       payment_method: "cash_in_store" | "cash_on_delivery" | "online"
       payment_status: "pending" | "paid" | "failed" | "refunded"
@@ -1324,7 +1337,10 @@ export const Constants = {
         "accepted",
         "rejected",
         "in_progress",
+        "ready_for_pickup",
         "in_delivery",
+        "picked_up",
+        "delivered",
         "done",
       ],
       payment_method: ["cash_in_store", "cash_on_delivery", "online"],

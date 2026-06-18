@@ -114,7 +114,8 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
       login/register cards; consistent header logo/theme toggle_
 - [x] **Role badge** in header — show the role you logged in as (customer/shop/admin).
       Shared component, owned here; C3 imports it into the dashboard header
-- [ ] Adjust toast colors based on theme (global Toaster)
+- [x] Adjust toast colors based on theme (global Toaster) — _`ThemedToaster` wraps sonner with the
+      Mantine color scheme (auto→system), mounted inside `MantineProvider`._
 - [ ] Recheck homepage at the end (QA pass)
 
 ### Browse
@@ -129,7 +130,7 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 
 ### Store page (`/shop/[id]`)
 
-- [ ] Remove button from stores header
+- [x] Remove button from stores header — _removed the leftover `FavoriteButton` (+ its query/import)._
 - [x] Remove share & favorite buttons
 - [x] Make address clickable → Google Maps
 - [x] Make phone number clickable → native dial — _`tel:` links on store page + order detail_
@@ -206,7 +207,9 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 
 ### Offers admin (shop side) ⬅BE 🔗
 
-- [ ] Banner color configuration on promos
+- [x] Banner color configuration on promos — _`config.bannerColor` (jsonb, preserved in
+      `normalizeOfferInput`); `ColorInput` in `PromotionEditor`; the storefront `ShopOffers` banner
+      ends in the first configured promo colour (dark start keeps white text readable)._
 - [x] Promo config UI (per product/category/cart) — admin face of C1's engine
 
 ### Profile & store
@@ -222,7 +225,8 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
 - [x] Select shop when a user owns multiple shops
 - [x] **Owner role: create / add users & employees** — owner-only members UI
       (add teammate, assign `staff`/`catalog`/`owner`) ⬅BE 🔗
-- [ ] Generate/export invoices & receipts — shop-side view ⬅BE
+- [x] Generate/export invoices & receipts — shop-side view ⬅BE — _added `DownloadReceiptButton`
+      (existing invoice API) to the shop order detail header, enabled once terminal._
 
 ### Dashboard & orders
 
@@ -457,7 +461,10 @@ Captured here as they come up; not yet assigned to a lane.
 - [x] **Saved phone numbers** — autofill / dropdown of saved phones / "add new" in the order modal.
       _New `saved_phones` table (migration `20260617180313`) mirroring addresses; `lib/phones/*` +
       `PhonesManager` on `/account`; checkout shows a "Telefon salvat" picker + "save for next time"._
-- [ ] **Phone prefix** = selectable dropdown **with country flags**.
+- [x] **Phone prefix** = selectable dropdown **with country flags**.
+      _New reusable `components/ui/PhoneInput` (flag + dial-code Select, searchable by country name,
+      RO default) wired into the checkout contact phone + the `/account` PhonesManager. Stores the full
+      "+40 7XX…" string._
 - [x] **"Adresă salvată" vs "Adresă de livrare"** can differ → confusing. Selecting a saved address
       should fill (or grey out) the delivery-address field, not coexist as two different values.
 
@@ -484,14 +491,29 @@ Captured here as they come up; not yet assigned to a lane.
       (chime on new order). Verified — no change needed._
 
 ### Orders / statuses / financials
-- [ ] **More order statuses**: ready-for-pickup, picked-up, in-delivery, delivered.
+- [x] **More order statuses**: ready-for-pickup, picked-up, in-delivery, delivered.
+      _Migrations `20260618074734` (enum values) + `…074810` (completed_at trigger + notify cases +
+      archive cron). Pickup: in_progress → `ready_for_pickup` → `picked_up`; delivery: in_delivery →
+      `delivered` (`done` kept as legacy terminal). Status tokens + `isTerminalStatus`/`isCompletedStatus`
+      helpers; `advanceOrderStatus` VALID_PREV; shop advance buttons (`ShopOrderActions`/`ShopOrderQueue`);
+      fulfilment-aware `StatusTimeline`; chat-close / reviews / reorder / analytics / Finalizate tab /
+      export / reject / modify all updated to the new terminals._
 - [x] **Financial displays = post-commission amount** (what the shop actually receives) — current
       figure can mislead.
-- [ ] **ETA → "Estimat de completare a comenzii"** (rename "~50 min"). Store it as a **timestamp**
+- [x] **ETA → "Estimat de completare a comenzii"** (rename "~50 min"). Store it as a **timestamp**
       set at the moment, and just show `selected_ts − now` as a live countdown (the duration is
       syntactic sugar — no stored computation, only the diff).
-- [ ] **Partial item rejection** — reject only some lines (e.g. accept 3 cups, reject 2 OOS pens)
+      _Migration `20260618074016` (`orders.eta_at`). `setOrderEta` stores `now() + minutes`; new
+      `EtaCountdown` client component renders `eta_at − now` live (30s tick); header + `StatusTimeline`
+      relabelled "Estimat de completare", falling back to the static minutes for legacy orders._
+- [x] **Partial item rejection** — reject only some lines (e.g. accept 3 cups, reject 2 OOS pens)
       rather than the whole order.
+      _Migration `20260618071118` (`order_items.rejected` + atomic `reject_order_lines` RPC that marks
+      lines + reduces subtotal/total/payout in one txn, idempotent). `rejectOrderLines` action
+      (`lib/orders/actions.ts`): membership + order-active check, partial-refunds paid online orders
+      FIRST, then the atomic reduce; keeps ≥1 line; notifies the customer. Shop UI `RejectLinesControl`
+      (line checkboxes + refund preview); rejected lines struck-through + "Indisponibil" badge on both
+      order details._
 - [x] **Shop-side order modification** — let the shop change an order (charge extra/less) and request
       the customer's acceptance; auto-refund the difference if less; an optional free-form **extra-charges
       (RON)** field the shop can fill when modifying.
@@ -514,9 +536,16 @@ Captured here as they come up; not yet assigned to a lane.
       `modifications-internal.ts` so `finalizeModificationById` is no longer a client-callable action._
 
 ### Bugs
-- [ ] **Reorder ("Comandă din nou") file types** — from the basket view I can attach **any** file
+- [x] **Reorder ("Comandă din nou") file types** — from the basket view I can attach **any** file
       type, bypassing the shop's `accepted_file_types` restriction. Enforce the shop's allowed types.
+      _`CartLine` now carries `acceptedFileTypes` (populated in `buildCartLine` + `getReorderPayload`/
+      `ReorderButton`); the `CartBar` re-attach `FileButton` sets `accept` AND rejects a disallowed file
+      with a toast (`fileAllowed`). Server-side parity check already enforced at placement._
 
 ### More small UI (added later 2026-06-17)
-- [ ] **"Disponibil" switch** → use `cursor: pointer` on hover.
-- [ ] **"RON" everywhere instead of "lei"** — replace the currency suffix app-wide (use `formatPrice`).
+- [x] **"Disponibil" switch** → use `cursor: pointer` on hover.
+      _Global `Switch` theme config (`theme.ts`): pointer cursor on track/input/label — applies to every switch._
+- [x] **"RON" everywhere instead of "lei"** — replace the currency suffix app-wide (use `formatPrice`).
+      _Swapped the `" lei"` suffix → `" RON"` across all customer + shop money displays (order details,
+      breakdowns, dashboard, analytics, offers chips, invoice PDF, modification cards). Legal terms line
+      ("în lei (RON)") left intact._

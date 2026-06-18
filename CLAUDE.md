@@ -69,8 +69,10 @@ self-contained record — it never changes when the catalog is later edited.
   courier pickup. `commission_rate` owner-immutable (admin-only, trigger `shops_guard_commission`);
   `default_eta_minutes` seeds new orders' ETA. "Temporary pause" = `schedule_overrides` day-entries set
   to `null` (closed) via the `setShopPause` action; `isOpenNow` honours overrides over the weekly
-  `schedule`, flipping the open badge + checkout gate. (`is_active` column exists; browse-hiding by it is
-  a separate TODO.)
+  `schedule`, flipping the open badge + checkout gate. **`is_active` = hard on/off** (distinct from the
+  temporary pause): owner-toggleable via `setShopActive` in the profile editor; an inactive shop is hidden
+  from browse + unreachable by direct URL (RLS `shops_select_public using(is_active)` + a `to authenticated`
+  member policy so owners still read their own; every customer-facing read filters it; place-order rejects).
 - **`shop_permissions`** `(shop_id, profile_id, role)`, `shop_role` enum ordered `staff < catalog <
   owner`. staff=orders+chat; catalog=+catalog/offers; owner=+members/legal/finance. RLS via
   `is_shop_member(shop_id, min_role)` SECURITY DEFINER helper.
@@ -79,14 +81,22 @@ self-contained record — it never changes when the catalog is later edited.
   **draft**, publish = move the pointer. Keep last 10. RPCs: `create_catalog_draft`,
   `set_active_catalog_version`. `catalog`+ manage; public reads only the active version's `document`.
 - **`orders`** + **`order_items`** (mixed cart, one row + N lines). Lines freeze `kind, item_id,
-  item_title, quantity, answers (jsonb), price_breakdown (jsonb), line_total, files (jsonb)`.
-  Orders carry `total, subtotal, discount, shipping_fee, service_fee, commission, payout,
-  eta_minutes, applied_offers (jsonb), status, payment_method, payment_status, payment_ref, paid_at,
+  item_title, quantity, answers (jsonb), price_breakdown (jsonb), line_total, files (jsonb)`, plus
+  `rejected` (a shop can reject individual lines — see partial rejection below).
+  Orders carry `total, subtotal, discount, adjustment, shipping_fee, service_fee, commission, payout,
+  eta_minutes, eta_at, applied_offers (jsonb), status, payment_method, payment_status, payment_ref, paid_at,
   catalog_version_id, handled_by, completed_at, archived_at`, plus `delivery_lat/lng` (drop-off coords
   from the checkout map/geolocation) and `courier_provider/ref/status/tracking_url/name/phone` (external
   courier dispatch — Glovo). `eta_minutes` = per-order estimate (visible both sides; shop-editable via
-  `setOrderEta`; seeded from `shops.default_eta_minutes`).
+  `setOrderEta`); `eta_at` = the same estimate frozen as an absolute timestamp (`now()+minutes`) → the UI
+  shows a live `eta_at − now` countdown ("Estimat de completare a comenzii"). `adjustment` = net of accepted
+  shop modifications (signed) — see Money & flows.
   **No client insert** — only the place-order Server Action (service role).
+- **`order_modifications`** = a shop-proposed change to a placed order (signed `adjustment` + reason),
+  pending the customer's acceptance. RLS read-only for participants; all writes via service-role actions
+  (`lib/orders/modifications.ts` + the non-action `modifications-internal.ts`). See Money & flows.
+- **`addresses`** + **`saved_phones`** = the customer's own autofill book (label + is_default, own-RLS),
+  surfaced on the `/account` "Profilul meu" page + as pickers in checkout.
 - **`shop_invitations`** `(shop_id, email, role)` = pre-authorized members without an account yet.
   Owner-only SECURITY DEFINER RPCs manage the team (`add_shop_member` → 'added' if the email has a
   profile else 'invited'; `set_shop_member_role`, `remove_shop_member`, `list_shop_members`,
@@ -156,7 +166,17 @@ self-contained record — it never changes when the catalog is later edited.
   `stripe listen --forward-to localhost:3000/api/stripe-webhook`; test card `4242…`.
 - **Refunds (done):** a paid online order is auto-refunded when the shop **rejects** it
   (`lib/orders/refund.ts` → Stripe refund, wired in `advanceOrderStatus`; `charge.refunded` webhook also
-  catches manual dashboard refunds) → `payment_status='refunded'`. Customer-initiated cancel/refund: not built.
+  catches manual dashboard refunds) → `payment_status='refunded'`. The `charge.refunded` branch only flips
+  to `refunded` on a **full** refund (a partial — a modification reduction or a line rejection — stays
+  `paid`). Customer-initiated cancel/refund: not built.
+- **Shop-side order modification (done):** a shop proposes a signed `adjustment` (+extra / −reduction) +
+  reason; the customer accepts/declines (`order_modifications` table). On accept: cash → recorded; online
+  reduction → auto **partial-refund** the difference (must succeed before finalizing); online extra → a
+  **delta PaymentIntent** (metadata `kind:'modification'`) the customer confirms with a card. Finalize is the
+  atomic `finalize_order_modification` RPC (CAS flip + apply total/payout/adjustment in one txn) so the
+  webhook + the client `confirmModificationPayment` fallback can't double-apply. Webhook-only helpers live in
+  `lib/orders/modifications-internal.ts` (NOT a `"use server"` file → never client-callable). Shop UI
+  `ShopModificationControl`; customer `CustomerModificationCard` (Stripe Element); "Ajustare" breakdown line.
 - **Payouts = MANUAL (MVP choice):** the platform collects everything; shop `payout` is just a stored number
   — shops are paid by bank transfer using the CSV export. **No Stripe Connect** (deferred to scale; would be
   Express accounts + `transfer_data`/`application_fee_amount`). Full plan + the deferred items: TASKS.md
@@ -175,10 +195,20 @@ self-contained record — it never changes when the catalog is later edited.
   **signed URLs** (`GET /api/orders/[id]/files`).
 - **Invoice:** `GET /api/orders/[id]/invoice` streams an on-demand receipt PDF (`@react-pdf/renderer`,
   embedded Noto Sans for diacritics). Auth-gated via `getOrderDetail`.
-- **Status:** `pending → accepted | rejected → in_progress → in_delivery → done`. `in_delivery` is
-  delivery-only (pickup skips it). `completed_at` set on `done`/`rejected`; `pg_cron` sets
-  `archived_at` ~1 day later. `advanceOrderStatus(orderId, status)` Server Action; stamps `handled_by`
-  on accept; on `in_delivery` dispatches the Glovo courier, on `rejected` cancels it + refunds (if paid).
+- **Status:** `pending → accepted | rejected → in_progress → …`, then **fulfilment-branched**:
+  pickup → `ready_for_pickup → picked_up`; delivery → `in_delivery → delivered`. (`done` is a kept
+  **legacy** terminal — older orders; new orders end at picked_up/delivered.) Helpers in
+  `lib/design/status.ts`: `isTerminalStatus` (done/rejected/picked_up/delivered) + `isCompletedStatus`
+  (success terminals, excl. rejected) — use these, not hardcoded `=== "done"`. `StatusTimeline` is
+  fulfilment-aware. `completed_at` set on every terminal (trigger); `pg_cron` archives ~1 day later.
+  `advanceOrderStatus(orderId, status)` Server Action (VALID_PREV concurrency guard); stamps `handled_by`
+  on accept; on `in_delivery` dispatches the Glovo courier; on `rejected` cancels it + refunds (if paid);
+  on any terminal cancels pending order-modifications (+ their unconfirmed delta PIs).
+- **Partial item rejection:** a shop can reject SOME lines (e.g. OOS) instead of the whole order —
+  `rejectOrderLines` action partial-refunds the rejected goods (paid online) FIRST, then the atomic
+  `reject_order_lines` RPC marks `order_items.rejected` + reduces subtotal/total/payout (only the newly-
+  rejected lines, so a re-submit can't double-reduce). ≥1 line must remain. Shop UI `RejectLinesControl`;
+  rejected lines struck-through + "Indisponibil" on both order details.
 - **Order visibility (shop):** an order reaches the shop (queue + the "Comandă nouă" notification) only
   once it's actually placed — **cash on insert, online ONLY when `payment_status='paid'`.** Enforced by the
   `notify_new_order`/`notify_paid_order` triggers + a shared `payment_method.neq.online,payment_status.eq.paid,
@@ -189,8 +219,10 @@ self-contained record — it never changes when the catalog is later edited.
   payout CSV) until payment succeeds.
 
 ## Routing
-- Customer: `/browse`, `/orders`, `/shop/[shopId]`, `/order/[orderId]` (public: `/browse`, `/shop/[id]`).
-- Shop: `/dashboard` + `/dashboard/{orders,products,services,offers,profile}` (layout guards `shop|admin`).
+- Customer: `/browse`, `/orders`, `/account` ("Profilul meu" — profile + saved addresses + saved phones;
+  `/addresses` redirects here), `/shop/[shopId]`, `/order/[orderId]` (public: `/browse`, `/shop/[id]`).
+- Shop: `/dashboard` + `/dashboard/{orders,products,services,offers,profile,members,analytics,reviews,messages}`
+  (layout guards `shop|admin`).
 - Auth: `/login`, `/register`. `/` routes by role. `middleware.ts` skips auth when env keys are
   placeholder; protected prefixes `/order /orders /dashboard /courier` (segment-precise).
 
@@ -217,8 +249,8 @@ self-contained record — it never changes when the catalog is later edited.
 ## Known gaps / still-stubbed (visual placeholders until BE lands)
 - Shop profile editor persists name/description/phone/email/address/schedule/delivery_fee/
   default_eta_minutes; logo/banner upload wired via `shop-assets`. (City still hardcoded Iași.)
-- Order ETA: `orders.eta_minutes` exists + is read on both sides; shop edit control / customer
-  timeline display is FE polish (C3/C2).
+- Order ETA: **done** — `orders.eta_minutes` (shop edit control) + `eta_at` timestamp → live
+  `EtaCountdown` ("Estimat de completare a comenzii") on the header + `StatusTimeline`, both sides.
 - Customer identity for shops now resolvable (`profiles_select_shop_customer`); still falls back
   to "Client" if a profile has no `full_name`.
 - Courier delivery: **superseded by the Glovo LaaS integration** (built + gated — see Money & flows and
@@ -260,6 +292,30 @@ self-contained record — it never changes when the catalog is later edited.
 - **Shipping/courier money parity:** the place-order reprice must mirror the checkout preview. Shipping is
   fulfilment-aware (`baseShipping = pickup ? 0 : delivery_fee`, or the Glovo quote when enabled); for a
   courier delivery the shop's `payout` EXCLUDES that fee (the platform pays the courier — pricing model A).
+- **Adding an enum value needs TWO migrations:** `alter type … add value` can't be *used* in the same
+  transaction that adds it. Migration 1 adds the value(s); migration 2 updates any trigger/function/cron that
+  references the new literal (e.g. the order_status pickup/delivered split did exactly this).
+- **`"use server"` exports are client-callable endpoints.** Never put a privileged/no-auth helper (a webhook
+  finalizer, a terminal-cleanup) in a `"use server"` file — anyone could invoke it. Keep such helpers in a
+  plain `import "server-only"` module (e.g. `lib/orders/modifications-internal.ts`) and import them into the
+  webhook/actions; only user-facing, authorization-checked actions belong in `"use server"`.
+- **Money-mutating server actions must be idempotent + refund-before-apply.** Concurrent finalizers (webhook +
+  client fallback) can double-apply: gate with an atomic CAS / `SECURITY DEFINER` RPC (see
+  `finalize_order_modification`, `reject_order_lines`). For a reduction, the Stripe refund must SUCCEED before
+  reducing total/payout; for a partial refund, don't flip `payment_status` to `refunded`.
+
+## Shipped this iteration (statuses, profile, order-ops push, ~2026-06-18)
+> Condensed record; durable details are integrated into the sections above, full task checklist in TASKS.md.
+- **More order statuses:** fulfilment-branched flow — pickup `ready_for_pickup → picked_up`, delivery `in_delivery → delivered` (`done` kept as legacy). `isTerminalStatus`/`isCompletedStatus` helpers in `lib/design/status.ts`; fulfilment-aware `StatusTimeline`; shop advance buttons + every terminal/completed check updated. (migrations `…074734` enum + `…074810` triggers/cron)
+- **Partial item rejection:** shop rejects some lines (OOS) → partial-refund + atomic `reject_order_lines` RPC + `order_items.rejected`; `RejectLinesControl`, struck-through lines. (migration `…071118`)
+- **Shop-side order modification:** `order_modifications` + signed adjustment + customer accept (delta-charge / auto partial-refund), atomic `finalize_order_modification` RPC. (migrations `…183739`, `…190808`)
+- **Shop visibility:** `shops.is_active` hard on/off (owner switch, hidden from browse + direct URL). (migration `…180305`)
+- **Profile / autofill:** `/account` "Profilul meu" (profile + addresses + `saved_phones`); checkout pickers; reusable `PhoneInput` (country-prefix dropdown with flags). (migration `…180313`)
+- **ETA:** `orders.eta_at` timestamp → live `EtaCountdown`. (migration `…074016`)
+- **Discounts:** promo-code field in the cart drawer (`CartContext.applyPromo` → `validate_offer_code`, folded into the live preview, prefilled into checkout).
+- **Chat/notifications:** unread-row highlight, full-height chat, `message_reads` in Realtime (live sidebar badge), richer customer order-status notifications + per-status text. (migrations `…182640`, `…182641`)
+- **Promo banner colour:** per-offer `config.bannerColor` (editor `ColorInput` → storefront banner tint).
+- **Copy/UI polish:** "RON" everywhere (not "lei"); `roCount(0)`→"0 magazine"; `formatTimeInput` (2359→23:59); StatCard icons right-aligned; "Setează ca implicită"; order status badge beside the detail title; **Klarna dropped** (`allow_redirects:"never"`); global `Switch` pointer cursor; theme-aware `ThemedToaster`; shop-side invoice download; removed the store-header favorite button; reorder enforces `accepted_file_types`.
 
 ## Shipped this iteration (delivery + payments push, ~2026-06-03)
 > Condensed record; durable details are integrated into the sections above, full task checklist in TASKS.md.

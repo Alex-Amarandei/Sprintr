@@ -6,8 +6,16 @@ import { getActiveShopId } from "@/lib/shop/active";
 import { getShopCatalog, getShopView } from "@/lib/catalog/shops";
 import { cancelCourierForOrder, dispatchCourierForOrder } from "@/lib/delivery/dispatch";
 import { refundOrder } from "./refund";
-import { cancelPendingModificationsForOrder } from "./modifications-internal";
-import type { OrderStatus } from "@/lib/design/status";
+import {
+  cancelPendingModificationsForOrder,
+  getStripe,
+  notify,
+  round2,
+  serviceClient,
+} from "./modifications-internal";
+import { roCount } from "@/lib/utils/format";
+import type { FileTypeKey } from "@/lib/catalog/schema";
+import { isTerminalStatus, type OrderStatus } from "@/lib/design/status";
 import type { ExportRow } from "./sample";
 
 export interface ReorderPayload {
@@ -23,6 +31,8 @@ export interface ReorderPayload {
     total: number;
     /** Whether the item requires a file upload (so the cart can prompt to re-attach it). */
     requiresUpload: boolean;
+    /** Shop's allowed file types — enforced when re-attaching in the basket. */
+    acceptedFileTypes: FileTypeKey[];
   }[];
 }
 
@@ -53,6 +63,7 @@ export async function getReorderPayload(orderId: string): Promise<ReorderPayload
   // Map current catalog items → whether they require an upload, so a reordered requires-upload
   // line carries the flag (the cart then prompts to re-attach the file, which isn't restored).
   const requiresUpload = new Map(catalog.items.map((i) => [i.id, i.requires_upload]));
+  const acceptedTypes = new Map(catalog.items.map((i) => [i.id, i.accepted_file_types]));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const items = (order.order_items ?? []) as any[];
@@ -68,6 +79,7 @@ export async function getReorderPayload(orderId: string): Promise<ReorderPayload
       answers: (it.answers ?? {}) as Record<string, unknown>,
       total: Number(it.line_total),
       requiresUpload: requiresUpload.get(it.item_id) ?? false,
+      acceptedFileTypes: acceptedTypes.get(it.item_id) ?? [],
     })),
   };
 }
@@ -138,7 +150,13 @@ export async function advanceOrderStatus(
     accepted: ["pending"],
     rejected: ["pending"],
     in_progress: ["accepted"],
+    // Pickup leg.
+    ready_for_pickup: ["in_progress"],
+    picked_up: ["ready_for_pickup", "in_progress"],
+    // Delivery leg.
     in_delivery: ["in_progress"],
+    delivered: ["in_delivery"],
+    // Legacy terminal (kept for older orders).
     done: ["in_progress", "in_delivery"],
   };
   const prevs = VALID_PREV[status] ?? [];
@@ -165,7 +183,7 @@ export async function advanceOrderStatus(
 
   // A terminal order can no longer be modified — cancel any pending proposal (and its unconfirmed
   // delta PaymentIntent) so the customer can't accept/pay a now-moot change.
-  if (status === "rejected" || status === "done") {
+  if (isTerminalStatus(status)) {
     await cancelPendingModificationsForOrder(orderId);
   }
 
@@ -192,9 +210,97 @@ export async function setOrderEta(
 
   const eta =
     etaMinutes == null || Number.isNaN(etaMinutes) ? null : Math.max(0, Math.round(etaMinutes));
+  // Freeze the estimate as an absolute target timestamp set NOW — the UI shows `eta_at − now` as a
+  // live countdown (the minutes are just the input; the diff is never recomputed server-side).
+  const etaAt = eta == null ? null : new Date(Date.now() + eta * 60_000).toISOString();
 
-  const { error } = await supabase.from("orders").update({ eta_minutes: eta }).eq("id", orderId);
+  const { error } = await supabase
+    .from("orders")
+    .update({ eta_minutes: eta, eta_at: etaAt })
+    .eq("id", orderId);
   if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/dashboard/orders");
+  revalidatePath(`/dashboard/orders/${orderId}`);
+  revalidatePath(`/order/${orderId}`);
+  return { ok: true };
+}
+
+/**
+ * Shop rejects a SUBSET of an order's lines (e.g. out of stock) rather than the whole order. The
+ * rejected lines are struck from the order; for a paid online order the customer is partial-refunded
+ * the rejected goods FIRST, then the order subtotal/total/payout are reduced atomically (the RPC only
+ * counts the newly-rejected lines, so a re-submit can't double-reduce). At least one line must remain.
+ */
+export async function rejectOrderLines(
+  orderId: string,
+  lineIds: string[],
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Neautentificat" };
+  if (!lineIds?.length) return { ok: false, error: "Selectează cel puțin un produs" };
+
+  const { data: order } = await supabase
+    .from("orders")
+    .select("id, shop_id, customer_id, status, payment_method, payment_status, payment_ref")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (!order) return { ok: false, error: "Comanda nu a fost găsită" };
+
+  const { data: isMember } = await supabase.rpc("is_shop_member", { p_shop_id: order.shop_id });
+  if (!isMember) return { ok: false, error: "Nepermis" };
+  if (isTerminalStatus(order.status))
+    return { ok: false, error: "Comanda nu mai poate fi modificată" };
+
+  const db = serviceClient();
+  const { data: items } = await db
+    .from("order_items")
+    .select("id, line_total, rejected")
+    .eq("order_id", orderId);
+  const all = items ?? [];
+  const wanted = new Set(lineIds);
+  const targets = all.filter((i) => wanted.has(i.id) && !i.rejected);
+  if (!targets.length) return { ok: false, error: "Produsele selectate sunt deja respinse" };
+  if (all.filter((i) => !i.rejected && !wanted.has(i.id)).length === 0)
+    return { ok: false, error: "Nu poți respinge toate produsele — respinge întreaga comandă." };
+
+  const refundAmount = round2(targets.reduce((s, i) => s + Number(i.line_total), 0));
+  const online = order.payment_method === "online" && order.payment_status === "paid";
+
+  // Paid online → refund the rejected goods BEFORE reducing the order (refund must succeed first).
+  if (online && refundAmount > 0 && order.payment_ref) {
+    try {
+      await getStripe().refunds.create(
+        { payment_intent: order.payment_ref, amount: Math.round(refundAmount * 100) },
+        {
+          idempotencyKey: `reject_${orderId}_${targets
+            .map((t) => t.id)
+            .sort()
+            .join("")
+            .slice(0, 200)}`,
+        },
+      );
+    } catch (e) {
+      console.error("[reject] partial refund failed", orderId, e);
+      return { ok: false, error: "Rambursarea nu a putut fi procesată. Încearcă din nou." };
+    }
+  }
+
+  await db.rpc("reject_order_lines", {
+    p_order_id: orderId,
+    p_line_ids: targets.map((t) => t.id),
+  });
+
+  await notify(
+    db,
+    order.customer_id,
+    "Produse indisponibile",
+    `Comanda #${orderId.slice(0, 8)} · ${roCount(targets.length, "produs indisponibil", "produse indisponibile")}`,
+    `/order/${orderId}`,
+  );
 
   revalidatePath("/dashboard/orders");
   revalidatePath(`/dashboard/orders/${orderId}`);

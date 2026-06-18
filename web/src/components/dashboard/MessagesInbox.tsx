@@ -18,7 +18,7 @@ import {
 import { ArrowLeft, MessageSquare } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { ShopConversation } from "@/lib/messages/queries";
-import type { OrderStatus } from "@/lib/design/status";
+import { isTerminalStatus, type OrderStatus } from "@/lib/design/status";
 import type { SampleMessage } from "@/lib/orders/sample";
 import { ChatPanel } from "@/components/order/ChatPanel";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -30,7 +30,7 @@ const timeOnly = (iso: string) =>
 const initials = (n: string) =>
   n.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 const short = (id: string) => id.slice(0, 8);
-const chatClosed = (s: OrderStatus) => s === "done" || s === "rejected";
+const chatClosed = (s: OrderStatus) => isTerminalStatus(s);
 
 export function MessagesInbox({
   conversations: initial,

@@ -76,12 +76,17 @@ export function ShopOrderActions({
             Trimite la livrare
           </Button>
         ) : (
-          <Button color="teal" loading={pending} onClick={() => set("done", `#${short(id)} finalizată`)}>
-            Marchează gata
+          <Button color="orange" loading={pending} onClick={() => set("ready_for_pickup", `#${short(id)} gata de ridicare`)}>
+            Gata de ridicare
           </Button>
         ))}
+      {status === "ready_for_pickup" && (
+        <Button color="teal" loading={pending} onClick={() => set("picked_up", `#${short(id)} ridicată`)}>
+          Marchează ridicată
+        </Button>
+      )}
       {status === "in_delivery" && (
-        <Button color="teal" loading={pending} onClick={() => set("done", `#${short(id)} livrată`)}>
+        <Button color="teal" loading={pending} onClick={() => set("delivered", `#${short(id)} livrată`)}>
           Marchează livrată
         </Button>
       )}

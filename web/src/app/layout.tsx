@@ -8,9 +8,9 @@ import {
   MantineProvider,
   mantineHtmlProps,
 } from "@mantine/core";
-import { Toaster } from "sonner";
 import { theme } from "@/lib/theme";
 import { ServiceWorkerRegistrar } from "@/components/ui/ServiceWorkerRegistrar";
+import { ThemedToaster } from "@/components/ui/ThemedToaster";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -60,8 +60,8 @@ export default function RootLayout({
       <body>
         <MantineProvider theme={theme} defaultColorScheme="auto">
           {children}
+          <ThemedToaster />
         </MantineProvider>
-        <Toaster position="bottom-right" richColors closeButton />
         <ServiceWorkerRegistrar />
       </body>
     </html>

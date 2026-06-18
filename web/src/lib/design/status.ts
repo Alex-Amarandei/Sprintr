@@ -28,7 +28,10 @@ export const ORDER_STATUS: Record<OrderStatus, StatusMeta> = {
     badgeVariant: "filled",
   },
   in_progress: { label: "În pregătire", color: "cyan" },
+  ready_for_pickup: { label: "Gata de ridicare", color: "orange" },
   in_delivery: { label: "În livrare", color: "grape" },
+  picked_up: { label: "Ridicată", color: "teal", badgeColor: "teal.7" },
+  delivered: { label: "Livrată", color: "teal", badgeColor: "teal.7" },
   done: { label: "Finalizată", color: "mist" },
   rejected: { label: "Respinsă", color: "red" },
 };
@@ -50,8 +53,19 @@ export function statusStep(status: OrderStatus): number {
   return ORDER_FLOW.indexOf(status);
 }
 
-/** Terminal = the order is finished (done or rejected). Receipts are only offered then. */
-export const TERMINAL_STATUSES: OrderStatus[] = ["done", "rejected"];
+/** Terminal = the order is finished (no further action). Receipts are only offered then. */
+export const TERMINAL_STATUSES: OrderStatus[] = [
+  "done",
+  "rejected",
+  "picked_up",
+  "delivered",
+];
 export function isTerminalStatus(status: OrderStatus): boolean {
   return TERMINAL_STATUSES.includes(status);
+}
+
+/** Successfully completed (terminal but NOT rejected) — drives reviews, reorder, "Finalizate". */
+export const COMPLETED_STATUSES: OrderStatus[] = ["done", "picked_up", "delivered"];
+export function isCompletedStatus(status: OrderStatus): boolean {
+  return COMPLETED_STATUSES.includes(status);
 }

@@ -38,6 +38,7 @@ const timeOnly = (iso: string) =>
   new Intl.DateTimeFormat("ro-RO", { hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
 
 type RawItem = {
+  id: string;
   item_id: string;
   item_title: string;
   kind: "service" | "product";
@@ -46,6 +47,7 @@ type RawItem = {
   price_breakdown: Record<string, number> | null;
   line_total: number;
   files: { path: string; name: string }[] | null;
+  rejected: boolean;
 };
 
 /** Build a readable config summary from answers using the catalog item's labels. */
@@ -76,7 +78,7 @@ export function summarize(answers: Record<string, unknown> | null, item?: Item):
 }
 
 const ORDER_SELECT =
-  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, delivery_lat, delivery_lng, contact_phone, notes, subtotal, discount, shipping_fee, service_fee, total, adjustment, commission, payout, eta_minutes, payment_method, payment_status, courier_provider, courier_name, courier_phone, courier_status, courier_tracking_url, created_at, shops(name), order_items(item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files)";
+  "id, customer_id, shop_id, catalog_version_id, status, fulfilment, delivery_address, delivery_lat, delivery_lng, contact_phone, notes, subtotal, discount, shipping_fee, service_fee, total, adjustment, commission, payout, eta_minutes, eta_at, payment_method, payment_status, courier_provider, courier_name, courier_phone, courier_status, courier_tracking_url, created_at, shops(name), order_items(id, item_id, item_title, kind, quantity, answers, price_breakdown, line_total, files, rejected)";
 
 /** Format an ETA in minutes as a short label (e.g. "~30 min", "~1 h 20 min"). */
 function etaLabel(min: number | null | undefined): string | undefined {
@@ -283,7 +285,7 @@ export async function getShopOrderCounts(): Promise<{ pending: number; inProgres
       .from("orders")
       .select("id", { count: "exact", head: true })
       .eq("shop_id", shopId)
-      .in("status", ["accepted", "in_progress", "in_delivery"])
+      .in("status", ["accepted", "in_progress", "ready_for_pickup", "in_delivery"])
       .or(placed),
   ]);
   return { pending: pendingRes.count ?? 0, inProgress: progressRes.count ?? 0 };
@@ -387,10 +389,12 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
 
   const items = (order.order_items ?? []) as RawItem[];
   const lines: SampleOrderLine[] = items.map((it) => ({
+    lineId: it.id,
     itemId: it.item_id,
     title: it.item_title,
     summary: summarize(it.answers, catalogItems.find((ci) => ci.id === it.item_id)),
     lineTotal: Number(it.line_total),
+    rejected: it.rejected,
     pdfName: it.files?.[0]?.name,
     files: (it.files ?? []).map((f) => ({ name: f.name })),
   }));
@@ -412,6 +416,7 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
     placedAt: relTime(order.created_at),
     eta: etaLabel(order.eta_minutes),
     etaMinutes: order.eta_minutes ?? null,
+    etaAt: order.eta_at ?? null,
     subtotal,
     delivery: round2(total - subtotal),
     shippingFee: Number(order.shipping_fee ?? 0),

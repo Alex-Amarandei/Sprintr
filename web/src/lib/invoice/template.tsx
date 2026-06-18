@@ -105,7 +105,7 @@ const s = StyleSheet.create({
   },
 });
 
-const lei = (n: number) => `${n.toFixed(2)} lei`;
+const lei = (n: number) => `${n.toFixed(2)} RON`;
 
 export function InvoiceDocument({ data }: { data: InvoiceData }) {
   return (

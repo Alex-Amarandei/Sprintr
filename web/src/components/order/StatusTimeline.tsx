@@ -1,24 +1,47 @@
 import { Box, Group, Stack, Text, ThemeIcon } from "@mantine/core";
 import { Check, X } from "lucide-react";
-import { type OrderStatus, statusStep } from "@/lib/design/status";
+import { isCompletedStatus, type OrderStatus } from "@/lib/design/status";
 import { TintIcon } from "@/components/ui/TintIcon";
+import { EtaCountdown } from "./EtaCountdown";
 
-const TIMELINE: { status: OrderStatus; label: string }[] = [
-  { status: "pending", label: "Plasată" },
-  { status: "accepted", label: "Acceptată" },
-  { status: "in_progress", label: "În pregătire" },
-  { status: "done", label: "Livrată" },
+const LABELS: Partial<Record<OrderStatus, string>> = {
+  pending: "Plasată",
+  accepted: "Acceptată",
+  in_progress: "În pregătire",
+  ready_for_pickup: "Gata de ridicare",
+  picked_up: "Ridicată",
+  in_delivery: "În livrare",
+  delivered: "Livrată",
+};
+
+const PICKUP_FLOW: OrderStatus[] = [
+  "pending",
+  "accepted",
+  "in_progress",
+  "ready_for_pickup",
+  "picked_up",
+];
+const DELIVERY_FLOW: OrderStatus[] = [
+  "pending",
+  "accepted",
+  "in_progress",
+  "in_delivery",
+  "delivered",
 ];
 
-/** Vertical order-status timeline. `times` maps a status → display time (optional). */
+/** Vertical order-status timeline, fulfilment-aware (pickup vs delivery paths). */
 export function StatusTimeline({
   status,
+  fulfilment,
   times = {},
   eta,
+  etaAt,
 }: {
   status: OrderStatus;
+  fulfilment?: "pickup" | "delivery";
   times?: Partial<Record<OrderStatus, string>>;
   eta?: string;
+  etaAt?: string | null;
 }) {
   if (status === "rejected") {
     return (
@@ -33,51 +56,44 @@ export function StatusTimeline({
     );
   }
 
-  const current = statusStep(status);
+  const flow = fulfilment === "pickup" ? PICKUP_FLOW : DELIVERY_FLOW;
+  // Legacy "done" (older orders) maps to the final step; an unknown status that's completed also does.
+  const effective = status === "done" ? flow[flow.length - 1] : status;
+  let current = flow.indexOf(effective);
+  if (current === -1) current = isCompletedStatus(status) ? flow.length - 1 : 0;
 
   return (
     <Stack gap={0}>
-      {TIMELINE.map((step, i) => {
+      {flow.map((step, i) => {
         const done = i < current;
         const isCurrent = i === current;
         const future = i > current;
-        const last = i === TIMELINE.length - 1;
-        const time = times[step.status] ?? (future && last ? eta && `ETA ${eta}` : undefined);
+        const last = i === flow.length - 1;
+        const timeStr = times[step] ?? (future && last && !etaAt ? (eta ? `Estimat ${eta}` : undefined) : undefined);
+        const showCountdown = future && last && !!etaAt;
         return (
-          <Group key={step.status} align="flex-start" gap="sm" wrap="nowrap">
+          <Group key={step} align="flex-start" gap="sm" wrap="nowrap">
             <Stack gap={0} align="center">
               {future ? (
                 <TintIcon size={26} radius="xl" color="mist">
                   <span />
                 </TintIcon>
               ) : (
-                <ThemeIcon
-                  size={26}
-                  radius="xl"
-                  variant="filled"
-                  color={done ? "teal" : "brand"}
-                >
+                <ThemeIcon size={26} radius="xl" variant="filled" color={done ? "teal" : "brand"}>
                   {done ? <Check size={14} /> : <span />}
                 </ThemeIcon>
               )}
               {!last && (
-                <Box
-                  w={2}
-                  h={30}
-                  bg={done ? "teal.6" : "var(--mantine-color-default-border)"}
-                />
+                <Box w={2} h={30} bg={done ? "teal.6" : "var(--mantine-color-default-border)"} />
               )}
             </Stack>
             <Box pb={last ? 0 : "md"}>
-              <Text
-                fw={isCurrent ? 700 : 500}
-                c={future ? "dimmed" : "var(--mantine-color-text)"}
-              >
-                {step.label}
+              <Text fw={isCurrent ? 700 : 500} c={future ? "dimmed" : "var(--mantine-color-text)"}>
+                {LABELS[step] ?? step}
               </Text>
-              {time && (
+              {(timeStr || showCountdown) && (
                 <Text fz="xs" c="dimmed">
-                  {time}
+                  {showCountdown ? <>Estimat <EtaCountdown at={etaAt!} inherit /></> : timeStr}
                 </Text>
               )}
             </Box>

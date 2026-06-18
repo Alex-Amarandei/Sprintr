@@ -16,15 +16,14 @@ import { TintIcon } from "@/components/ui/TintIcon";
 import { SHOP_CATEGORY } from "@/components/shop/category";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { roCount } from "@/lib/utils/format";
+import { isCompletedStatus, isTerminalStatus } from "@/lib/design/status";
 
 type Filter = "all" | "active" | "done" | "rejected";
 
-const ACTIVE: SampleOrder["status"][] = ["pending", "accepted", "in_progress"];
-
 function matches(o: SampleOrder, f: Filter): boolean {
   if (f === "all") return true;
-  if (f === "active") return ACTIVE.includes(o.status);
-  if (f === "done") return o.status === "done";
+  if (f === "active") return !isTerminalStatus(o.status);
+  if (f === "done") return isCompletedStatus(o.status);
   return o.status === "rejected";
 }
 
@@ -64,13 +63,13 @@ function OrderRow({ order }: { order: SampleOrder }) {
             {roCount(order.itemsCount, "produs", "produse")}
           </Text>
           <Text fw={700} fz="sm" w={90} ta="right" style={{ flexShrink: 0 }}>
-            {order.total.toFixed(2)} lei
+            {order.total.toFixed(2)} RON
           </Text>
           <Box w={130} visibleFrom="sm">
             <StatusBadge status={order.status} />
-            {order.eta && ACTIVE.includes(order.status) && (
+            {order.eta && !isTerminalStatus(order.status) && (
               <Text fz={10} c="dimmed" mt={2}>
-                ETA {order.eta}
+                Estimat {order.eta}
               </Text>
             )}
           </Box>

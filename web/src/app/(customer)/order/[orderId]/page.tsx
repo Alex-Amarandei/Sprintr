@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   Anchor,
+  Badge,
   Box,
   Card,
   Divider,
@@ -18,9 +19,10 @@ import { courierStatusLabel } from "@/lib/delivery/types";
 import { CustomerModificationCard } from "@/components/order/CustomerModificationCard";
 import { getMyShopReview } from "@/lib/reviews/queries";
 import { createClient } from "@/lib/supabase/server";
-import { isTerminalStatus } from "@/lib/design/status";
+import { isCompletedStatus, isTerminalStatus } from "@/lib/design/status";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
+import { EtaCountdown } from "@/components/order/EtaCountdown";
 import { ChatPanel } from "@/components/order/ChatPanel";
 import { ReviewForm } from "@/components/order/ReviewForm";
 import { DownloadReceiptButton } from "@/components/order/DownloadReceiptButton";
@@ -44,11 +46,11 @@ export default async function OrderDetailPage({ params }: Props) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const chatClosed = order.status === "done" || order.status === "rejected";
+  const chatClosed = isTerminalStatus(order.status);
 
   // Post-purchase review is available once the order is done.
   const myReview =
-    order.status === "done" ? await getMyShopReview(order.shopId) : null;
+    isCompletedStatus(order.status) ? await getMyShopReview(order.shopId) : null;
 
   const shortId = order.id.slice(0, 8);
 
@@ -77,7 +79,16 @@ export default async function OrderDetailPage({ params }: Props) {
             </LinkAnchor>
             {" · Plasată "}
             {order.placedAt}
-            {order.eta ? ` · ETA ${order.eta}` : ""}
+            {order.etaAt ? (
+              <>
+                {" · Estimat de completare: "}
+                <EtaCountdown at={order.etaAt} inherit fw={500} />
+              </>
+            ) : order.eta ? (
+              ` · Estimat de completare: ${order.eta}`
+            ) : (
+              ""
+            )}
           </Text>
         </div>
         <Group gap="sm" wrap="wrap">
@@ -96,7 +107,12 @@ export default async function OrderDetailPage({ params }: Props) {
             <Text fw={700} mb="md">
               Status comandă
             </Text>
-            <StatusTimeline status={order.status} eta={order.eta} />
+            <StatusTimeline
+              status={order.status}
+              fulfilment={order.fulfilment}
+              eta={order.eta}
+              etaAt={order.etaAt}
+            />
           </Card>
 
           {modification && modification.status === "pending" && (
@@ -112,15 +128,23 @@ export default async function OrderDetailPage({ params }: Props) {
                 <Box key={i}>
                   <Group justify="space-between" align="flex-start" wrap="nowrap">
                     <div>
-                      <LinkAnchor
-                        href={`/shop/${order.shopId}${line.itemId ? `#item-${line.itemId}` : ""}`}
-                        fw={600}
-                        fz="sm"
-                        c="var(--mantine-color-text)"
-                        underline="hover"
-                      >
-                        {line.title}
-                      </LinkAnchor>
+                      <Group gap={6} wrap="nowrap">
+                        <LinkAnchor
+                          href={`/shop/${order.shopId}${line.itemId ? `#item-${line.itemId}` : ""}`}
+                          fw={600}
+                          fz="sm"
+                          c={line.rejected ? "dimmed" : "var(--mantine-color-text)"}
+                          td={line.rejected ? "line-through" : undefined}
+                          underline="hover"
+                        >
+                          {line.title}
+                        </LinkAnchor>
+                        {line.rejected && (
+                          <Badge size="xs" color="red" variant="light">
+                            Indisponibil
+                          </Badge>
+                        )}
+                      </Group>
                       <Text fz="xs" c="dimmed" mt={2}>
                         {line.summary}
                       </Text>
@@ -140,8 +164,14 @@ export default async function OrderDetailPage({ params }: Props) {
                         </Stack>
                       )}
                     </div>
-                    <Text fw={700} fz="sm" style={{ whiteSpace: "nowrap" }}>
-                      {line.lineTotal.toFixed(2)} lei
+                    <Text
+                      fw={700}
+                      fz="sm"
+                      c={line.rejected ? "dimmed" : undefined}
+                      td={line.rejected ? "line-through" : undefined}
+                      style={{ whiteSpace: "nowrap" }}
+                    >
+                      {line.lineTotal.toFixed(2)} RON
                     </Text>
                   </Group>
                   {i < order.lines.length - 1 && <Divider mt="md" />}
@@ -153,37 +183,37 @@ export default async function OrderDetailPage({ params }: Props) {
             <Stack gap={4}>
               <Group justify="space-between">
                 <Text fz="sm" c="dimmed">Subtotal</Text>
-                <Text fz="sm">{order.subtotal.toFixed(2)} lei</Text>
+                <Text fz="sm">{order.subtotal.toFixed(2)} RON</Text>
               </Group>
               {(order.discount ?? 0) > 0 && (
                 <Group justify="space-between">
                   <Text fz="sm" c="dimmed">Reducere</Text>
-                  <Text fz="sm" c="teal.7">−{(order.discount ?? 0).toFixed(2)} lei</Text>
+                  <Text fz="sm" c="teal.7">−{(order.discount ?? 0).toFixed(2)} RON</Text>
                 </Group>
               )}
               {(order.shippingFee ?? 0) > 0 && (
                 <Group justify="space-between">
                   <Text fz="sm" c="dimmed">Livrare</Text>
-                  <Text fz="sm">{(order.shippingFee ?? 0).toFixed(2)} lei</Text>
+                  <Text fz="sm">{(order.shippingFee ?? 0).toFixed(2)} RON</Text>
                 </Group>
               )}
               <Group justify="space-between">
                 <Text fz="sm" c="dimmed">Taxă serviciu</Text>
-                <Text fz="sm">{(order.serviceFee ?? 0).toFixed(2)} lei</Text>
+                <Text fz="sm">{(order.serviceFee ?? 0).toFixed(2)} RON</Text>
               </Group>
               {(order.adjustment ?? 0) !== 0 && (
                 <Group justify="space-between">
                   <Text fz="sm" c="dimmed">Ajustare</Text>
                   <Text fz="sm" c={(order.adjustment ?? 0) > 0 ? "orange" : "teal.7"}>
                     {(order.adjustment ?? 0) > 0 ? "+" : "−"}
-                    {Math.abs(order.adjustment ?? 0).toFixed(2)} lei
+                    {Math.abs(order.adjustment ?? 0).toFixed(2)} RON
                   </Text>
                 </Group>
               )}
               <Group justify="space-between" mt={4}>
                 <Text fw={700}>Total</Text>
                 <Text fw={800} fz="xl" c="var(--mantine-color-text)">
-                  {order.total.toFixed(2)} lei
+                  {order.total.toFixed(2)} RON
                 </Text>
               </Group>
             </Stack>
@@ -224,7 +254,7 @@ export default async function OrderDetailPage({ params }: Props) {
             </Card>
           )}
 
-          {order.status === "done" && (
+          {isCompletedStatus(order.status) && (
             <ReviewForm
               shopId={order.shopId}
               orderId={order.id}

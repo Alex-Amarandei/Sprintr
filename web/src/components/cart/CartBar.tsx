@@ -26,7 +26,9 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
+import { toast } from "sonner";
 import { formatPrice, roCount } from "@/lib/utils/format";
+import { acceptAttr, acceptedLabel, fileAllowed } from "@/lib/catalog/fileTypes";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useCart } from "./CartContext";
 import { CheckoutModal } from "./CheckoutModal";
@@ -177,7 +179,21 @@ export function CartBar() {
                       </Group>
                     </Group>
                     {missing && (
-                      <FileButton onChange={(f) => f && attachFiles(l.lineId, [f])}>
+                      <FileButton
+                        accept={l.acceptedFileTypes?.length ? acceptAttr(l.acceptedFileTypes) : undefined}
+                        onChange={(f) => {
+                          if (!f) return;
+                          // Enforce the shop's allowed types on basket re-attach (the file picker's
+                          // `accept` is only a hint — a determined user can still pick anything).
+                          if (l.acceptedFileTypes?.length && !fileAllowed(f, l.acceptedFileTypes)) {
+                            toast.error(
+                              `Tip de fișier neacceptat. Permise: ${acceptedLabel(l.acceptedFileTypes)}.`,
+                            );
+                            return;
+                          }
+                          attachFiles(l.lineId, [f]);
+                        }}
+                      >
                         {(props) => (
                           <Button
                             {...props}

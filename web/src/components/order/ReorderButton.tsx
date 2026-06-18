@@ -36,6 +36,7 @@ export function ReorderButton({ orderId }: { orderId: string }) {
           answers: l.answers,
           total: l.total,
           requiresUpload: l.requiresUpload,
+          acceptedFileTypes: l.acceptedFileTypes,
           files: [],
         },
         shop

@@ -27,7 +27,7 @@ import {
  */
 
 // Statuses in which the shop may still modify an order (accepted → before it's terminal).
-const MODIFIABLE = new Set(["accepted", "in_progress", "in_delivery"]);
+const MODIFIABLE = new Set(["accepted", "in_progress", "ready_for_pickup", "in_delivery"]);
 
 /** Shop proposes an adjustment (+ extra / − reduction) + reason; awaits the customer's acceptance. */
 export async function proposeModification(
@@ -90,7 +90,7 @@ export async function proposeModification(
     db,
     order.customer_id,
     "Magazinul a propus o modificare",
-    `Comanda #${orderId.slice(0, 8)} · ${adj > 0 ? "+" : "−"}${Math.abs(adj).toFixed(2)} lei`,
+    `Comanda #${orderId.slice(0, 8)} · ${adj > 0 ? "+" : "−"}${Math.abs(adj).toFixed(2)} RON`,
     `/order/${orderId}`,
   );
   revalidateBoth(orderId);

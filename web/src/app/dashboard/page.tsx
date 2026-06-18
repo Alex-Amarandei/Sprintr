@@ -24,6 +24,7 @@ import { StatCard } from "@/components/ui/StatCard";
 import { DashboardGreeting } from "@/components/dashboard/DashboardGreeting";
 import { ExportReportButton } from "@/components/dashboard/ExportReportButton";
 import { ShopOrderQueue } from "@/components/dashboard/ShopOrderQueue";
+import { isCompletedStatus } from "@/lib/design/status";
 
 export const metadata: Metadata = { title: "Dashboard magazin" };
 
@@ -48,9 +49,9 @@ export default async function ShopDashboardPage() {
   const prepCount = orders.filter(
     (o) => o.status === "accepted" || o.status === "in_progress",
   ).length;
-  const doneCount = orders.filter((o) => o.status === "done").length;
+  const doneCount = orders.filter((o) => isCompletedStatus(o.status)).length;
   const doneRevenue = orders
-    .filter((o) => o.status === "done")
+    .filter((o) => isCompletedStatus(o.status))
     .reduce((sum, o) => sum + o.total, 0);
 
   return (
@@ -104,7 +105,7 @@ export default async function ShopDashboardPage() {
         />
         <StatCard
           icon={<TrendingUp size={20} />}
-          value={`${doneRevenue.toFixed(2)} lei`}
+          value={`${doneRevenue.toFixed(2)} RON`}
           label="Venit finalizat"
           color="brand"
         />
@@ -116,7 +117,7 @@ export default async function ShopDashboardPage() {
             <Text fw={700}>Venit — ultimele 7 zile</Text>
             {stats && (
               <Text fz="xs" c="dimmed">
-                Total: {stats.revenueTotal.toFixed(2)} lei
+                Total: {stats.revenueTotal.toFixed(2)} RON
               </Text>
             )}
           </Group>
@@ -131,7 +132,7 @@ export default async function ShopDashboardPage() {
                   <Text fz={9} c="dimmed">
                     {d.revenue > 0 ? d.revenue.toFixed(0) : ""}
                   </Text>
-                  <Tooltip label={`${d.revenue.toFixed(2)} lei`} withArrow>
+                  <Tooltip label={`${d.revenue.toFixed(2)} RON`} withArrow>
                     <div
                       style={{
                         width: "100%",
@@ -182,7 +183,7 @@ export default async function ShopDashboardPage() {
                     </Text>
                   </div>
                   <Text fw={700} fz="sm" style={{ whiteSpace: "nowrap" }}>
-                    {t.revenue.toFixed(2)} lei
+                    {t.revenue.toFixed(2)} RON
                   </Text>
                 </Group>
               ))}

@@ -35,7 +35,10 @@ const STATUSES: OrderStatus[] = [
   "pending",
   "accepted",
   "in_progress",
+  "ready_for_pickup",
   "in_delivery",
+  "picked_up",
+  "delivered",
   "done",
   "rejected",
 ];

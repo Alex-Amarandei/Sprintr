@@ -41,7 +41,8 @@ import {
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils/format";
-import { phoneError, sanitizePhoneInput } from "@/lib/utils/validation";
+import { phoneError } from "@/lib/utils/validation";
+import { PhoneInput } from "@/components/ui/PhoneInput";
 import { addAddress } from "@/lib/addresses/actions";
 import { addPhone } from "@/lib/phones/actions";
 import {
@@ -464,15 +465,11 @@ function DeliveryStep({
               }}
             />
           )}
-          <TextInput
-            label="Telefon de contact"
-            placeholder="+40 7XX XXX XXX"
+          <PhoneInput
+            value={form.values.contact_phone}
+            onChange={(full) => form.setFieldValue("contact_phone", full)}
+            error={form.errors.contact_phone}
             required
-            inputMode="tel"
-            {...form.getInputProps("contact_phone")}
-            onChange={(e) =>
-              form.setFieldValue("contact_phone", sanitizePhoneInput(e.target.value))
-            }
           />
           <Checkbox
             label="Salvează acest număr pentru data viitoare"

@@ -104,5 +104,13 @@ export const theme = createTheme({
     PasswordInput: { defaultProps: { radius: "md" } },
     Select: { defaultProps: { radius: "md" } },
     MultiSelect: { defaultProps: { radius: "md" } },
+    // Pointer cursor over the whole toggle (track, label, hit-area) so it reads as clickable.
+    Switch: {
+      styles: {
+        track: { cursor: "pointer" },
+        input: { cursor: "pointer" },
+        label: { cursor: "pointer" },
+      },
+    },
   },
 });

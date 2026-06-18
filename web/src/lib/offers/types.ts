@@ -11,6 +11,8 @@ export type OfferConfig = {
   amount?: number; // fixed
   buy?: number; // bxgy
   get?: number; // bxgy
+  /** Optional storefront banner accent colour (CSS color) for this promo. */
+  bannerColor?: string;
 };
 
 /** What the builder UI submits to create/update an offer. */
@@ -47,6 +49,8 @@ export function normalizeOfferInput(input: OfferInput): OfferInput {
   else if (input.type === "fixed") config = { amount: input.config.amount ?? 0 };
   else if (input.type === "bxgy")
     config = { buy: input.config.buy ?? 1, get: input.config.get ?? 1 };
+  // Preserve the optional banner colour across the type-specific rebuild.
+  if (input.config.bannerColor) config.bannerColor = input.config.bannerColor;
 
   return { ...input, scope, target_id, code, config };
 }

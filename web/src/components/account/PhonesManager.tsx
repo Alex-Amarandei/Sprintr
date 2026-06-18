@@ -6,7 +6,7 @@ import { ActionIcon, Badge, Button, Card, Group, Stack, Text, TextInput } from "
 import { Phone, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { addPhone, deletePhone, setDefaultPhone } from "@/lib/phones/actions";
-import { sanitizePhoneInput } from "@/lib/utils/validation";
+import { PhoneInput } from "@/components/ui/PhoneInput";
 import type { SavedPhone } from "@/lib/phones/queries";
 
 export function PhonesManager({ phones }: { phones: SavedPhone[] }) {
@@ -51,13 +51,7 @@ export function PhonesManager({ phones }: { phones: SavedPhone[] }) {
             value={label}
             onChange={(e) => setLabel(e.currentTarget.value)}
           />
-          <TextInput
-            label="Număr de telefon"
-            placeholder="+40 7XX XXX XXX"
-            inputMode="tel"
-            value={phone}
-            onChange={(e) => setPhone(sanitizePhoneInput(e.currentTarget.value))}
-          />
+          <PhoneInput label="Număr de telefon" value={phone} onChange={setPhone} />
           <Group justify="flex-end">
             <Button loading={pending} disabled={!phone.trim()} onClick={add}>
               Salvează numărul

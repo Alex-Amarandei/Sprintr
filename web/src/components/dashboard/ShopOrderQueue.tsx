@@ -126,7 +126,8 @@ export function ShopOrderQueue({
     });
   }
 
-  const isPrep = (s: OrderStatus) => s === "accepted" || s === "in_progress" || s === "in_delivery";
+  const isPrep = (s: OrderStatus) =>
+    s === "accepted" || s === "in_progress" || s === "ready_for_pickup" || s === "in_delivery";
   const q = query.trim().toLowerCase();
   // Search the VISIBLE order number (short #id), client + products — never the raw internal
   // UUID, which isn't shown anywhere and shouldn't be a search term.
@@ -221,12 +222,25 @@ export function ShopOrderQueue({
       ) : (
         <Button
           variant="light"
+          color="orange"
+          size="xs"
+          disabled={pending}
+          onClick={() => setStatus(o.id, "ready_for_pickup", `#${short(o.id)} gata de ridicare`)}
+        >
+          Gata de ridicare
+        </Button>
+      );
+    }
+    if (o.status === "ready_for_pickup") {
+      return (
+        <Button
+          variant="light"
           color="teal"
           size="xs"
           disabled={pending}
-          onClick={() => setStatus(o.id, "done", `#${short(o.id)} finalizată`)}
+          onClick={() => setStatus(o.id, "picked_up", `#${short(o.id)} ridicată`)}
         >
-          Marchează gata
+          Marchează ridicată
         </Button>
       );
     }
@@ -237,7 +251,7 @@ export function ShopOrderQueue({
           color="teal"
           size="xs"
           disabled={pending}
-          onClick={() => setStatus(o.id, "done", `#${short(o.id)} livrată`)}
+          onClick={() => setStatus(o.id, "delivered", `#${short(o.id)} livrată`)}
         >
           Marchează livrată
         </Button>
@@ -317,7 +331,7 @@ export function ShopOrderQueue({
             </Box>
             <Box w={90} style={{ flexShrink: 0 }}>
               <Text fw={700} fz="sm" ta="right" style={{ whiteSpace: "nowrap" }}>
-                {o.total.toFixed(2)} lei
+                {o.total.toFixed(2)} RON
               </Text>
             </Box>
             {/* Desktop: status (right-aligned, roomy) + actions inline */}

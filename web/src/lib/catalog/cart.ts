@@ -2,6 +2,7 @@ import type { Item } from "./schema";
 import { computeItemPrice, type Answers } from "./pricing";
 import { defaultAnswers } from "./answers";
 import type { CartLineInput } from "./offers";
+import type { FileTypeKey } from "./schema";
 
 /** One line in the mixed cart (CLAUDE.md: order = N line items, each freezing answers). */
 export interface CartLine {
@@ -18,6 +19,8 @@ export interface CartLine {
   /** The item requires a file upload. Frozen on the line (serializable) so a reloaded cart — whose
    *  in-memory `files` were stripped on persist — can still detect a now-missing required file. */
   requiresUpload?: boolean;
+  /** Shop's allowed file types (serializable) — enforced when (re-)attaching a file in the basket. */
+  acceptedFileTypes?: FileTypeKey[];
   /** Attached files, held in memory until checkout (uploaded to storage there). */
   files: File[];
 }
@@ -55,6 +58,7 @@ export function buildCartLine(
     quantity,
     total,
     requiresUpload: item.requires_upload,
+    acceptedFileTypes: item.accepted_file_types,
     files,
   };
 }

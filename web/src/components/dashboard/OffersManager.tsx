@@ -37,7 +37,7 @@ const fmtDate = (s: string) =>
 function typeValue(o: OfferRow): string {
   const c = (o.config ?? {}) as { percent?: number; amount?: number; buy?: number; get?: number };
   if (o.type === "percent") return `−${c.percent ?? 0}%`;
-  if (o.type === "fixed") return `−${c.amount ?? 0} lei`;
+  if (o.type === "fixed") return `−${c.amount ?? 0} RON`;
   if (o.type === "bxgy") return `${c.buy ?? 0}+${c.get ?? 0} gratuit`;
   return "Livrare gratuită";
 }

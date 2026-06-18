@@ -29,7 +29,7 @@ export function RevenueAreaChart({ data }: { data: { date: string; Venit: number
         strokeWidth: 2,
       }}
       tickLine="y"
-      valueFormatter={(v) => `${v.toFixed(0)} lei`}
+      valueFormatter={(v) => `${v.toFixed(0)} RON`}
     />
   );
 }

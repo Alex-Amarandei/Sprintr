@@ -7,6 +7,7 @@ import {
   Box,
   Button,
   Card,
+  ColorInput,
   Group,
   NumberInput,
   Paper,
@@ -45,7 +46,13 @@ export function PromotionEditor({
 }) {
   const router = useRouter();
   const editing = Boolean(offer);
-  const cfg = (offer?.config ?? {}) as { percent?: number; amount?: number; buy?: number; get?: number };
+  const cfg = (offer?.config ?? {}) as {
+    percent?: number;
+    amount?: number;
+    buy?: number;
+    get?: number;
+    bannerColor?: string;
+  };
 
   const [name, setName] = useState(offer?.name ?? "");
   const [description, setDescription] = useState(offer?.description ?? "");
@@ -63,6 +70,7 @@ export function PromotionEditor({
   const [startsAt, setStartsAt] = useState(offer?.starts_at?.slice(0, 10) ?? "");
   const [endsAt, setEndsAt] = useState(offer?.ends_at?.slice(0, 10) ?? "");
   const [active, setActive] = useState(offer?.active ?? true);
+  const [bannerColor, setBannerColor] = useState(cfg.bannerColor ?? "");
   const [saving, setSaving] = useState(false);
 
   // free_shipping is always cart-scoped; otherwise the shop picks the scope.
@@ -87,7 +95,7 @@ export function PromotionEditor({
   // first render's values; a successful save navigates away, so no reset is needed.
   const snapshot = JSON.stringify({
     name, description, type, trigger, code, scope, targetId,
-    percent, amount, buy, getN, stackable, permanent, startsAt, endsAt, active,
+    percent, amount, buy, getN, stackable, permanent, startsAt, endsAt, active, bannerColor,
   });
   const initialSnapshot = useRef(snapshot);
   const dirty = snapshot !== initialSnapshot.current;
@@ -113,7 +121,7 @@ export function PromotionEditor({
       target_id: targetId,
       trigger,
       code: trigger === "code" ? code : null,
-      config: { percent, amount, buy, get: getN },
+      config: { percent, amount, buy, get: getN, bannerColor: bannerColor || undefined },
       stackable,
       starts_at: permanent || !startsAt ? null : new Date(startsAt).toISOString(),
       ends_at: permanent || !endsAt ? null : new Date(endsAt).toISOString(),
@@ -137,7 +145,7 @@ export function PromotionEditor({
     type === "percent"
       ? `−${percent}%`
       : type === "fixed"
-        ? `−${amount} lei`
+        ? `−${amount} RON`
         : type === "bxgy"
           ? `${buy}+${getN} gratuit`
           : "Livrare gratuită";
@@ -279,6 +287,24 @@ export function PromotionEditor({
                 minRows={2}
                 value={description}
                 onChange={(e) => setDescription(e.currentTarget.value)}
+              />
+              <ColorInput
+                label="Culoare banner (opțional)"
+                description="Accentuează bannerul promoției pe pagina magazinului."
+                placeholder="Implicită (portocaliu brand)"
+                value={bannerColor}
+                onChange={setBannerColor}
+                format="hex"
+                swatches={[
+                  "#ea6c1f",
+                  "#0d9488",
+                  "#7c3aed",
+                  "#dc2626",
+                  "#2563eb",
+                  "#db2777",
+                  "#16a34a",
+                  "#0f172a",
+                ]}
               />
               <Switch label="Permanentă" checked={permanent} onChange={(e) => setPermanent(e.currentTarget.checked)} />
               {!permanent && (

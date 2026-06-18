@@ -16,7 +16,7 @@ import { roCount } from "@/lib/utils/format";
 
 export const metadata: Metadata = { title: "Statistici" };
 
-const lei = (n: number) => `${n.toFixed(2)} lei`;
+const lei = (n: number) => `${n.toFixed(2)} RON`;
 
 export default async function AnalyticsPage() {
   const shop = await getMyShop();
