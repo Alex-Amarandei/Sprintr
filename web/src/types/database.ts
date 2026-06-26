@@ -1195,6 +1195,7 @@ export type Database = {
         | "picked_up"
         | "delivered"
         | "done"
+        | "cancelled"
       payment_method: "cash_in_store" | "cash_on_delivery" | "online"
       payment_status: "pending" | "paid" | "failed" | "refunded"
       review_target: "shop" | "employee" | "item"
@@ -1345,6 +1346,7 @@ export const Constants = {
         "picked_up",
         "delivered",
         "done",
+        "cancelled",
       ],
       payment_method: ["cash_in_store", "cash_on_delivery", "online"],
       payment_status: ["pending", "paid", "failed", "refunded"],

@@ -15,7 +15,7 @@ import {
 } from "./modifications-internal";
 import { roCount } from "@/lib/utils/format";
 import type { FileTypeKey } from "@/lib/catalog/schema";
-import { isTerminalStatus, type OrderStatus } from "@/lib/design/status";
+import { CUSTOMER_CANCELLABLE, isTerminalStatus, type OrderStatus } from "@/lib/design/status";
 import type { ExportRow } from "./sample";
 
 export interface ReorderPayload {
@@ -158,6 +158,8 @@ export async function advanceOrderStatus(
     delivered: ["in_delivery"],
     // Legacy terminal (kept for older orders).
     done: ["in_progress", "in_delivery"],
+    // Customer-only transition — never reached via advanceOrderStatus (see cancelOrder).
+    cancelled: [],
   };
   const prevs = VALID_PREV[status] ?? [];
 
@@ -190,6 +192,40 @@ export async function advanceOrderStatus(
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/orders");
   revalidatePath(`/dashboard/orders/${orderId}`);
+  return { ok: true };
+}
+
+/**
+ * Customer-initiated cancellation. Allowed only while the order is still cancellable (pending/accepted,
+ * before the shop starts preparing). Atomically claims the cancel — guarded on the customer id AND the
+ * current status via the service role, since customer RLS can't update orders — then auto-refunds a paid
+ * online order (best-effort; the `charge.refunded` webhook + a manual Stripe refund are the safety net).
+ */
+export async function cancelOrder(orderId: string): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Neautentificat" };
+
+  const db = serviceClient();
+  const { data, error } = await db
+    .from("orders")
+    .update({ status: "cancelled", completed_at: new Date().toISOString() })
+    .eq("id", orderId)
+    .eq("customer_id", user.id)
+    .in("status", CUSTOMER_CANCELLABLE)
+    .select("id");
+  if (error) return { ok: false, error: error.message };
+  if (!data || data.length === 0)
+    return { ok: false, error: "Comanda nu mai poate fi anulată." };
+
+  await refundOrder(orderId);
+  await cancelPendingModificationsForOrder(orderId);
+
+  revalidatePath("/orders");
+  revalidatePath(`/order/${orderId}`);
+  revalidatePath("/dashboard/orders");
   return { ok: true };
 }
 

@@ -19,7 +19,7 @@ import { courierStatusLabel } from "@/lib/delivery/types";
 import { CustomerModificationCard } from "@/components/order/CustomerModificationCard";
 import { getMyShopReview } from "@/lib/reviews/queries";
 import { createClient } from "@/lib/supabase/server";
-import { isCompletedStatus, isEtaActive, isTerminalStatus } from "@/lib/design/status";
+import { isCompletedStatus, isCustomerCancellable, isEtaActive, isTerminalStatus } from "@/lib/design/status";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { EtaCountdown } from "@/components/order/EtaCountdown";
@@ -27,6 +27,7 @@ import { ChatPanel } from "@/components/order/ChatPanel";
 import { ReviewForm } from "@/components/order/ReviewForm";
 import { DownloadReceiptButton } from "@/components/order/DownloadReceiptButton";
 import { ReorderButton } from "@/components/order/ReorderButton";
+import { CancelOrderButton } from "@/components/order/CancelOrderButton";
 import { DownloadButton } from "@/components/order/DownloadButton";
 import { LinkAnchor } from "@/components/ui/links";
 
@@ -93,6 +94,12 @@ export default async function OrderDetailPage({ params }: Props) {
           </Text>
         </div>
         <Group gap="sm" wrap="wrap">
+          {isCustomerCancellable(order.status) && (
+            <CancelOrderButton
+              orderId={order.id}
+              paidOnline={!!order.online && order.paymentStatus === "paid"}
+            />
+          )}
           <ReorderButton orderId={order.id} />
           <DownloadReceiptButton
             orderId={order.id}

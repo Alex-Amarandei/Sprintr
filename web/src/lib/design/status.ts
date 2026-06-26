@@ -34,6 +34,7 @@ export const ORDER_STATUS: Record<OrderStatus, StatusMeta> = {
   delivered: { label: "Livrată", color: "teal" },
   done: { label: "Finalizată", color: "mist" },
   rejected: { label: "Respinsă", color: "red" },
+  cancelled: { label: "Anulată", color: "gray" },
 };
 
 /**
@@ -57,9 +58,16 @@ export function statusStep(status: OrderStatus): number {
 export const TERMINAL_STATUSES: OrderStatus[] = [
   "done",
   "rejected",
+  "cancelled",
   "picked_up",
   "delivered",
 ];
+
+/** Statuses a customer may still cancel themselves (before the shop starts preparing). */
+export const CUSTOMER_CANCELLABLE: OrderStatus[] = ["pending", "accepted"];
+export function isCustomerCancellable(status: OrderStatus): boolean {
+  return CUSTOMER_CANCELLABLE.includes(status);
+}
 export function isTerminalStatus(status: OrderStatus): boolean {
   return TERMINAL_STATUSES.includes(status);
 }

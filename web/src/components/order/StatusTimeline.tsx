@@ -43,14 +43,14 @@ export function StatusTimeline({
   eta?: string;
   etaAt?: string | null;
 }) {
-  if (status === "rejected") {
+  if (status === "rejected" || status === "cancelled") {
     return (
       <Group gap="sm">
-        <ThemeIcon size={28} radius="xl" color="red">
+        <ThemeIcon size={28} radius="xl" color={status === "cancelled" ? "gray" : "red"}>
           <X size={16} />
         </ThemeIcon>
-        <Text fw={700} c="red.7">
-          Comandă respinsă
+        <Text fw={700} c={status === "cancelled" ? "dimmed" : "red.7"}>
+          {status === "cancelled" ? "Comandă anulată" : "Comandă respinsă"}
         </Text>
       </Group>
     );
