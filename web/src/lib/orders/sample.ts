@@ -55,6 +55,8 @@ export interface SampleOrder {
   total: number;
   status: OrderStatus;
   placedAt: string;
+  /** Raw ISO of `created_at` — powers the click-to-reveal exact time (relative by default). */
+  placedAtIso?: string;
   /** ETA display string (e.g. "~30 min") derived from etaMinutes. */
   eta?: string;
   /** Raw per-order ETA in minutes (shop-editable, defaults from the shop). Visible both sides. */

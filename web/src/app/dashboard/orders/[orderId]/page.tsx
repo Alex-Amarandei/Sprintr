@@ -34,6 +34,7 @@ import { EtaCountdown } from "@/components/order/EtaCountdown";
 import { ChatPanel } from "@/components/order/ChatPanel";
 import { ShopOrderActions } from "@/components/order/ShopOrderActions";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { RelativeTime } from "@/components/ui/RelativeTime";
 import { OrderEtaEditor } from "@/components/order/OrderEtaEditor";
 import { DownloadButton } from "@/components/order/DownloadButton";
 import { DownloadReceiptButton } from "@/components/order/DownloadReceiptButton";
@@ -271,7 +272,8 @@ export default async function ShopOrderDetailPage({ params }: Props) {
             <StatusBadge status={order.status} />
           </Group>
           <Text c="dimmed" mt={4}>
-            {order.customerName} · Plasată {order.placedAt}
+            {order.customerName} · Plasată{" "}
+            <RelativeTime iso={order.placedAtIso} fallback={order.placedAt} inherit />
             {isEtaActive(order.status) &&
               (order.etaAt ? (
                 <>

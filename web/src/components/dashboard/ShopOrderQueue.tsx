@@ -23,6 +23,7 @@ import type { OrderStatus } from "@/lib/design/status";
 import { advanceOrderStatus } from "@/lib/orders/actions";
 import { createClient } from "@/lib/supabase/client";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { RelativeTime } from "@/components/ui/RelativeTime";
 import { roCount } from "@/lib/utils/format";
 
 type Filter = "all" | "new" | "prep";
@@ -295,7 +296,7 @@ export function ShopOrderQueue({
                     #{short(o.id)}
                   </Text>
                   <Text fz="xs" c="dimmed">
-                    · {o.placedAt}
+                    · <RelativeTime iso={o.placedAtIso} fallback={o.placedAt} inherit />
                   </Text>
                 </Group>
                 <Text fz="sm" truncate>

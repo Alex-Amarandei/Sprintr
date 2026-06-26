@@ -15,6 +15,7 @@ import type { SampleOrder } from "@/lib/orders/sample";
 import { TintIcon } from "@/components/ui/TintIcon";
 import { SHOP_CATEGORY } from "@/components/shop/category";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { RelativeTime } from "@/components/ui/RelativeTime";
 import { roCount } from "@/lib/utils/format";
 import { isCompletedStatus, isTerminalStatus } from "@/lib/design/status";
 
@@ -49,7 +50,8 @@ function OrderRow({ order }: { order: SampleOrder }) {
               #{order.id.slice(0, 8)}
             </Text>
             <Text fz="xs" c="dimmed" truncate>
-              {order.shopName} · {order.placedAt}
+              {order.shopName} ·{" "}
+              <RelativeTime iso={order.placedAtIso} fallback={order.placedAt} inherit />
             </Text>
             {/* Status is hidden on the right on mobile → surface it here instead. */}
             <Box hiddenFrom="sm" mt={6}>

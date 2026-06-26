@@ -21,6 +21,7 @@ import { getMyShopReview } from "@/lib/reviews/queries";
 import { createClient } from "@/lib/supabase/server";
 import { isCompletedStatus, isCustomerCancellable, isEtaActive, isTerminalStatus } from "@/lib/design/status";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { RelativeTime } from "@/components/ui/RelativeTime";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { EtaCountdown } from "@/components/order/EtaCountdown";
 import { ChatPanel } from "@/components/order/ChatPanel";
@@ -79,7 +80,8 @@ export default async function OrderDetailPage({ params }: Props) {
               {order.shopName}
             </LinkAnchor>
             {" · Plasată "}
-            {order.placedAt}
+            <RelativeTime iso={order.placedAtIso} fallback={order.placedAt} inherit />
+            {" "}
             {isEtaActive(order.status) &&
               (order.etaAt ? (
                 <>

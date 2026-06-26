@@ -58,3 +58,15 @@ export function formatDate(date: string | Date): string {
     minute: "2-digit",
   }).format(new Date(date));
 }
+
+/** Verbose Romanian relative time ("Acum 5 min", "Acum 2 ore", "Ieri", then a short date). */
+export function relativeTime(iso: string): string {
+  const min = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (min < 1) return "Acum";
+  if (min < 60) return `Acum ${min} min`;
+  const h = Math.round(min / 60);
+  if (h < 24) return `Acum ${h} ${h === 1 ? "oră" : "ore"}`;
+  const d = Math.round(h / 24);
+  if (d === 1) return "Ieri";
+  return new Intl.DateTimeFormat("ro-RO", { day: "2-digit", month: "short" }).format(new Date(iso));
+}
