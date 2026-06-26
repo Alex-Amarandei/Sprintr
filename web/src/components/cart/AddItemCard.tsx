@@ -57,8 +57,11 @@ export function AddItemCard({
   const [pendingLine, setPendingLine] = useState<CartLine | null>(null);
   const configurable = needsConfiguration(item);
 
-  // "from" price for the card (base + defaults)
-  const fromPrice = computeItemPrice(item, defaultAnswers(item)).total;
+  // "from" price for the card = per-unit (base + default add-ons), NOT min_quantity × unit.
+  // computeItemPrice's total is quantity × (base + addons); divide back out the quantity so
+  // an item sold in lots of 100 still shows the price of a single unit.
+  const priced = computeItemPrice(item, defaultAnswers(item));
+  const fromPrice = priced.quantity > 0 ? priced.total / priced.quantity : priced.total;
 
   const kindColor = item.kind === "service" ? "brand" : "blue";
   const mainUrl = itemImageUrl(mainImage(item));
