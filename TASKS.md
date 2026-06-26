@@ -615,8 +615,12 @@ Captured here as they come up; not yet assigned to a lane.
       editor once it's out for delivery/done._
 
 ### Chat
-- [ ] **Send photos in chat** [C1/C2/C3] — allow image attachments in both chat threads (order +
-      complaint). Needs a storage bucket/path + message rendering on both sides.
+- [x] **Send photos in chat** [C1/C2/C3] — allow image attachments in both chat threads (order +
+      complaint). _Migration `20260626185832_chat_media_attachments`: `messages.attachments jsonb` +
+      private `chat-media` bucket (own-folder upload RLS). Upload via `lib/storage/chatMedia.ts`; read via
+      `GET /api/orders/[id]/chat-media?path=` (order-participant + path-belongs-to-order checked → 1-day
+      signed URL). `ChatPanel` gains a paperclip image picker + pending previews + in-bubble image render,
+      working on both order & complaint threads, customer + shop side. Unit tests still green._
 
 ### Infra
 - [ ] **Register `sprintr.shop` OAuth callback** [C1 👤] — add the `sprintr.shop` redirect/callback URL
