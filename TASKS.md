@@ -623,13 +623,18 @@ Captured here as they come up; not yet assigned to a lane.
       working on both order & complaint threads, customer + shop side. Unit tests still green._
 
 ### Infra
-- [x] **Register `sprintr.shop` OAuth callback** [C1 👤] — add the `sprintr.shop` redirect/callback URL
-      in Supabase Auth + Vercel env. _Done (config, no code): Supabase → Auth → URL Configuration → Site URL
-      = `https://sprintr.shop` + Redirect URLs allow-list `https://sprintr.shop/**` (the bounce to
-      sprintr-dev was Supabase falling back to the Site URL). Google OAuth client keeps the Supabase callback
-      `https://qborcngytmztfucjuwgw.supabase.co/auth/v1/callback`. App code was already domain-agnostic
-      (`window.location.origin`). Set Google **OAuth consent screen App name = "Sprintr"** + logo so the
-      consent reads "Continue to Sprintr"._
+- [x] **Register `sprintr.shop` OAuth callback** [C1 👤] — production Google login on `sprintr.shop`. ✅ WORKING.
+      _Config (Supabase → Auth → URL Configuration): Site URL = `https://sprintr.shop`; Redirect URLs allow-list
+      `https://sprintr.shop/auth/callback` + `https://sprintr.shop/**` (the early bounce to sprintr-dev was
+      Supabase falling back to the Site URL when the redirect_to wasn't allow-listed). Google OAuth client keeps
+      the Supabase callback `https://qborcngytmztfucjuwgw.supabase.co/auth/v1/callback`; consent App name set to
+      "Sprintr". **ROOT CAUSE of the final "PKCE code verifier not found" / works-on-2nd-try:** Vercel served
+      BOTH `www.sprintr.shop` and apex `sprintr.shop` as separate origins with no redirect → the verifier is a
+      host-only cookie, so when the flow started on one host and the callback resolved on the other, the cookie
+      was lost. **Fix: removed `www.sprintr.shop` in Vercel → single apex origin.** Code hardening pushed along
+      the way (kept): `proxy.ts` forwards a stray `?code=` from `/` → `/auth/callback`; the callback now surfaces
+      the real Supabase error instead of a generic `auth_failed`. App auth was already domain-agnostic
+      (`window.location.origin` + `@supabase/ssr` cookies on client & server)._
 - [ ] **Vanity auth domain (consent-screen polish)** [C1 👤, deferred — pre-launch] — the Google consent
       screen still shows the raw `qborcngytmztfucjuwgw.supabase.co` redirect host. To make it read
       `sprintr.shop`, enable Supabase **Custom Domains** (Pro add-on, ~$10/mo): set up `auth.sprintr.shop`
