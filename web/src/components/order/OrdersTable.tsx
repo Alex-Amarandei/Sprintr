@@ -19,13 +19,14 @@ import { RelativeTime } from "@/components/ui/RelativeTime";
 import { roCount } from "@/lib/utils/format";
 import { isCompletedStatus, isTerminalStatus } from "@/lib/design/status";
 
-type Filter = "all" | "active" | "done" | "rejected";
+type Filter = "all" | "active" | "done" | "cancelled";
 
 function matches(o: SampleOrder, f: Filter): boolean {
   if (f === "all") return true;
   if (f === "active") return !isTerminalStatus(o.status);
   if (f === "done") return isCompletedStatus(o.status);
-  return o.status === "rejected";
+  // Both shop-rejected and customer-cancelled orders read as "didn't go through".
+  return o.status === "rejected" || o.status === "cancelled";
 }
 
 function OrderRow({ order }: { order: SampleOrder }) {
@@ -98,7 +99,7 @@ export function OrdersTable({ orders }: { orders: SampleOrder[] }) {
           <Tabs.Tab value="all">Toate ({count("all")})</Tabs.Tab>
           <Tabs.Tab value="active">Active ({count("active")})</Tabs.Tab>
           <Tabs.Tab value="done">Finalizate ({count("done")})</Tabs.Tab>
-          <Tabs.Tab value="rejected">Respinse ({count("rejected")})</Tabs.Tab>
+          <Tabs.Tab value="cancelled">Anulate ({count("cancelled")})</Tabs.Tab>
         </Tabs.List>
       </Tabs>
 
