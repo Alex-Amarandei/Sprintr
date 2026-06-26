@@ -23,6 +23,7 @@ import { isCompletedStatus, isCustomerCancellable, isEtaActive, isTerminalStatus
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { RelativeTime } from "@/components/ui/RelativeTime";
 import { CopyId } from "@/components/ui/CopyId";
+import { OrderLiveRefresh } from "@/components/order/OrderLiveRefresh";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { EtaCountdown } from "@/components/order/EtaCountdown";
 import { ChatPanel } from "@/components/order/ChatPanel";
@@ -59,6 +60,7 @@ export default async function OrderDetailPage({ params }: Props) {
 
   return (
     <Stack gap="lg">
+      <OrderLiveRefresh orderId={order.id} />
       <LinkAnchor href="/orders" c="dimmed" fz="sm" underline="never">
         <Group gap={4} component="span">
           <ArrowLeft size={15} /> Toate comenzile

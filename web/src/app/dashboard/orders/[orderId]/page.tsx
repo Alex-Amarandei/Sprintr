@@ -36,6 +36,7 @@ import { ShopOrderActions } from "@/components/order/ShopOrderActions";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { RelativeTime } from "@/components/ui/RelativeTime";
 import { CopyId } from "@/components/ui/CopyId";
+import { OrderLiveRefresh } from "@/components/order/OrderLiveRefresh";
 import { OrderEtaEditor } from "@/components/order/OrderEtaEditor";
 import { DownloadButton } from "@/components/order/DownloadButton";
 import { DownloadReceiptButton } from "@/components/order/DownloadReceiptButton";
@@ -228,6 +229,7 @@ export default async function ShopOrderDetailPage({ params }: Props) {
 
   return (
     <Stack gap="lg">
+      <OrderLiveRefresh orderId={order.id} />
       <Group justify="space-between" align="center">
         <LinkAnchor href="/dashboard/orders" c="dimmed" fz="sm" underline="never">
           <Group gap={4} component="span">
