@@ -286,12 +286,12 @@ real thing.
 
 Captured here as they come up; not yet assigned to a lane.
 
-- [~] Warn before cart loss — the cart is single-shop client state that's wiped on a full
+- [x] Warn before cart loss — the cart is single-shop client state that's wiped on a full
   reload and cleared when switching shops. Warn the user before they lose it: a
   `beforeunload` prompt on refresh/back-navigation + a confirm dialog when switching shops.
-  _DONE: cross-shop confirm dialog ("Există deja produse în coș de la {magazin}" →
-  Anulează / Golește coșul) before adding from another shop. TODO: `beforeunload` prompt
-  on refresh/back; persist cart in localStorage (see Cart/checkout above)._
+  _DONE: cross-shop confirm dialog; cart persists in localStorage; and a `beforeunload` guard
+  (`CartContext`) now warns on refresh/close — but ONLY when a line carries in-memory attached
+  files (the lines themselves survive localStorage, so files are the only truly-lost state)._
 
 ### 🅿️ Parking lot — header / nav / shop-identity polish
 
@@ -315,9 +315,12 @@ Captured here as they come up; not yet assigned to a lane.
   revealing the already-loaded list to keep the DOM light + an "X din Y" counter. No user knob:
   data is fetched server-side in one go, so a "load N" control would be misleading. (Full page
   only; dashboard preview keeps its `limit`. True server-side paging deferred until volume needs it.)
-- [~] **Refunds + cancel order** — ✅ DONE: auto-refund a paid online order when the shop rejects it
-  (`lib/orders/refund.ts` + `charge.refunded` webhook → `payment_status='refunded'`). See "🚀 Production
-  launch" below. Still parked: a **customer-initiated** cancel/refund UI/flow.
+- [x] **Refunds + cancel order** — auto-refund on shop reject (`lib/orders/refund.ts` + `charge.refunded`
+  webhook → `payment_status='refunded'`) AND now **customer-initiated cancel**: migration
+  `20260626204122_order_status_cancelled` adds an `cancelled` status; `cancelOrder` action (service role,
+  atomic CAS on customer_id + cancellable status pending/accepted) flips it + auto-refunds a paid online
+  order; `CancelOrderButton` (confirm modal) shows on the customer order page while cancellable; "Anulată"
+  status token + timeline state. Shop-side "modify order" (`order_modifications`) covers post-acceptance changes.
 - [ ] **Shop ops — deferred** (parked): bulk order actions (multi-select accept/advance),
   printable packing slip, analytics date-range selector + MoM/YoY deltas, consumables inventory
   (stock table + per-item consumption + decrement-on-order + low-stock).
