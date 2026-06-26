@@ -549,14 +549,21 @@ Captured here as they come up; not yet assigned to a lane.
 > before building.
 
 ### Pricing / configurator
-- [ ] **Configurator total is wrong** [C1/C2] — when configuring a product, the computed total amount
-      is incorrect. Audit `lib/catalog/pricing.ts` ↔ the order-form live preview ↔ server reprice.
+- [x] **Configurator total is wrong** [C1/C2] — when configuring a product, the computed total amount
+      is incorrect. _Root cause: with `min_quantity > 1` and no quantity field, the line was priced ×min
+      while the breakdown only showed the per-unit base (no visible multiplier). Fixed alongside built-in
+      quantity: the configurator now shows a quantity stepper + an explicit "Cantitate × N" line so the
+      total reconciles. Client/server reprice stay byte-equivalent._
 - [x] **"De la" price = per unit** [C2] — the "De la …" teaser price should be the **per-unit** base
       price, not `min_quantity × min_cost`. Fix the storefront/catalog-card "from" price computation.
       _`AddItemCard` divides the quantity back out of `computeItemPrice().total`._
-- [ ] **Quantity is a built-in, not a shop-configured field** [C1/C3] — every product/service should
+- [x] **Quantity is a built-in, not a shop-configured field** [C1/C3] — every product/service should
       have a default quantity input out of the box; the shop should NOT have to add a quantity field
-      manually in the builder. Make quantity intrinsic to the item.
+      manually in the builder. Make quantity intrinsic to the item. _New reserved `QUANTITY_KEY` ("__qty")
+      in `pricing.ts`: when no explicit is_quantity field exists, the intrinsic quantity drives the line
+      multiplier (client + server). `defaultAnswers` seeds it to min_quantity; simple products get an
+      inline −/+ stepper on the card (quick-add), configurable ones get a Cantitate field in the modal.
+      An explicit is_quantity field still wins (backward-compatible)._
 - [x] **Catalog builder: min-quantity field alignment** [C3] — "Cantitate minimă / Comanda minimă
       (ex. 100 buc.)" spans 2 rows; align the row as if every field had a subtitle (consistent heights).
       _Gave Titlu + Preț de bază a `description` so all three inputs align in `ItemCard`._
