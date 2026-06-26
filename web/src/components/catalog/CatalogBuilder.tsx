@@ -408,8 +408,9 @@ export function CatalogBuilder({
     setDoc({ ...doc, categories, items });
     setDirty(true);
   }
+  // New category lands at the TOP (mirrors "add item on top"); sort_order is re-normalized on save.
   const addCategory = () =>
-    setCategories([...doc.categories, newCategory("", doc.categories.length)]);
+    setCategories([newCategory("", 0), ...doc.categories]);
   const renameCategory = (id: string, name: string) =>
     setCategories(
       doc.categories.map((c) => (c.id === id ? { ...c, name } : c)),
@@ -476,6 +477,7 @@ export function CatalogBuilder({
   function buildValidDoc(): CatalogDocument | null {
     const normalized: CatalogDocument = {
       ...doc,
+      categories: doc.categories.map((c, idx) => ({ ...c, sort_order: idx })),
       items: doc.items.map((it, idx) => ({ ...it, sort_order: idx })),
     };
     const dupErr = findDuplicateKeys(normalized);
