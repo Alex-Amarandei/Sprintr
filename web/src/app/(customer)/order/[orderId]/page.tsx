@@ -22,6 +22,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isCompletedStatus, isCustomerCancellable, isEtaActive, isTerminalStatus } from "@/lib/design/status";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { RelativeTime } from "@/components/ui/RelativeTime";
+import { CopyId } from "@/components/ui/CopyId";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { EtaCountdown } from "@/components/order/EtaCountdown";
 import { ChatPanel } from "@/components/order/ChatPanel";
@@ -68,6 +69,7 @@ export default async function OrderDetailPage({ params }: Props) {
         <div>
           <Group gap="sm" align="center">
             <Title order={2}>Comanda #{shortId}</Title>
+            <CopyId value={shortId} />
             <StatusBadge status={order.status} />
           </Group>
           <Text c="dimmed" mt={4}>
