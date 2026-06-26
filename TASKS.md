@@ -579,10 +579,17 @@ Captured here as they come up; not yet assigned to a lane.
       "save for next time" opt-in. Verified._
 
 ### Orders / financials
-- [ ] **Platform commission wrong on order page** [C1] — "Comision platformă" on the order detail is
-      not computed correctly. Re-check `commission`/`payout` math + display.
-- [ ] **Dashboard shows wrong data** [C1/C3] — dashboard figures are not correctly computed. Audit the
-      `shop_stats`/`shop_revenue_daily`/analytics RPCs vs. what the dashboard renders.
+- [x] **Platform commission wrong on order page** [C1] — "Comision platformă" on the order detail is
+      not computed correctly. _Not a code bug: the place-order calc + frozen display were correct. The
+      symptom was **legacy data** — 8 pre-commission-system orders frozen with `commission/payout = 0`
+      (showing shops "Încasezi 0.00 RON"). Resolved by deleting the stale PrintHaus test orders (39 rows,
+      cascaded) at Alex's request; 0 broken rows remain._
+- [x] **Dashboard shows wrong data** [C1/C3] — dashboard figures are not correctly computed. _Real bug:
+      `shop_stats` + `shop_revenue_daily` counted only `status='done'`, but the flow now also has
+      `picked_up`/`delivered` as completed (and `ready_for_pickup` was in no bucket) — so revenue/payout/
+      commission/done undercounted, disagreeing with the dashboard's JS StatCards. Migration
+      `20260626183825_fix_shop_stats_completed_statuses` widens the completed set to
+      `done|picked_up|delivered` and adds `ready_for_pickup` to the in-progress bucket._
 
 ### Order status UI / colors
 - [ ] **"Trimite la livrare" button color** [C2/C3] — off-palette; use a brand/palette token via the
