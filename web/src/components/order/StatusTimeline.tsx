@@ -65,7 +65,9 @@ export function StatusTimeline({
   return (
     <Stack gap={0}>
       {flow.map((step, i) => {
-        const done = i < current;
+        // Once the order is completed, the final (current) step reads as done — teal + check, not
+        // the in-progress brand colour (an orange "current" dot made a delivered order look unfinished).
+        const done = i < current || (i === current && isCompletedStatus(status));
         const isCurrent = i === current;
         const future = i > current;
         const last = i === flow.length - 1;

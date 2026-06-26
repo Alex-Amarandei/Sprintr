@@ -29,9 +29,9 @@ export const ORDER_STATUS: Record<OrderStatus, StatusMeta> = {
   },
   in_progress: { label: "În pregătire", color: "cyan" },
   ready_for_pickup: { label: "Gata de ridicare", color: "orange" },
-  in_delivery: { label: "În livrare", color: "grape" },
-  picked_up: { label: "Ridicată", color: "teal", badgeColor: "teal.7" },
-  delivered: { label: "Livrată", color: "teal", badgeColor: "teal.7" },
+  in_delivery: { label: "În livrare", color: "indigo" },
+  picked_up: { label: "Ridicată", color: "teal" },
+  delivered: { label: "Livrată", color: "teal" },
   done: { label: "Finalizată", color: "mist" },
   rejected: { label: "Respinsă", color: "red" },
 };
