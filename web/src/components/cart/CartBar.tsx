@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -89,11 +89,33 @@ export function CartBar() {
     Boolean(l.requiresUpload) && !(l.files?.length);
   const anyMissingFile = lines.some(needsFile);
 
+  // Quick "pop" of the cart pill whenever the item count grows — tactile feedback on add.
+  const [bump, setBump] = useState(false);
+  const prevCount = useRef(count);
+  useEffect(() => {
+    if (count > prevCount.current) {
+      setBump(true);
+      const t = setTimeout(() => setBump(false), 220);
+      prevCount.current = count;
+      return () => clearTimeout(t);
+    }
+    prevCount.current = count;
+  }, [count]);
+
   return (
     <>
       <CheckoutModal opened={checkoutOpened} onClose={closeCheckout} />
 
-      <Indicator label={count} size={18} disabled={count === 0} color="brand">
+      <Indicator
+        label={count}
+        size={18}
+        disabled={count === 0}
+        color="brand"
+        style={{
+          transition: "transform 180ms ease",
+          transform: bump ? "scale(1.18)" : "scale(1)",
+        }}
+      >
         <Button
           variant="subtle"
           color="gray"
