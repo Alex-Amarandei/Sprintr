@@ -8,11 +8,11 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const explicitNext = searchParams.get("next");
 
-  // Surface the real reason on failure (instead of a generic auth_failed) so we can tell a PKCE
-  // verifier mismatch from an expired code, a provider error, or a config problem.
-  const fail = (reason: string) => {
-    console.error("[auth/callback] failed:", reason);
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(reason)}`);
+  // Log the real reason server-side (PKCE mismatch / expired code / provider error / config) for
+  // debugging, but send the USER back with a clean, generic flag — no raw internals in the URL.
+  const fail = (detail: string) => {
+    console.error("[auth/callback] failed:", detail);
+    return NextResponse.redirect(`${origin}/login?error=auth_failed`);
   };
 
   // Provider-side error (user denied / misconfig) comes back without a code.

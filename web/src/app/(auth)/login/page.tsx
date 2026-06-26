@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { Divider, Paper, Stack, Text, Title } from "@mantine/core";
+import { Alert, Divider, Paper, Stack, Text, Title } from "@mantine/core";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { LinkAnchor } from "@/components/ui/links";
 
@@ -8,9 +8,9 @@ export const metadata: Metadata = { title: "Autentificare" };
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, error } = await searchParams;
   return (
     <Paper withBorder shadow="md" radius="lg" p="xl">
       <Stack gap="lg">
@@ -22,6 +22,12 @@ export default async function LoginPage({
             Autentifică-te cu contul tău Google ca să-ți continui comenzile.
           </Text>
         </div>
+
+        {error && (
+          <Alert color="red" variant="light" title="Autentificarea nu a reușit">
+            Te rugăm să încerci din nou. Dacă problema persistă, scrie-ne.
+          </Alert>
+        )}
 
         <GoogleSignInButton label="Continuă cu Google" next={next} />
 
