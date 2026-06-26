@@ -123,6 +123,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [lines, shop, hydrated]);
 
+  // Warn before a full reload / tab close — but ONLY when a line carries in-memory attached files.
+  // The cart lines themselves survive in localStorage, so warning on every refresh would be a pointless
+  // scary dialog; the genuinely-lost state is the File objects (stripped on persist → must be re-attached).
+  useEffect(() => {
+    if (!hydrated) return;
+    const hasUnsavedFiles = lines.some((l) => l.files && l.files.length > 0);
+    if (!hasUnsavedFiles) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [lines, hydrated]);
+
   // Load the cart shop's live automatic offers so the cart can preview the discount.
   // Code-triggered offers are deliberately excluded (those apply only at checkout).
   const shopId = shop?.id ?? null;
