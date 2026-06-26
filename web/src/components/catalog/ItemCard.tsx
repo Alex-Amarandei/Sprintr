@@ -17,6 +17,7 @@ import {
   Text,
   Textarea,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
 import { ChevronDown, ChevronUp, GripVertical, Plus, Trash2 } from "lucide-react";
 import {
@@ -215,12 +216,16 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
           </div>
         </Group>
         <Group gap={4} wrap="nowrap">
-          <ActionIcon variant="subtle" color="gray" size="lg" onClick={() => setOpen((o) => !o)} aria-label="Editează item-ul">
-            {open ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-          </ActionIcon>
-          <ActionIcon variant="subtle" color="red" size="lg" onClick={onRemove} aria-label="Șterge item-ul">
-            <Trash2 size={18} />
-          </ActionIcon>
+          <Tooltip label={open ? "Restrânge" : "Editează"} withArrow>
+            <ActionIcon variant="subtle" color="gray" size="lg" onClick={() => setOpen((o) => !o)} aria-label="Editează item-ul">
+              {open ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label="Șterge" withArrow>
+            <ActionIcon variant="subtle" color="red" size="lg" onClick={onRemove} aria-label="Șterge item-ul">
+              <Trash2 size={18} />
+            </ActionIcon>
+          </Tooltip>
         </Group>
       </Group>
 

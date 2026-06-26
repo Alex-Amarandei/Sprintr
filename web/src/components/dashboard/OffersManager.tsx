@@ -10,6 +10,7 @@ import {
   Switch,
   Text,
   Title,
+  Tooltip,
 } from "@mantine/core";
 import { Pencil, Plus, Tag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -171,22 +172,26 @@ export function OffersManager({
                       onChange={() => toggle(o)}
                       aria-label="Activează/dezactivează"
                     />
-                    <LinkActionIcon
-                      href={`/dashboard/offers/${o.id}/edit`}
-                      variant="subtle"
-                      color="gray"
-                      aria-label="Editează promoția"
-                    >
-                      <Pencil size={16} />
-                    </LinkActionIcon>
-                    <ActionIcon
-                      variant="subtle"
-                      color="red"
-                      aria-label="Șterge promoția"
-                      onClick={() => remove(o)}
-                    >
-                      <Trash2 size={16} />
-                    </ActionIcon>
+                    <Tooltip label="Editează" withArrow>
+                      <LinkActionIcon
+                        href={`/dashboard/offers/${o.id}/edit`}
+                        variant="subtle"
+                        color="gray"
+                        aria-label="Editează promoția"
+                      >
+                        <Pencil size={16} />
+                      </LinkActionIcon>
+                    </Tooltip>
+                    <Tooltip label="Șterge" withArrow>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        aria-label="Șterge promoția"
+                        onClick={() => remove(o)}
+                      >
+                        <Trash2 size={16} />
+                      </ActionIcon>
+                    </Tooltip>
                   </Group>
                 )}
               </Group>
