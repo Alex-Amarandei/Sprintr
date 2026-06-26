@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useDisclosure } from "@mantine/hooks";
 import {
   ActionIcon,
@@ -29,6 +30,7 @@ import {
 import { toast } from "sonner";
 import { formatPrice, roCount } from "@/lib/utils/format";
 import { acceptAttr, acceptedLabel, fileAllowed } from "@/lib/catalog/fileTypes";
+import { createClient } from "@/lib/supabase/client";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useCart } from "./CartContext";
 import { CheckoutModal } from "./CheckoutModal";
@@ -53,8 +55,28 @@ export function CartBar() {
     applyPromo,
     clearPromo,
   } = useCart();
+  const router = useRouter();
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
   const [checkoutOpened, { open: openCheckout, close: closeCheckout }] = useDisclosure(false);
+  const [authChecking, setAuthChecking] = useState(false);
+
+  // Gate checkout on auth: a logged-out customer is sent to /login (returning here after,
+  // with the cart intact via localStorage) instead of opening the checkout modal.
+  async function startCheckout() {
+    setAuthChecking(true);
+    try {
+      const { data } = await createClient().auth.getUser();
+      closeDrawer();
+      if (!data.user) {
+        const next = window.location.pathname + window.location.search;
+        router.push(`/login?next=${encodeURIComponent(next)}`);
+        return;
+      }
+      openCheckout();
+    } finally {
+      setAuthChecking(false);
+    }
+  }
   // Local promo input (seeded from the applied code; cleared when the cart's shop changes).
   const [promoInput, setPromoInput] = useState(promoCode);
   useEffect(() => {
@@ -316,10 +338,8 @@ export function CartBar() {
               fullWidth
               rightSection={<ArrowRight size={16} />}
               disabled={!shopOpen || anyMissingFile}
-              onClick={() => {
-                closeDrawer();
-                openCheckout();
-              }}
+              loading={authChecking}
+              onClick={() => void startCheckout()}
             >
               {!shopOpen
                 ? "Magazin închis"

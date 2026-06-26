@@ -5,7 +5,12 @@ import { LinkAnchor } from "@/components/ui/links";
 
 export const metadata: Metadata = { title: "Autentificare" };
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
   return (
     <Paper withBorder shadow="md" radius="lg" p="xl">
       <Stack gap="lg">
@@ -18,7 +23,7 @@ export default function LoginPage() {
           </Text>
         </div>
 
-        <GoogleSignInButton label="Continuă cu Google" />
+        <GoogleSignInButton label="Continuă cu Google" next={next} />
 
         <Text ta="center" size="sm" c="dimmed">
           Nu ai cont încă?{" "}
