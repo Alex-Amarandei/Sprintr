@@ -623,5 +623,19 @@ Captured here as they come up; not yet assigned to a lane.
       working on both order & complaint threads, customer + shop side. Unit tests still green._
 
 ### Infra
-- [ ] **Register `sprintr.shop` OAuth callback** [C1 👤] — add the `sprintr.shop` redirect/callback URL
-      in Supabase Auth + Vercel env.
+- [x] **Register `sprintr.shop` OAuth callback** [C1 👤] — add the `sprintr.shop` redirect/callback URL
+      in Supabase Auth + Vercel env. _Done (config, no code): Supabase → Auth → URL Configuration → Site URL
+      = `https://sprintr.shop` + Redirect URLs allow-list `https://sprintr.shop/**` (the bounce to
+      sprintr-dev was Supabase falling back to the Site URL). Google OAuth client keeps the Supabase callback
+      `https://qborcngytmztfucjuwgw.supabase.co/auth/v1/callback`. App code was already domain-agnostic
+      (`window.location.origin`). Set Google **OAuth consent screen App name = "Sprintr"** + logo so the
+      consent reads "Continue to Sprintr"._
+- [ ] **Vanity auth domain (consent-screen polish)** [C1 👤, deferred — pre-launch] — the Google consent
+      screen still shows the raw `qborcngytmztfucjuwgw.supabase.co` redirect host. To make it read
+      `sprintr.shop`, enable Supabase **Custom Domains** (Pro add-on, ~$10/mo): set up `auth.sprintr.shop`
+      (CNAME), then add `https://auth.sprintr.shop/auth/v1/callback` to the Google OAuth client's authorized
+      redirect URIs. Pure branding polish — defer until closer to public launch.
+- [ ] **(minor) `NEXT_PUBLIC_SITE_URL` on Vercel** — code reads `NEXT_PUBLIC_SITE_URL` (sitemap/robots/
+      canonical meta) but Vercel only has an unused `NEXT_PUBLIC_APP_URL`; in prod these default to
+      `localhost`. Add/rename to `NEXT_PUBLIC_SITE_URL = https://sprintr.shop` (Production) + redeploy.
+      No effect on auth.
