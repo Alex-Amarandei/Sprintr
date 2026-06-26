@@ -228,9 +228,16 @@ export function ItemCard({ item, categories, onChange, onRemove, dragHandle }: P
         <Stack gap="md" px="md" pb="md">
           <Divider />
           <Group grow align="flex-start">
-            <TextInput label="Titlu" maxLength={TEXT_MAX} value={item.title} onChange={(e) => patch({ title: e.currentTarget.value })} />
+            <TextInput
+              label="Titlu"
+              description="Numele afișat clientului"
+              maxLength={TEXT_MAX}
+              value={item.title}
+              onChange={(e) => patch({ title: e.currentTarget.value })}
+            />
             <NumberInput
               label="Preț de bază (RON)"
+              description="Prețul pentru o unitate"
               min={0}
               decimalScale={2}
               step={1}
