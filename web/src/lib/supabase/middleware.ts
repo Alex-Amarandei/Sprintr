@@ -5,6 +5,16 @@ import type { Database } from "@/types/database";
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
+  // OAuth-code recovery: if Supabase falls back to the Site URL it delivers `?code=…` to the
+  // root (`/?code=…`) instead of `/auth/callback`, where nothing exchanges it → the user stays
+  // logged out. Forward it to the callback so the PKCE exchange runs (the verifier cookie is
+  // already on this domain). Belt-and-suspenders for a Site-URL/redirect-allow-list misconfig.
+  if (request.nextUrl.pathname === "/" && request.nextUrl.searchParams.has("code")) {
+    const callback = request.nextUrl.clone();
+    callback.pathname = "/auth/callback";
+    return NextResponse.redirect(callback); // preserves ?code (+ ?next/?state)
+  }
+
   // Supabase not configured yet — skip auth so the app is browsable during dev.
   // Guards against missing vars AND the placeholder values in .env.local.example.
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
