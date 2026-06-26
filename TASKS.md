@@ -335,22 +335,19 @@ Captured here as they come up; not yet assigned to a lane.
 
 ---
 
-## 🚀 Production launch — Stripe & Glovo (the last mile)
+## 🚀 Production launch — Stripe (the last mile)
 
-> Goal: make **payments** + **courier delivery** production-ready — the last big steps before launch.
-> Most of the code already exists; the blockers are (a) two decisions, (b) real accounts/keys, and
-> (c) a few finishing pieces. **Legend: 👤 = a human does it** (accounts, keys, dashboard config,
-> decisions) · **⌨️ = code to write.**
+> Goal: make **payments** production-ready — the last big step before launch. Most of the code
+> already exists; the blockers are real accounts/keys + a couple of finishing pieces.
+> **Legend: 👤 = a human does it** (accounts, keys, dashboard config) · **⌨️ = code to write.**
+> _Courier integration (**Glovo**) was **DROPPED**. Delivery uses the shop's flat `delivery_fee` + the
+> 12 km radius. The gated `lib/delivery/*` code stays dormant in the repo; no further work planned._
 
 ### ✅ Already built (the baseline you're finishing)
 - **Stripe:** PaymentIntent at place-order (RON, `amount×100`, idempotency key `pi_<orderId>`, order is
   rolled back if PI creation fails), `/api/stripe-webhook` (raw-body signature verify + `stripe_events`
   idempotency; handles `payment_intent.succeeded` → paid and `payment_intent.payment_failed` → failed),
   and a `confirmOrderPayment` client fallback (`lib/orders/payment.ts`). Running on **test keys**.
-- **Glovo (LaaS courier):** full client + dispatch + cancel + an estimate wired into checkout AND
-  place-order (pricing **model A** + the payout fix), `/api/glovo-webhook`, courier display on both order
-  details, `orders.courier_*` columns. **Gated OFF until keys**; `GLOVO_API_ENV=mock` runs the whole flow
-  with realistic fake data (no account needed). Everything lives in `lib/delivery/*`.
 
 ### 🔑 Decisions — DECIDED (MVP = easiest path, 2026-06-03)
 - [x] **Payouts → Option 1 (Manual).** Platform collects the full amount; shops are paid by bank transfer
@@ -383,33 +380,11 @@ Captured here as they come up; not yet assigned to a lane.
 - [ ] _Deferred (optional):_ graceful UI for PI `requires_action`/`processing` + the 3DS `/orders?paid=…`
   return; Apple/Google Pay domain-association file; create the order AFTER payment (no orphaned `pending` rows).
 
-### 👤 GLOVO — you do
-- [ ] **(Now)** validate the whole flow in **mock mode** (`GLOVO_API_ENV=mock`) — no account/keys needed.
-- [ ] Set `GLOVO_API_ENV` / `GLOVO_API_KEY` / `GLOVO_API_SECRET` locally (sandbox) then on Vercel (prod).
-- [ ] Make sure shops **save their profile** (auto-geocodes the address → `shops.lat/lng`, which the
-  dispatch + quote require).
-
-### ⌨️ GLOVO — code to write (once sandbox creds land — one small pass)
-- [ ] Verify/extend `courierStatusLabel` (`lib/delivery/types.ts`) against Glovo's real status strings.
-- [ ] _(Optional)_ use Glovo's `/working-areas` for precise coverage instead of the flat 12 km radius.
-- [ ] _(Optional)_ a `glovoTrack` poll fallback if webhooks prove flaky.
-- [ ] Sandbox end-to-end test pass + adjustments.
-
-### Recommended sequence
-1. Decide **Payouts** + **Refunds** → start **refunds** immediately (it's needed either way).
-2. Get **Glovo sandbox creds** in parallel (cheap to verify; mock-test until they arrive).
-3. Build: refunds → (manual payout tracking _or_ Connect) → Glovo verification + auto-done.
-4. Switch to **live keys + register both webhooks + all Vercel env**; deploy to a staging URL.
-5. **Dress rehearsal** (Stripe test mode + Glovo sandbox), then flip to live and run one real low-value
-   order each way.
-
 ### Pre-launch checklist
-- [ ] Vercel env: Supabase (url / anon / **service role**), Stripe (live sk / pk / whsec), Glovo
-  (env / key / secret), `NEXT_PUBLIC_APP_URL`.
-- [ ] Both webhooks registered at the prod domain + verified (Stripe "send test event"; one sandbox Glovo dispatch).
+- [ ] Vercel env: Supabase (url / anon / **service role**), Stripe (live sk / pk / whsec), `NEXT_PUBLIC_SITE_URL`.
+- [ ] Stripe webhook registered at the prod domain + verified (Stripe "send test event").
 - [ ] Refund path tested (reject a paid order → customer is refunded).
-- [ ] Shops have coordinates; the 12 km gate and Glovo coverage agree.
-- [ ] One real end-to-end each: online-pay delivery (paid → dispatched → delivered → done) + pickup/cash.
+- [ ] One real end-to-end: online-pay delivery (paid → done) + pickup/cash.
 
 ---
 
@@ -640,7 +615,4 @@ Captured here as they come up; not yet assigned to a lane.
       `sprintr.shop`, enable Supabase **Custom Domains** (Pro add-on, ~$10/mo): set up `auth.sprintr.shop`
       (CNAME), then add `https://auth.sprintr.shop/auth/v1/callback` to the Google OAuth client's authorized
       redirect URIs. Pure branding polish — defer until closer to public launch.
-- [ ] **(minor) `NEXT_PUBLIC_SITE_URL` on Vercel** — code reads `NEXT_PUBLIC_SITE_URL` (sitemap/robots/
-      canonical meta) but Vercel only has an unused `NEXT_PUBLIC_APP_URL`; in prod these default to
-      `localhost`. Add/rename to `NEXT_PUBLIC_SITE_URL = https://sprintr.shop` (Production) + redeploy.
-      No effect on auth.
+- [x] **(minor) `NEXT_PUBLIC_SITE_URL` on Vercel** — set to `https://sprintr.shop` (Production) by Alex.
