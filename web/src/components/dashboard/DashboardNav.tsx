@@ -6,6 +6,7 @@ import { Group, NavLink, Stack, Text } from "@mantine/core";
 import {
   BarChart3,
   LayoutDashboard,
+  LifeBuoy,
   type LucideIcon,
   MessageSquare,
   Package,
@@ -46,6 +47,7 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/dashboard/members", label: "Echipă", icon: Users },
       { href: "/dashboard/profile", label: "Magazin", icon: Store },
+      { href: "/support", label: "Suport", icon: LifeBuoy },
     ],
   },
 ];
