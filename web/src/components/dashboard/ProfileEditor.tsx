@@ -90,7 +90,7 @@ export function ProfileEditor({
   isActive: boolean;
   logoPath: string | null;
   bannerPath: string | null;
-  meta: { itemCount: number };
+  meta: { itemCount: number; commissionRate: number };
 }) {
   const router = useRouter();
   const [form, setForm] = useState<ProfileText>(initial);
@@ -435,6 +435,22 @@ export function ProfileEditor({
                   }
                 />
               </SimpleGrid>
+
+              {/* Platform commission — read-only (admin-set). Lets the shop see exactly what it keeps. */}
+              <Card withBorder bg="var(--mantine-color-default-hover)" p="sm" radius="md">
+                <Group justify="space-between" wrap="nowrap" gap="sm">
+                  <div>
+                    <Text fw={600} fz="sm">
+                      Comision platformă: {(meta.commissionRate * 100).toFixed(meta.commissionRate * 100 % 1 === 0 ? 0 : 2)}%
+                    </Text>
+                    <Text fz="xs" c="dimmed">
+                      Se aplică la valoarea produselor (după reduceri) și se scade din încasările tale.
+                      Încasezi = produse − comision + livrare. Taxa de serviciu și comisioanele de plată
+                      online sunt suportate de platformă, nu de tine.
+                    </Text>
+                  </div>
+                </Group>
+              </Card>
             </Stack>
           </Card>
 

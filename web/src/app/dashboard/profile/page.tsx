@@ -24,7 +24,7 @@ export default async function ShopProfilePage() {
       isActive={shop?.isActive ?? true}
       logoPath={shop?.logoPath ?? null}
       bannerPath={shop?.bannerPath ?? null}
-      meta={{ itemCount: shop?.itemCount ?? 0 }}
+      meta={{ itemCount: shop?.itemCount ?? 0, commissionRate: shop?.commissionRate ?? 0 }}
     />
   );
 }

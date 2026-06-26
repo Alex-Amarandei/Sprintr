@@ -25,6 +25,8 @@ export interface ShopProfileData {
   isActive: boolean;
   defaultEtaMinutes: number | null;
   deliveryFee: number;
+  /** Platform commission as a fraction (e.g. 0.05 = 5%). Admin-set, owner-immutable — shown read-only. */
+  commissionRate: number;
   logoPath: string | null;
   bannerPath: string | null;
   hasLogo: boolean;
@@ -46,7 +48,7 @@ export async function loadShopProfile(): Promise<ShopProfileData | null> {
   const { data: shop } = await supabase
     .from("shops")
     .select(
-      "id, name, description, phones, website_url, email, address, logo_path, banner_path, schedule, schedule_overrides, default_eta_minutes, delivery_fee, active_version_id, is_active"
+      "id, name, description, phones, website_url, email, address, logo_path, banner_path, schedule, schedule_overrides, default_eta_minutes, delivery_fee, commission_rate, active_version_id, is_active"
     )
     .eq("id", shopId)
     .maybeSingle();
@@ -76,6 +78,7 @@ export async function loadShopProfile(): Promise<ShopProfileData | null> {
     isActive: shop.is_active ?? true,
     defaultEtaMinutes: shop.default_eta_minutes ?? null,
     deliveryFee: Number(shop.delivery_fee ?? 0),
+    commissionRate: Number(shop.commission_rate ?? 0),
     logoPath: shop.logo_path ?? null,
     bannerPath: shop.banner_path ?? null,
     hasLogo: Boolean(shop.logo_path),
