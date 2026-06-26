@@ -22,19 +22,19 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "SprintR",
-    template: "%s | SprintR",
+    default: "Sprintr",
+    template: "%s | Sprintr",
   },
   description:
     "Papetărie la ușa ta. Printare, legătorie și produse de birou livrate rapid în Iași.",
   keywords: ["papetărie", "printare", "legătorie", "livrare", "Iași"],
-  applicationName: "SprintR",
-  appleWebApp: { capable: true, title: "SprintR", statusBarStyle: "default" },
+  applicationName: "Sprintr",
+  appleWebApp: { capable: true, title: "Sprintr", statusBarStyle: "default" },
   openGraph: {
     type: "website",
-    siteName: "SprintR",
+    siteName: "Sprintr",
     locale: "ro_RO",
-    title: "SprintR — Papetărie la ușa ta",
+    title: "Sprintr — Papetărie la ușa ta",
     description:
       "Printare, legătorie și produse de birou livrate rapid în Iași.",
   },

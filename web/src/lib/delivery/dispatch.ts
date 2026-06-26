@@ -54,7 +54,7 @@ export async function dispatchCourierForOrder(orderId: string): Promise<void> {
         address: shop.address ?? "",
         contactName: shop.name,
         contactPhone: shop.phone,
-        details: "Ridicare comandă SprintR",
+        details: "Ridicare comandă Sprintr",
       },
       dropoff: {
         lat: order.delivery_lat,
@@ -62,7 +62,7 @@ export async function dispatchCourierForOrder(orderId: string): Promise<void> {
         address: order.delivery_address ?? "",
         contactPhone: order.contact_phone,
       },
-      description: `Comandă SprintR #${order.id.slice(0, 8)}`,
+      description: `Comandă Sprintr #${order.id.slice(0, 8)}`,
     });
     if (!dispatch) return;
 

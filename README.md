@@ -1,1 +1,1 @@
-# SprintR
+# Sprintr

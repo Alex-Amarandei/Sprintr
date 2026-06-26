@@ -1,7 +1,7 @@
 import { createTheme, type MantineColorsTuple } from "@mantine/core";
 
 /**
- * SprintR design system v2 — "Slate · Ink · Ember".
+ * Sprintr design system v2 — "Slate · Ink · Ember".
  * Cool-blue structure (slate/ink/mist/stone) + vibrant ember for CTAs & status,
  * teal/cyan accents. Ramps are 10-shade Mantine tuples (0 = lightest, 9 = darkest);
  * derived from the prototype's 7-shade anchors. Use shades by index, e.g. `c="slate.6"`.

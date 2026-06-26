@@ -42,7 +42,7 @@ export default async function LoginPage({
 
         <Text ta="center" size="xs" c="dimmed">
           Prin autentificare ești de acord cu Termenii și Politica de
-          confidențialitate SprintR.
+          confidențialitate Sprintr.
         </Text>
       </Stack>
     </Paper>

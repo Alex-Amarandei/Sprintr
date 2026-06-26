@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "SprintR — Papetărie la ușa ta",
-    short_name: "SprintR",
+    name: "Sprintr — Papetărie la ușa ta",
+    short_name: "Sprintr",
     description: "Printare, legătorie și produse de birou livrate rapid în Iași.",
     start_url: "/",
     scope: "/",

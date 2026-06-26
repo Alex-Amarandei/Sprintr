@@ -5,7 +5,7 @@ import type { DeliveryDispatch, DeliveryPoint, DeliveryQuote } from "./types";
 
 /**
  * Glovo Logistics-as-a-Service (Business / "On-Demand") API client — use Glovo couriers to
- * deliver SprintR's own orders (pickup at the shop → drop-off at the customer).
+ * deliver Sprintr's own orders (pickup at the shop → drop-off at the customer).
  *
  * FULLY GATED: every function no-ops (returns null/false) unless GLOVO_API_KEY + GLOVO_API_SECRET
  * are set, so the live order flow is unaffected until real credentials exist. Never throws —

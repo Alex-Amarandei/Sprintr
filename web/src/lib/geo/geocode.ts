@@ -51,7 +51,7 @@ export async function forwardGeocode(address: string): Promise<LatLng | null> {
       `&accept-language=ro&bounded=1&viewbox=27.48,47.25,27.70,47.08` +
       `&q=${encodeURIComponent(q)}`;
     const res = await fetch(url, {
-      headers: { Accept: "application/json", "User-Agent": "SprintR/1.0 (stationery delivery, Iași)" },
+      headers: { Accept: "application/json", "User-Agent": "Sprintr/1.0 (stationery delivery, Iași)" },
     });
     if (!res.ok) return null;
     const data = (await res.json()) as Array<{ lat?: string; lon?: string }>;

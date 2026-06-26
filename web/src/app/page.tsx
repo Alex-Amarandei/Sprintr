@@ -175,7 +175,7 @@ export default async function HomePage() {
             <Box style={{ position: "relative", zIndex: 1 }}>
               <Image
                 src="/logo.svg"
-                alt="SprintR"
+                alt="Sprintr"
                 width={420}
                 height={420}
                 priority

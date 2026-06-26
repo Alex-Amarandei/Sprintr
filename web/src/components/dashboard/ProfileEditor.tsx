@@ -256,7 +256,7 @@ export function ProfileEditor({
       <Group justify="space-between" align="flex-end" wrap="wrap" gap="md">
         <div>
           <Title order={2}>Profil magazin</Title>
-          <Text c="dimmed">Așa te văd clienții pe SprintR.</Text>
+          <Text c="dimmed">Așa te văd clienții pe Sprintr.</Text>
         </div>
         <Button
           leftSection={<Check size={16} />}

@@ -32,7 +32,7 @@ export default function RegisterPage() {
 
         <Text ta="center" size="xs" c="dimmed">
           Prin crearea contului ești de acord cu Termenii și Politica de
-          confidențialitate SprintR.
+          confidențialitate Sprintr.
         </Text>
       </Stack>
     </Paper>

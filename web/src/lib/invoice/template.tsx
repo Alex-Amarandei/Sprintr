@@ -109,12 +109,12 @@ const lei = (n: number) => `${n.toFixed(2)} RON`;
 
 export function InvoiceDocument({ data }: { data: InvoiceData }) {
   return (
-    <Document title={`Chitanță ${data.orderShortId}`} author="SprintR">
+    <Document title={`Chitanță ${data.orderShortId}`} author="Sprintr">
       <Page size="A4" style={s.page}>
         {/* Header */}
         <View style={s.header}>
           <View>
-            <Text style={s.brand}>SprintR</Text>
+            <Text style={s.brand}>Sprintr</Text>
             <Text style={s.docKind}>Chitanță comandă</Text>
           </View>
           <View style={s.headRight}>
@@ -214,7 +214,7 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
         ) : null}
 
         <Text style={s.footer} fixed>
-          Acest document este o chitanță, nu o factură fiscală. · Generat de SprintR · Iași
+          Acest document este o chitanță, nu o factură fiscală. · Generat de Sprintr · Iași
         </Text>
       </Page>
     </Document>

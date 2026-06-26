@@ -8,7 +8,7 @@ import { SiteFooter } from "@/components/ui/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Termeni și condiții",
-  description: "Termenii și condițiile de utilizare a platformei SprintR.",
+  description: "Termenii și condițiile de utilizare a platformei Sprintr.",
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -79,8 +79,8 @@ export default function TermsPage() {
             </div>
 
             <Text>
-              Bine ai venit pe SprintR. Acești Termeni și condiții („Termenii”) reglementează
-              utilizarea platformei SprintR („Platforma”), prin care poți comanda servicii de
+              Bine ai venit pe Sprintr. Acești Termeni și condiții („Termenii”) reglementează
+              utilizarea platformei Sprintr („Platforma”), prin care poți comanda servicii de
               printare, legătorie și produse de papetărie de la magazine partenere din Iași. Prin
               crearea unui cont sau prin plasarea unei comenzi, confirmi că ai citit, ai înțeles și
               ești de acord cu acești Termeni.
@@ -88,8 +88,8 @@ export default function TermsPage() {
 
             <Section title="1. Despre serviciu">
               <Text>
-                SprintR este o platformă intermediară care conectează clienții cu magazine partenere
-                de papetărie și printare. SprintR facilitează plasarea comenzilor, comunicarea și plata,
+                Sprintr este o platformă intermediară care conectează clienții cu magazine partenere
+                de papetărie și printare. Sprintr facilitează plasarea comenzilor, comunicarea și plata,
                 însă serviciile și produsele sunt furnizate și onorate de magazinul ales. Contractul de
                 vânzare se încheie direct între tine și magazin.
               </Text>
@@ -120,7 +120,7 @@ export default function TermsPage() {
                 items={[
                   "Comenzile cu livrare se plătesc online, cu cardul, prin procesatorul securizat Stripe.",
                   "Comenzile cu ridicare din magazin pot fi plătite online sau în numerar, la ridicare.",
-                  "Datele cardului nu sunt stocate pe serverele SprintR; ele sunt procesate exclusiv de Stripe.",
+                  "Datele cardului nu sunt stocate pe serverele Sprintr; ele sunt procesate exclusiv de Stripe.",
                 ]}
               />
             </Section>
@@ -162,7 +162,7 @@ export default function TermsPage() {
 
             <Section title="9. Limitarea răspunderii">
               <Text>
-                SprintR acționează ca intermediar și nu este parte la executarea efectivă a serviciilor de
+                Sprintr acționează ca intermediar și nu este parte la executarea efectivă a serviciilor de
                 printare ori de papetărie. Nu răspundem pentru calitatea lucrărilor, întârzieri sau erori
                 care țin de magazin. Platforma este oferită „ca atare”, fără garanții implicite, în limitele
                 permise de lege.
