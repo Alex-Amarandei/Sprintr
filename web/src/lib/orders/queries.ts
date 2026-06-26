@@ -376,13 +376,21 @@ export async function getOrderDetail(id: string): Promise<SampleOrder | null> {
   // Messages — split into the order thread and the post-completion complaint thread.
   const { data: msgs } = await supabase
     .from("messages")
-    .select("sender_id, body, created_at, kind")
+    .select("sender_id, body, created_at, kind, attachments")
     .eq("order_id", id)
     .order("created_at", { ascending: true });
-  const toMsg = (m: { sender_id: string; body: string; created_at: string }): SampleMessage => ({
+  const toMsg = (m: {
+    sender_id: string;
+    body: string;
+    created_at: string;
+    attachments?: unknown;
+  }): SampleMessage => ({
     from: m.sender_id === order.customer_id ? "customer" : "shop",
     body: m.body,
     at: timeOnly(m.created_at),
+    attachments: Array.isArray(m.attachments)
+      ? (m.attachments as { path: string; name: string }[])
+      : [],
   });
   const messages: SampleMessage[] = (msgs ?? []).filter((m) => m.kind !== "complaint").map(toMsg);
   const complaintMessages: SampleMessage[] = (msgs ?? []).filter((m) => m.kind === "complaint").map(toMsg);

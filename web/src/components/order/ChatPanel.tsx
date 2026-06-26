@@ -6,7 +6,9 @@ import {
   Avatar,
   Box,
   Button,
+  FileButton,
   Group,
+  Image,
   Paper,
   SegmentedControl,
   Stack,
@@ -22,10 +24,12 @@ const CANNED_REPLIES = [
   "Întârziem puțin, revenim imediat cu un update.",
   "Mulțumim pentru comandă! 🙌",
 ];
-import { Paperclip, Receipt, Send } from "lucide-react";
+import { Paperclip, Receipt, Send, X } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import type { SampleMessage } from "@/lib/orders/sample";
+import { uploadChatImages, CHAT_IMAGE_ACCEPT } from "@/lib/storage/chatMedia";
+import type { ChatAttachment, SampleMessage } from "@/lib/orders/sample";
+import type { Json } from "@/types/database";
 import type { OrderStatus } from "@/lib/design/status";
 import { Dot } from "@/components/ui/Dot";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -39,6 +43,7 @@ type ChatMsg = {
   from: "shop" | "customer";
   body: string;
   at: string;
+  attachments?: ChatAttachment[];
 };
 
 const timeOnly = (iso: string) =>
@@ -103,6 +108,7 @@ export function ChatPanel({
   const [tab, setTab] = useState<Thread>(orderClosed ? "complaint" : "order");
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [pendingImages, setPendingImages] = useState<File[]>([]);
 
   const seen = useRef(new Set<string>());
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -121,6 +127,7 @@ export function ChatPanel({
             body: string;
             created_at: string;
             kind: Thread;
+            attachments?: ChatAttachment[];
           };
           if (seen.current.has(row.id)) return; // already shown (our own optimistic insert)
           seen.current.add(row.id);
@@ -129,6 +136,7 @@ export function ChatPanel({
             from: row.sender_id === customerId ? "customer" : "shop",
             body: row.body,
             at: timeOnly(row.created_at),
+            attachments: Array.isArray(row.attachments) ? row.attachments : [],
           };
           (row.kind === "complaint" ? setComplaintMsgs : setOrderMsgs)((prev) => [...prev, msg]);
           onMessage?.();
@@ -161,14 +169,33 @@ export function ChatPanel({
 
   async function send() {
     const body = text.trim();
-    if (!body || sending || inputDisabled) return;
+    const images = pendingImages;
+    if ((!body && images.length === 0) || sending || inputDisabled) return;
 
     setSending(true);
     setText("");
+    setPendingImages([]);
+
+    let attachments: ChatAttachment[] = [];
+    try {
+      attachments = await uploadChatImages(images);
+    } catch (e) {
+      setSending(false);
+      setText(body); // restore so the user can retry
+      setPendingImages(images);
+      toast.error(e instanceof Error ? e.message : "Imaginile nu au putut fi trimise.");
+      return;
+    }
 
     const { data, error } = await supabase
       .from("messages")
-      .insert({ order_id: orderId, sender_id: currentUserId, body, kind: tab })
+      .insert({
+        order_id: orderId,
+        sender_id: currentUserId,
+        body,
+        kind: tab,
+        attachments: attachments as unknown as Json,
+      })
       .select("id, created_at")
       .single();
 
@@ -176,12 +203,19 @@ export function ChatPanel({
 
     if (error || !data) {
       setText(body); // restore so the user can retry
+      setPendingImages(images);
       toast.error("Mesajul nu a putut fi trimis.");
       return;
     }
 
     seen.current.add(data.id);
-    const msg: ChatMsg = { id: data.id, from: mySide, body, at: timeOnly(data.created_at) };
+    const msg: ChatMsg = {
+      id: data.id,
+      from: mySide,
+      body,
+      at: timeOnly(data.created_at),
+      attachments,
+    };
     (tab === "complaint" ? setComplaintMsgs : setOrderMsgs)((prev) => [...prev, msg]);
   }
 
@@ -312,9 +346,31 @@ export function ChatPanel({
                 py={8}
                 bg={mine ? "brand.6" : "var(--mantine-color-default-hover)"}
               >
-                <Text fz="sm" c={mine ? "white" : "var(--mantine-color-text)"}>
-                  {m.body}
-                </Text>
+                {m.attachments && m.attachments.length > 0 && (
+                  <Stack gap={6} mb={m.body ? 6 : 0}>
+                    {m.attachments.map((att, k) => (
+                      <a
+                        key={k}
+                        href={`/api/orders/${orderId}/chat-media?path=${encodeURIComponent(att.path)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <Image
+                          src={`/api/orders/${orderId}/chat-media?path=${encodeURIComponent(att.path)}`}
+                          alt={att.name}
+                          radius="md"
+                          fit="cover"
+                          mah={220}
+                        />
+                      </a>
+                    ))}
+                  </Stack>
+                )}
+                {m.body && (
+                  <Text fz="sm" c={mine ? "white" : "var(--mantine-color-text)"}>
+                    {m.body}
+                  </Text>
+                )}
               </Paper>
               <Text fz={10} c="dimmed" ta={mine ? "right" : "left"} mt={2}>
                 {m.at}
@@ -341,6 +397,37 @@ export function ChatPanel({
         </Group>
       )}
 
+      {/* Pending image previews */}
+      {pendingImages.length > 0 && !inputDisabled && (
+        <Group gap={6} px="sm" pt="xs" wrap="wrap">
+          {pendingImages.map((f, i) => (
+            <Box key={i} pos="relative">
+              <Image
+                src={URL.createObjectURL(f)}
+                alt={f.name}
+                w={56}
+                h={56}
+                radius="sm"
+                fit="cover"
+              />
+              <ActionIcon
+                size="xs"
+                color="red"
+                variant="filled"
+                radius="xl"
+                pos="absolute"
+                top={-6}
+                right={-6}
+                aria-label="Elimină imaginea"
+                onClick={() => setPendingImages((prev) => prev.filter((_, k) => k !== i))}
+              >
+                <X size={12} />
+              </ActionIcon>
+            </Box>
+          ))}
+        </Group>
+      )}
+
       {/* Input */}
       <Group
         p="sm"
@@ -348,9 +435,26 @@ export function ChatPanel({
         wrap="nowrap"
         style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
       >
-        <ActionIcon variant="subtle" color="gray" size="lg" aria-label="Atașează" disabled>
-          <Paperclip size={18} />
-        </ActionIcon>
+        <FileButton
+          accept={CHAT_IMAGE_ACCEPT}
+          multiple
+          onChange={(picked) =>
+            setPendingImages((prev) => [...prev, ...(Array.isArray(picked) ? picked : [])])
+          }
+        >
+          {(props) => (
+            <ActionIcon
+              {...props}
+              variant="subtle"
+              color="gray"
+              size="lg"
+              aria-label="Atașează imagine"
+              disabled={inputDisabled || sending}
+            >
+              <Paperclip size={18} />
+            </ActionIcon>
+          )}
+        </FileButton>
         <TextInput
           flex={1}
           placeholder={placeholder}
@@ -364,7 +468,7 @@ export function ChatPanel({
           size="lg"
           onClick={send}
           loading={sending}
-          disabled={inputDisabled || !text.trim()}
+          disabled={inputDisabled || (!text.trim() && pendingImages.length === 0)}
           aria-label="Trimite"
         >
           <Send size={18} />

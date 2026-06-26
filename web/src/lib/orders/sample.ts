@@ -28,10 +28,16 @@ export interface SampleOrderLine {
   /** All attached files for this line. */
   files?: { name: string }[];
 }
+export interface ChatAttachment {
+  path: string;
+  name: string;
+}
 export interface SampleMessage {
   from: "shop" | "customer";
   body: string;
   at: string;
+  /** Image attachments (storage paths); rendered via the signed-URL chat-media endpoint. */
+  attachments?: ChatAttachment[];
 }
 export interface SampleOrder {
   id: string;
