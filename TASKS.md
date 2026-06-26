@@ -551,26 +551,32 @@ Captured here as they come up; not yet assigned to a lane.
 ### Pricing / configurator
 - [ ] **Configurator total is wrong** [C1/C2] — when configuring a product, the computed total amount
       is incorrect. Audit `lib/catalog/pricing.ts` ↔ the order-form live preview ↔ server reprice.
-- [ ] **"De la" price = per unit** [C2] — the "De la …" teaser price should be the **per-unit** base
+- [x] **"De la" price = per unit** [C2] — the "De la …" teaser price should be the **per-unit** base
       price, not `min_quantity × min_cost`. Fix the storefront/catalog-card "from" price computation.
+      _`AddItemCard` divides the quantity back out of `computeItemPrice().total`._
 - [ ] **Quantity is a built-in, not a shop-configured field** [C1/C3] — every product/service should
       have a default quantity input out of the box; the shop should NOT have to add a quantity field
       manually in the builder. Make quantity intrinsic to the item.
-- [ ] **Catalog builder: min-quantity field alignment** [C3] — "Cantitate minimă / Comanda minimă
+- [x] **Catalog builder: min-quantity field alignment** [C3] — "Cantitate minimă / Comanda minimă
       (ex. 100 buc.)" spans 2 rows; align the row as if every field had a subtitle (consistent heights).
-- [ ] **New category appears at the top** [C3] — adding a category should prepend it to the top of the
-      list (mirror the "add item on top" behaviour).
+      _Gave Titlu + Preț de bază a `description` so all three inputs align in `ItemCard`._
+- [x] **New category appears at the top** [C3] — adding a category should prepend it to the top of the
+      list (mirror the "add item on top" behaviour). _`addCategory` prepends; category `sort_order`
+      normalized on save._
 
 ### Auth / cart
-- [ ] **Logged-out checkout → login** [C2] — clicking "Finalizează comanda" while logged out should
-      route to the login page (not silently fail / show the modal).
-- [ ] **Persist cart across login** [C2] — after logging in (from the checkout redirect), the cart
-      contents should still be there.
+- [x] **Logged-out checkout → login** [C2] — clicking "Finalizează comanda" while logged out should
+      route to the login page (not silently fail / show the modal). _`CartBar.startCheckout` checks
+      `auth.getUser()`; logged-out → `/login?next=<cart path>`; login page forwards `next` to the callback._
+- [x] **Persist cart across login** [C2] — after logging in (from the checkout redirect), the cart
+      contents should still be there. _Cart already lives in `localStorage`; the `next` round-trip returns
+      to the same page so the cart rehydrates. (In-memory attached files still need re-attach — known.)_
 
 ### Checkout
-- [ ] **Phone picker in the checkout modal** [C2] — the details step should offer a dropdown of the
-      account's saved phone numbers AND allow free-text entry (combobox). _(May be covered by the new
-      `PhoneInput`/`PhonesManager` work in `90c0cda` — verify.)_
+- [x] **Phone picker in the checkout modal** [C2] — the details step should offer a dropdown of the
+      account's saved phone numbers AND allow free-text entry (combobox). _Already shipped in `90c0cda`:
+      "Telefon salvat" `Select` fills the field + free-text `PhoneInput` (with country-flag prefix) +
+      "save for next time" opt-in. Verified._
 
 ### Orders / financials
 - [ ] **Platform commission wrong on order page** [C1] — "Comision platformă" on the order detail is
@@ -585,9 +591,10 @@ Captured here as they come up; not yet assigned to a lane.
       the token in `lib/design/status.ts`.
 - [ ] **Finished order shouldn't look orange** [C2/C3] — a `done`/Livrată order still shows orange,
       implying something pending; give a terminal/neutral color so it reads as complete.
-- [ ] **Hide ETA when In livrare / Livrată** [C2] — "Estimat de completare a comenzii" should be hidden
-      once the order is in delivery or delivered (already complete). _(May be covered by the new
-      `EtaCountdown` in `90c0cda` — verify.)_
+- [x] **Hide ETA when In livrare / Livrată** [C2] — "Estimat de completare a comenzii" should be hidden
+      once the order is in delivery or delivered (already complete). _New `isEtaActive` (pending/accepted/
+      in_progress only) gates the ETA header + timeline countdown on both order pages + hides the shop ETA
+      editor once it's out for delivery/done._
 
 ### Chat
 - [ ] **Send photos in chat** [C1/C2/C3] — allow image attachments in both chat threads (order +
