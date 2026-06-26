@@ -585,24 +585,27 @@ export function CatalogBuilder({
 
   return (
     <Stack gap="lg">
-      <Group justify="space-between" align="flex-start">
-        <div>
-          <Title order={2}>{copy.heading}</Title>
-          <Group gap="xs" mt={4}>
-            {editing ? (
-              <Badge color="yellow" variant="light">
-                Editezi schița v{version}
-              </Badge>
-            ) : (
-              <Badge color="gray" variant="light">
-                Doar vizualizare (versiunea publicată)
-              </Badge>
-            )}
-            <Text size="sm" c="dimmed">
-              {roCount(visibleItems.length, copy.one, copy.many)}
-            </Text>
-          </Group>
-        </div>
+      <div>
+        <Title order={2}>{copy.heading}</Title>
+        <Group gap="xs" mt={4}>
+          {editing ? (
+            <Badge color="yellow" variant="light">
+              Editezi schița v{version}
+            </Badge>
+          ) : (
+            <Badge color="gray" variant="light">
+              Doar vizualizare (versiunea publicată)
+            </Badge>
+          )}
+          <Text size="sm" c="dimmed">
+            {roCount(visibleItems.length, copy.one, copy.many)}
+          </Text>
+        </Group>
+      </div>
+
+      {/* Actions on their own row, spread to opposite ends:
+          history / discard on the LEFT, save / publish (or edit) on the RIGHT. */}
+      <Group justify="space-between" gap="sm" wrap="wrap">
         <Group gap="xs">
           {!localMode && (
             <CatalogVersions
@@ -612,18 +615,23 @@ export function CatalogBuilder({
               canManage={canEdit}
             />
           )}
-          {canEdit &&
-            (editing ? (
+          {canEdit && editing && (
+            <Button
+              variant="subtle"
+              color="gray"
+              leftSection={<X size={16} />}
+              onClick={requestCancelEditing}
+              disabled={busy}
+            >
+              Renunță
+            </Button>
+          )}
+        </Group>
+
+        {canEdit && (
+          <Group gap="xs">
+            {editing ? (
               <>
-                <Button
-                  variant="subtle"
-                  color="gray"
-                  leftSection={<X size={16} />}
-                  onClick={requestCancelEditing}
-                  disabled={busy}
-                >
-                  Renunță
-                </Button>
                 <Button
                   variant="default"
                   leftSection={<Save size={16} />}
@@ -651,8 +659,9 @@ export function CatalogBuilder({
               >
                 Editează catalogul
               </Button>
-            ))}
-        </Group>
+            )}
+          </Group>
+        )}
       </Group>
 
       {!editing && (
