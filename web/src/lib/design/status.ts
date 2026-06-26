@@ -69,3 +69,12 @@ export const COMPLETED_STATUSES: OrderStatus[] = ["done", "picked_up", "delivere
 export function isCompletedStatus(status: OrderStatus): boolean {
   return COMPLETED_STATUSES.includes(status);
 }
+
+/**
+ * The ETA ("Estimat de completare") is only meaningful while the order is still being prepared.
+ * Once it's out for delivery, ready, or finished, the estimate is moot and must be hidden.
+ */
+export const ETA_ACTIVE_STATUSES: OrderStatus[] = ["pending", "accepted", "in_progress"];
+export function isEtaActive(status: OrderStatus): boolean {
+  return ETA_ACTIVE_STATUSES.includes(status);
+}

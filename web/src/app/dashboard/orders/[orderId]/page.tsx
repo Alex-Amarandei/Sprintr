@@ -37,7 +37,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { OrderEtaEditor } from "@/components/order/OrderEtaEditor";
 import { DownloadButton } from "@/components/order/DownloadButton";
 import { DownloadReceiptButton } from "@/components/order/DownloadReceiptButton";
-import { isTerminalStatus } from "@/lib/design/status";
+import { isEtaActive, isTerminalStatus } from "@/lib/design/status";
 import { LinkAnchor, LinkActionIcon } from "@/components/ui/links";
 import { TintIcon } from "@/components/ui/TintIcon";
 
@@ -201,7 +201,7 @@ export default async function ShopOrderDetailPage({ params }: Props) {
               }
             />
           )}
-          {order.status !== "done" && order.status !== "rejected" && (
+          {isEtaActive(order.status) && (
             <>
               <Divider my="xs" />
               <OrderEtaEditor orderId={order.id} initial={order.etaMinutes ?? null} />
@@ -272,16 +272,17 @@ export default async function ShopOrderDetailPage({ params }: Props) {
           </Group>
           <Text c="dimmed" mt={4}>
             {order.customerName} · Plasată {order.placedAt}
-            {order.etaAt ? (
-              <>
-                {" · Estimat de completare: "}
-                <EtaCountdown at={order.etaAt} inherit fw={500} />
-              </>
-            ) : order.eta ? (
-              ` · Estimat de completare: ${order.eta}`
-            ) : (
-              ""
-            )}
+            {isEtaActive(order.status) &&
+              (order.etaAt ? (
+                <>
+                  {" · Estimat de completare: "}
+                  <EtaCountdown at={order.etaAt} inherit fw={500} />
+                </>
+              ) : order.eta ? (
+                ` · Estimat de completare: ${order.eta}`
+              ) : (
+                ""
+              ))}
           </Text>
         </div>
         <Group gap="sm" wrap="wrap" justify="flex-end">

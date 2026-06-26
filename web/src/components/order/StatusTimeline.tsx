@@ -1,6 +1,6 @@
 import { Box, Group, Stack, Text, ThemeIcon } from "@mantine/core";
 import { Check, X } from "lucide-react";
-import { isCompletedStatus, type OrderStatus } from "@/lib/design/status";
+import { isCompletedStatus, isEtaActive, type OrderStatus } from "@/lib/design/status";
 import { TintIcon } from "@/components/ui/TintIcon";
 import { EtaCountdown } from "./EtaCountdown";
 
@@ -69,8 +69,10 @@ export function StatusTimeline({
         const isCurrent = i === current;
         const future = i > current;
         const last = i === flow.length - 1;
-        const timeStr = times[step] ?? (future && last && !etaAt ? (eta ? `Estimat ${eta}` : undefined) : undefined);
-        const showCountdown = future && last && !!etaAt;
+        // ETA is only shown while the order is still being prepared (hidden once in delivery/terminal).
+        const etaActive = isEtaActive(status);
+        const timeStr = times[step] ?? (future && last && !etaAt && etaActive ? (eta ? `Estimat ${eta}` : undefined) : undefined);
+        const showCountdown = future && last && !!etaAt && etaActive;
         return (
           <Group key={step} align="flex-start" gap="sm" wrap="nowrap">
             <Stack gap={0} align="center">

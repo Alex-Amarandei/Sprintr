@@ -19,7 +19,7 @@ import { courierStatusLabel } from "@/lib/delivery/types";
 import { CustomerModificationCard } from "@/components/order/CustomerModificationCard";
 import { getMyShopReview } from "@/lib/reviews/queries";
 import { createClient } from "@/lib/supabase/server";
-import { isCompletedStatus, isTerminalStatus } from "@/lib/design/status";
+import { isCompletedStatus, isEtaActive, isTerminalStatus } from "@/lib/design/status";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatusTimeline } from "@/components/order/StatusTimeline";
 import { EtaCountdown } from "@/components/order/EtaCountdown";
@@ -79,16 +79,17 @@ export default async function OrderDetailPage({ params }: Props) {
             </LinkAnchor>
             {" · Plasată "}
             {order.placedAt}
-            {order.etaAt ? (
-              <>
-                {" · Estimat de completare: "}
-                <EtaCountdown at={order.etaAt} inherit fw={500} />
-              </>
-            ) : order.eta ? (
-              ` · Estimat de completare: ${order.eta}`
-            ) : (
-              ""
-            )}
+            {isEtaActive(order.status) &&
+              (order.etaAt ? (
+                <>
+                  {" · Estimat de completare: "}
+                  <EtaCountdown at={order.etaAt} inherit fw={500} />
+                </>
+              ) : order.eta ? (
+                ` · Estimat de completare: ${order.eta}`
+              ) : (
+                ""
+              ))}
           </Text>
         </div>
         <Group gap="sm" wrap="wrap">
