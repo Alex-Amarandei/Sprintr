@@ -76,9 +76,7 @@ something C1 builds (build against a stub until it lands).
 
 Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the split above.
 
-- [ ] **WhatsApp courier ping on accept** 🔗 — CORE scope, currently only an `orders.whatsapp_sent`
-      column exists (migration 5); no send code. Server-side send to the courier group on shop
-      accept, then set `whatsapp_sent` (creds server-only; real API vs `wa.me` fallback TBD).
+- [x] ~~**WhatsApp courier ping on accept**~~ — **DROPPED** (superseded by the Glovo LaaS courier integration).
 - [x] **Server-side validation parity** — place-order reprice now byte-matches `lib/catalog/pricing.ts`
       (per_unit unanswered → 0 not ×1; quantity `|| 1`), guards a missing `item.fields` (was a 500),
       and validates `accepted_file_types` by extension. swatch (display-only single_select),
@@ -116,7 +114,7 @@ Backend items the CLAUDE.md notes flag as unbuilt/`TODO(BE)` that weren't in the
       Shared component, owned here; C3 imports it into the dashboard header
 - [x] Adjust toast colors based on theme (global Toaster) — _`ThemedToaster` wraps sonner with the
       Mantine color scheme (auto→system), mounted inside `MantineProvider`._
-- [ ] Recheck homepage at the end (QA pass)
+- [x] Recheck homepage at the end (QA pass)
 
 ### Browse
 
@@ -387,20 +385,12 @@ Captured here as they come up; not yet assigned to a lane.
 
 ### 👤 GLOVO — you do
 - [ ] **(Now)** validate the whole flow in **mock mode** (`GLOVO_API_ENV=mock`) — no account/keys needed.
-- [ ] Get a **sandbox** Glovo Business / On-Demand account (`business.testglovo.com`) → **API key + secret**
-  + the real API docs. Send the **auth + webhook** sections and one sample `/orders/estimate` response.
-- [ ] **Production:** sign the Glovo On-Demand/B2B agreement, add a billing card, get production credentials.
-- [ ] Register the Glovo webhook → `https://<prod-domain>/api/glovo-webhook`.
 - [ ] Set `GLOVO_API_ENV` / `GLOVO_API_KEY` / `GLOVO_API_SECRET` locally (sandbox) then on Vercel (prod).
 - [ ] Make sure shops **save their profile** (auto-geocodes the address → `shops.lat/lng`, which the
   dispatch + quote require).
 
 ### ⌨️ GLOVO — code to write (once sandbox creds land — one small pass)
-- [ ] Confirm/fix the **3 isolated `TODO(glovo)` spots** in `lib/delivery/glovo.ts`: the **auth header**
-  scheme, the **price units** (the `/100` in `glovoEstimate`), and the **webhook signature header + payload
-  field names** (`/api/glovo-webhook`).
 - [ ] Verify/extend `courierStatusLabel` (`lib/delivery/types.ts`) against Glovo's real status strings.
-- [ ] **Auto-advance the order → `done`** when Glovo's webhook reports *delivered*. _(small)_
 - [ ] _(Optional)_ use Glovo's `/working-areas` for precise coverage instead of the flat 12 km radius.
 - [ ] _(Optional)_ a `glovoTrack` poll fallback if webhooks prove flaky.
 - [ ] Sandbox end-to-end test pass + adjustments.
@@ -549,3 +539,60 @@ Captured here as they come up; not yet assigned to a lane.
       _Swapped the `" lei"` suffix → `" RON"` across all customer + shop money displays (order details,
       breakdowns, dashboard, analytics, offers chips, invoice PDF, modification cards). Legal terms line
       ("în lei (RON)") left intact._
+
+---
+
+## 📝 TODO — 2026-06-26 (review feedback)
+
+> New batch from Pelin + Alex (WhatsApp). Lane hints in brackets. Some may already be partially
+> covered by the work just merged in `90c0cda` (`PhoneInput`, `EtaCountdown`, status colors) — verify
+> before building.
+
+### Pricing / configurator
+- [ ] **Configurator total is wrong** [C1/C2] — when configuring a product, the computed total amount
+      is incorrect. Audit `lib/catalog/pricing.ts` ↔ the order-form live preview ↔ server reprice.
+- [ ] **"De la" price = per unit** [C2] — the "De la …" teaser price should be the **per-unit** base
+      price, not `min_quantity × min_cost`. Fix the storefront/catalog-card "from" price computation.
+- [ ] **Quantity is a built-in, not a shop-configured field** [C1/C3] — every product/service should
+      have a default quantity input out of the box; the shop should NOT have to add a quantity field
+      manually in the builder. Make quantity intrinsic to the item.
+- [ ] **Catalog builder: min-quantity field alignment** [C3] — "Cantitate minimă / Comanda minimă
+      (ex. 100 buc.)" spans 2 rows; align the row as if every field had a subtitle (consistent heights).
+- [ ] **New category appears at the top** [C3] — adding a category should prepend it to the top of the
+      list (mirror the "add item on top" behaviour).
+
+### Auth / cart
+- [ ] **Logged-out checkout → login** [C2] — clicking "Finalizează comanda" while logged out should
+      route to the login page (not silently fail / show the modal).
+- [ ] **Persist cart across login** [C2] — after logging in (from the checkout redirect), the cart
+      contents should still be there.
+
+### Checkout
+- [ ] **Phone picker in the checkout modal** [C2] — the details step should offer a dropdown of the
+      account's saved phone numbers AND allow free-text entry (combobox). _(May be covered by the new
+      `PhoneInput`/`PhonesManager` work in `90c0cda` — verify.)_
+
+### Orders / financials
+- [ ] **Platform commission wrong on order page** [C1] — "Comision platformă" on the order detail is
+      not computed correctly. Re-check `commission`/`payout` math + display.
+- [ ] **Dashboard shows wrong data** [C1/C3] — dashboard figures are not correctly computed. Audit the
+      `shop_stats`/`shop_revenue_daily`/analytics RPCs vs. what the dashboard renders.
+
+### Order status UI / colors
+- [ ] **"Trimite la livrare" button color** [C2/C3] — off-palette; use a brand/palette token via the
+      design system, not a hardcoded weird color.
+- [ ] **"Livrată" status pill too dark** [C2/C3] — the delivered status pill renders super dark; fix
+      the token in `lib/design/status.ts`.
+- [ ] **Finished order shouldn't look orange** [C2/C3] — a `done`/Livrată order still shows orange,
+      implying something pending; give a terminal/neutral color so it reads as complete.
+- [ ] **Hide ETA when In livrare / Livrată** [C2] — "Estimat de completare a comenzii" should be hidden
+      once the order is in delivery or delivered (already complete). _(May be covered by the new
+      `EtaCountdown` in `90c0cda` — verify.)_
+
+### Chat
+- [ ] **Send photos in chat** [C1/C2/C3] — allow image attachments in both chat threads (order +
+      complaint). Needs a storage bucket/path + message rendering on both sides.
+
+### Infra
+- [ ] **Register `sprintr.shop` OAuth callback** [C1 👤] — add the `sprintr.shop` redirect/callback URL
+      in Supabase Auth + Vercel env.
