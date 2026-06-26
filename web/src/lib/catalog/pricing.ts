@@ -15,6 +15,14 @@ import type { Item, PriceRule } from "./schema";
 
 export type Answers = Record<string, unknown>;
 
+/**
+ * Reserved answers key holding the item's built-in quantity. Every item has an intrinsic quantity
+ * (the shop no longer needs to add an is_quantity field). When a shop HAS defined an explicit
+ * is_quantity field, that field wins and this key is ignored. The server reprice
+ * (api/place-order) mirrors this constant — keep them in sync.
+ */
+export const QUANTITY_KEY = "__qty";
+
 export interface PriceLine {
   label: string;
   amount: number;
@@ -42,13 +50,12 @@ export interface PriceResult {
 export function computeItemPrice(item: Item, answers: Answers): PriceResult {
   const lines: PriceLine[] = [];
 
-  // The is_quantity number field multiplies the whole line; it is NOT an addon.
-  // Clamped to the item's min_quantity floor so an under-min answer still prices correctly.
+  // The quantity multiplies the whole line; it is NOT an addon. An explicit is_quantity field wins;
+  // otherwise the intrinsic QUANTITY_KEY is used (every item has a built-in quantity). Clamped to the
+  // item's min_quantity floor so an under-min answer still prices correctly.
   const qField = item.fields.find((f) => f.type === "number" && f.is_quantity);
-  const quantity = Math.max(
-    qField ? Number(answers[qField.key]) || 1 : 1,
-    item.min_quantity
-  );
+  const rawQty = qField ? Number(answers[qField.key]) : Number(answers[QUANTITY_KEY]);
+  const quantity = Math.max(rawQty || 1, item.min_quantity);
 
   for (const f of item.fields) {
     if (f.type === "number" && f.is_quantity) continue;

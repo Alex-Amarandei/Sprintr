@@ -1,9 +1,14 @@
 import type { Item } from "./schema";
-import type { Answers } from "./pricing";
+import { QUANTITY_KEY, type Answers } from "./pricing";
 
 /** Initial answers for an item: applies field defaults + locked/default options (§4). */
 export function defaultAnswers(item: Item): Answers {
   const a: Answers = {};
+  // Intrinsic quantity: unless the shop defined an explicit is_quantity field, every item carries a
+  // built-in quantity seeded to its min_quantity floor.
+  if (!item.fields.some((f) => f.type === "number" && f.is_quantity)) {
+    a[QUANTITY_KEY] = Math.max(item.min_quantity, 1);
+  }
   for (const f of item.fields) {
     switch (f.type) {
       case "single_select": {

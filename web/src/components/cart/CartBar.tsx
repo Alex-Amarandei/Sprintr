@@ -164,13 +164,15 @@ export function CartBar() {
                           >
                             {missing
                               ? "Necesită un fișier atașat"
-                              : l.files?.length
-                                ? l.files.length === 1
-                                  ? l.files[0].name
-                                  : `${l.files.length} fișiere`
-                                : l.kind === "service"
-                                  ? "Serviciu"
-                                  : "Produs"}
+                              : `${(l.quantity ?? 1) > 1 ? `${l.quantity} × ` : ""}${
+                                  l.files?.length
+                                    ? l.files.length === 1
+                                      ? l.files[0].name
+                                      : `${l.files.length} fișiere`
+                                    : l.kind === "service"
+                                      ? "Serviciu"
+                                      : "Produs"
+                                }`}
                           </Text>
                         </div>
                       </Group>

@@ -7,6 +7,7 @@ import {
   Group,
   Image,
   Modal,
+  NumberInput,
   Paper,
   Stack,
   Text,
@@ -18,7 +19,7 @@ import { toast } from "sonner";
 import type { Item } from "@/lib/catalog/schema";
 import type { CartLine } from "@/lib/catalog/cart";
 import { buildCartLine, needsConfiguration } from "@/lib/catalog/cart";
-import { computeItemPrice } from "@/lib/catalog/pricing";
+import { computeItemPrice, QUANTITY_KEY } from "@/lib/catalog/pricing";
 import { defaultAnswers } from "@/lib/catalog/answers";
 import { itemImageUrl, mainImage } from "@/lib/catalog/images";
 import { formatPrice } from "@/lib/utils/format";
@@ -67,6 +68,8 @@ export function AddItemCard({
   const mainUrl = itemImageUrl(mainImage(item));
   const gallery = item.images.length ? item.images : item.image_path ? [item.image_path] : [];
   const [zoom, setZoom] = useState<number | null>(null);
+  // Inline quantity for simple (non-configurable) items — defaults to the min order quantity.
+  const [qty, setQty] = useState(item.min_quantity);
 
   // Show the description tooltip only when the 2-line clamp actually hides text.
   const descRef = useRef<HTMLParagraphElement>(null);
@@ -211,16 +214,33 @@ export function AddItemCard({
               Configurează
             </Button>
           ) : (
-            <Button
-              leftSection={<Plus size={15} />}
-              onClick={() => tryAdd(buildCartLine(item))}
-              variant="subtle"
-              color="brand"
-              size="compact-sm"
-              px={6}
-            >
-              Adaugă
-            </Button>
+            <Group gap={6} wrap="nowrap">
+              <NumberInput
+                aria-label="Cantitate"
+                min={item.min_quantity}
+                step={1}
+                allowDecimal={false}
+                clampBehavior="strict"
+                size="xs"
+                w={88}
+                value={qty}
+                onChange={(v) => setQty(typeof v === "number" ? v : item.min_quantity)}
+              />
+              <Button
+                leftSection={<Plus size={15} />}
+                onClick={() =>
+                  tryAdd(
+                    buildCartLine(item, { ...defaultAnswers(item), [QUANTITY_KEY]: qty })
+                  )
+                }
+                variant="subtle"
+                color="brand"
+                size="compact-sm"
+                px={6}
+              >
+                Adaugă
+              </Button>
+            </Group>
           )}
         </Group>
       </Stack>

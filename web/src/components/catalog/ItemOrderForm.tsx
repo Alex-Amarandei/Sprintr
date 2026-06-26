@@ -23,7 +23,7 @@ import {
 import { FileUp } from "lucide-react";
 import { toast } from "sonner";
 import type { Field, Item, PriceRule } from "@/lib/catalog/schema";
-import { computeItemPrice, type Answers } from "@/lib/catalog/pricing";
+import { computeItemPrice, QUANTITY_KEY, type Answers } from "@/lib/catalog/pricing";
 import { defaultAnswers, validateAnswers } from "@/lib/catalog/answers";
 import { acceptAttr, acceptedLabel, fileAllowed } from "@/lib/catalog/fileTypes";
 import { formatPrice } from "@/lib/utils/format";
@@ -213,6 +213,25 @@ export function ItemOrderForm({
           />
         )}
 
+        {/* Built-in quantity — shown unless the shop defined an explicit is_quantity field. */}
+        {!item.fields.some((f) => f.type === "number" && f.is_quantity) && (
+          <NumberInput
+            label="Cantitate"
+            description={
+              item.min_quantity > 1
+                ? `Comandă minimă ${item.min_quantity}${item.unit ? ` ${item.unit}` : ""}`
+                : undefined
+            }
+            min={item.min_quantity}
+            step={1}
+            allowDecimal={false}
+            clampBehavior="strict"
+            suffix={item.unit ? ` ${item.unit}` : undefined}
+            value={(answers[QUANTITY_KEY] as number) ?? item.min_quantity}
+            onChange={(v) => set(QUANTITY_KEY, typeof v === "number" ? v : item.min_quantity)}
+          />
+        )}
+
         {item.fields.map((f) => {
           const err = attempted ? errors[f.key] : undefined;
           if (hasSwatches(f)) {
@@ -386,6 +405,17 @@ export function ItemOrderForm({
                   <Text size="sm">{formatPrice(l.amount)}</Text>
                 </Group>
               ))}
+              {price.quantity > 1 && (
+                <Group justify="space-between">
+                  <Text size="sm" c="dimmed">
+                    Cantitate
+                  </Text>
+                  <Text size="sm">
+                    × {price.quantity}
+                    {item.unit ? ` ${item.unit}` : ""}
+                  </Text>
+                </Group>
+              )}
             </Stack>
           </Box>
         )}

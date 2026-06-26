@@ -84,11 +84,10 @@ function computeItemPrice(item: CatalogItem, answers: Answers) {
   // rather than crashing the whole request with a 500.
   const fields = item.fields ?? [];
   const qField = fields.find((f) => f.type === "number" && f.is_quantity);
-  // Clamp to the item's min_quantity floor (mirrors lib/catalog/pricing.ts).
-  const quantity = Math.max(
-    qField ? Number(answers[qField.key]) || 1 : 1,
-    item.min_quantity ?? 1
-  );
+  // An explicit is_quantity field wins; otherwise the intrinsic "__qty" key (mirrors QUANTITY_KEY in
+  // lib/catalog/pricing.ts). Clamp to the item's min_quantity floor.
+  const rawQty = qField ? Number(answers[qField.key]) : Number(answers["__qty"]);
+  const quantity = Math.max(rawQty || 1, item.min_quantity ?? 1);
   let addons = 0;
   const breakdown: Record<string, number> = {};
 
