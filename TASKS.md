@@ -592,12 +592,16 @@ Captured here as they come up; not yet assigned to a lane.
       `done|picked_up|delivered` and adds `ready_for_pickup` to the in-progress bucket._
 
 ### Order status UI / colors
-- [ ] **"Trimite la livrare" button color** [C2/C3] — off-palette; use a brand/palette token via the
-      design system, not a hardcoded weird color.
-- [ ] **"Livrată" status pill too dark** [C2/C3] — the delivered status pill renders super dark; fix
-      the token in `lib/design/status.ts`.
-- [ ] **Finished order shouldn't look orange** [C2/C3] — a `done`/Livrată order still shows orange,
-      implying something pending; give a terminal/neutral color so it reads as complete.
+- [x] **"Trimite la livrare" button color** [C2/C3] — off-palette; use a brand/palette token via the
+      design system, not a hardcoded weird color. _Action buttons inherit the target status token, so
+      changed the `in_delivery` token grape→`indigo` (a cool "in transit" tone); button + pill + donut
+      all follow._
+- [x] **"Livrată" status pill too dark** [C2/C3] — the delivered status pill renders super dark; fix
+      the token in `lib/design/status.ts`. _Dropped the `badgeColor: "teal.7"` override on
+      `delivered`/`picked_up` → standard light teal tint._
+- [x] **Finished order shouldn't look orange** [C2/C3] — a `done`/Livrată order still shows orange,
+      implying something pending; give a terminal/neutral color so it reads as complete. _The timeline's
+      current step now renders as done (teal + check) once `isCompletedStatus`, not the brand-orange dot._
 - [x] **Hide ETA when In livrare / Livrată** [C2] — "Estimat de completare a comenzii" should be hidden
       once the order is in delivery or delivered (already complete). _New `isEtaActive` (pending/accepted/
       in_progress only) gates the ETA header + timeline countdown on both order pages + hides the shop ETA
